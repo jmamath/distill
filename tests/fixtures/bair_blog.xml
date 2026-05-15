@@ -1,0 +1,681 @@
+<rss xmlns:atom="http://www.w3.org/2005/Atom" version="2.0">
+  <channel>
+    <title>The Berkeley Artificial Intelligence Research Blog</title>
+    <description>The BAIR Blog</description>
+    <link>http://bair.berkeley.edu/blog/</link>
+    <atom:link href="http://bair.berkeley.edu/blog/feed.xml" rel="self" type="application/rss+xml" />
+    
+     
+      <item>
+        <title>Gradient-based Planning for World Models at Longer Horizons</title>
+        <description>&lt;!-- twitter --&gt;
+&lt;meta name="twitter:title" content="Gradient-based Planning for World Models at Longer Horizons" /&gt;
+
+&lt;meta name="twitter:card" content="summary_large_image" /&gt;
+
+&lt;meta name="twitter:image" content="https://bair.berkeley.edu/static/blog/grasp/pusht_zoomout.gif" /&gt;
+
+&lt;meta name="keywords" content="world models, planning, adversarial robustness, gradient-based optimization" /&gt;
+
+&lt;meta name="description" content="GRASP is a new gradient-based planner for learned dynamics (a world model) that makes long-horizon planning practical by lifting trajectories into virtual states, stochastic state iterates for exploration, and gradient reshaping so action signals stay clean." /&gt;
+
+&lt;meta name="author" content="Michael Psenka, Mike Rabbat, Aditi Krishnapriyan, Yann LeCun, Amir Bar" /&gt;
+
+&lt;style&gt;
+.grasp-results-table table { font-size: 0.875rem; line-height: 1.35; width: 100%; }
+.grasp-results-table th,
+.grasp-results-table td { padding: 0.35rem 0.5rem; }
+
+/* Consistent whitespace between major sections (this post is long and hr-heavy) */
+article.post-content h2 {
+  margin-top: 2.75rem;
+  margin-bottom: 0.75rem;
+}
+article.post-content h2:first-of-type {
+  margin-top: 2.25rem;
+}
+article.post-content h3 {
+  margin-top: 1.65rem;
+  margin-bottom: 0.5rem;
+}
+article.post-content hr {
+  margin-top: 2.5rem;
+  margin-bottom: 2.5rem;
+}
+&lt;/style&gt;
+
+&lt;div style="display: flex; flex-direction: column; align-items: center; gap: 1em; margin-bottom: 1.5em;"&gt;
+  &lt;img src="https://bair.berkeley.edu/static/blog/grasp/ballnav_demo.gif" alt="BallNav demo" style="max-width: 60%;" /&gt;
+  &lt;img src="https://bair.berkeley.edu/static/blog/grasp/pusht_zoomout.gif" alt="Push-T demo" style="max-width: 90%;" /&gt;
+&lt;/div&gt;
+
+&lt;p&gt;&lt;strong&gt;GRASP&lt;/strong&gt; is a new gradient-based planner for learned dynamics (a “world model”) that makes long-horizon planning practical by (1) lifting the trajectory into virtual states so optimization is parallel across time, (2) adding stochasticity directly to the state iterates for exploration, and (3) reshaping gradients so actions get clean signals while we avoid brittle “state-input” gradients through high-dimensional vision models.&lt;/p&gt;
+
+&lt;!--more--&gt;
+
+&lt;p&gt;Large, learned world models are becoming increasingly capable. They can predict long sequences of future observations in high-dimensional visual spaces and generalize across tasks in ways that were difficult to imagine a few years ago. As these models scale, they start to look less like task-specific predictors and more like general-purpose simulators.&lt;/p&gt;
+
+&lt;p&gt;But having a powerful predictive model is not the same as being able to use it effectively for control/learning/planning. In practice, long-horizon planning with modern world models remains fragile: optimization becomes ill-conditioned, non-greedy structure creates bad local minima, and high-dimensional latent spaces introduce subtle failure modes.&lt;/p&gt;
+
+&lt;p&gt;In this blog post, I describe the problems that motivated this project and our approach to address them: why planning with modern world models can be surprisingly fragile, why long horizons are the real stress test, and what we changed to make gradient-based planning much more robust.&lt;/p&gt;
+
+&lt;hr /&gt;
+
+&lt;blockquote&gt;
+  &lt;p&gt;This blog post discusses work done with Mike Rabbat, Aditi Krishnapriyan, Yann LeCun, and Amir Bar (* denotes equal advisorship), where we propose GRASP.&lt;/p&gt;
+&lt;/blockquote&gt;
+
+&lt;hr /&gt;
+
+&lt;h2 id="what-is-a-world-model"&gt;What is a world model?&lt;/h2&gt;
+
+&lt;p&gt;These days, the term “world model” is quite overloaded, and depending on the context can either mean an explicit dynamics model or some implicit, reliable internal state that a generative model relies on (e.g. when an LLM generates chess moves, whether there is some internal representation of the board). We give our loose working definition below.&lt;/p&gt;
+
+&lt;p&gt;Suppose you take actions $a_t \in \mathcal{A}$ and observe states $s_t \in \mathcal{S}$ (images, latent vectors, proprioception). A &lt;strong&gt;world model&lt;/strong&gt; is a learned model that, given the current state and a sequence of future actions, predicts what will happen next. Formally, it defines a predictive distribution on a sequence of observed states $s_{t-h:t}$ and current action $a_t$:&lt;/p&gt;
+
+\[P_\theta(s_{t+1} \mid s_{t-h:t},\; a_t)\]
+
+&lt;p&gt;that approximates the environment’s true conditional $P(s_{t+1} \mid s_{t-h:t},\; a_t)$. For this blog post, we’ll assume a Markovian model $P(s_{t+1} \mid s_{t-h:t},\; a_t)$ for simplicity (all results here can be extended to the more general case), and when the model is deterministic it reduces to a map over states:&lt;/p&gt;
+
+\[s_{t+1} = F_\theta(s_t, a_t).\]
+
+&lt;p&gt;In practice the state $s_t$ is often a learned latent representation (e.g., encoded from pixels), so the model operates in a (theoretically) compact, differentiable space. The key point is that a world model gives you a &lt;em&gt;differentiable simulator&lt;/em&gt;; you can roll it forward under hypothetical action sequences and backpropagate through the predictions.&lt;/p&gt;
+
+&lt;hr /&gt;
+
+&lt;h2 id="planning-choosing-actions-by-optimizing-through-the-model"&gt;Planning: choosing actions by optimizing through the model&lt;/h2&gt;
+
+&lt;p&gt;Given a start $s_0$ and a goal $g$, the simplest planner chooses an action sequence $\mathbf{a}=(a_0,\dots,a_{T-1})$ by rolling out the model and minimizing terminal error:&lt;/p&gt;
+
+\[\min_{\mathbf{a}} \; \| s_T(\mathbf{a}) - g \|_2^2, \quad \text{where } s_T(\mathbf{a}) = \mathcal{F}_{\theta}^{T}(s_0,\mathbf{a}).\]
+
+&lt;p&gt;Here we use $\mathcal{F}^T$ as shorthand for the full rollout through the world model (dependence on model parameters $\theta$ is implicit):&lt;/p&gt;
+
+\[\mathcal{F}_{\theta}^{T}(s_0, \mathbf{a}) = F_\theta(F_\theta(\cdots F_\theta(s_0, a_0), \cdots, a_{T-2}), a_{T-1}).\]
+
+&lt;p&gt;In short horizons and low-dimensional systems, this can work reasonably well. But as horizons grow and models become larger and more expressive, its weaknesses become amplified.&lt;/p&gt;
+
+&lt;p&gt;So why doesn’t this just work at scale?&lt;/p&gt;
+
+&lt;hr /&gt;
+
+&lt;h2 id="why-long-horizon-planning-is-hard-even-when-everything-is-differentiable"&gt;Why long-horizon planning is hard (even when everything is differentiable)&lt;/h2&gt;
+
+&lt;p&gt;There are two separate pain points for the more general world model, plus a third that is specific to learned, deep learning-based models.&lt;/p&gt;
+
+&lt;h3 id="1-long-horizon-rollouts-create-deep-ill-conditioned-computation-graphs"&gt;1) Long-horizon rollouts create deep, ill-conditioned computation graphs&lt;/h3&gt;
+
+&lt;p&gt;Those familiar with backprop through time (BPTT) may notice that we’re differentiating through a model applied to itself repeatedly, which will lead to the &lt;strong&gt;exploding/vanishing gradients&lt;/strong&gt; problem. Namely, if we take derivatives (note we’re differentiating vector-valued functions, resulting in Jacobians that we denote with $D_x (\cdots)$) with respect to earlier actions (e.g. $a_0$):&lt;/p&gt;
+
+\[D_{a_0} \mathcal{F}_{\theta}^{T}(s_0, \mathbf{a}) = \Bigl(\prod_{t=1}^T D_s F_\theta(s_t, a_t)\Bigr) D_{a_0}F_\theta(s_0, a_0).\]
+
+&lt;p&gt;We see that the Jacobian’s conditioning scales exponentially with time $T$:&lt;/p&gt;
+
+\[\sigma_{\text{max/min}}(D_{a_0}\mathcal{F}_{\theta}^{T}) \sim \sigma_{\text{max/min}}(D_s F_\theta)^{T-1},\]
+
+&lt;p&gt;leading to exploding or vanishing gradients.&lt;/p&gt;
+
+&lt;h3 id="2-the-landscape-is-non-greedy-and-full-of-traps"&gt;2) The landscape is non-greedy and full of traps&lt;/h3&gt;
+
+&lt;p&gt;At short horizons, the greedy solution, where we move straight toward the goal at every step, is often good enough. If you only need to plan a few steps ahead, the optimal trajectory usually doesn’t deviate much from “head toward $g$” at each step.&lt;/p&gt;
+
+&lt;p&gt;As horizons grow, two things happen. First, longer tasks are more likely to require &lt;em&gt;non-greedy&lt;/em&gt; behavior: going around a wall, repositioning before pushing, backing up to take a better path. And as horizons grow, more of these non-greedy steps are typically needed. Second, the optimization space itself scales with horizon: $\mathrm{dim}(\mathcal{A} \times \cdots \times \mathcal{A}) = T\mathrm{dim}(\mathcal{A})$, further expanding the space of local minima for the optimization problem.&lt;/p&gt;
+
+&lt;figure style="text-align: center;"&gt;
+  &lt;img src="https://bair.berkeley.edu/static/blog/grasp/loss-landscape.jpg" alt="Loss landscape" style="max-width: 80%;" /&gt;
+  &lt;figcaption&gt;&lt;em&gt;Distance to goal along the optimal path is non-monotonic, and the resulting loss landscape can be rough.&lt;/em&gt;&lt;/figcaption&gt;
+&lt;/figure&gt;
+
+&lt;hr /&gt;
+
+&lt;h2 id="a-long-horizon-fix-lifting-the-dynamics-constraint"&gt;A long-horizon fix: lifting the dynamics constraint&lt;/h2&gt;
+
+&lt;p&gt;Suppose we treat the dynamics constraint $s_{t+1} = F_{\theta}(s_t, a_t)$ as a soft constraint, and we instead optimize the following penalty function over both actions $(a_0,\ldots,a_{T-1})$ and states $(s_0,\ldots,s_T)$:&lt;/p&gt;
+
+\[\min_{\mathbf{s},\mathbf{a}} \mathcal{L}(\mathbf{s}, \mathbf{a}) = \sum_{t=0}^{T-1} \big\|F_\theta(s_t,a_t) - s_{t+1}\big\|_2^2,
+\quad \text{with } s_0 \text{ fixed and } s_T=g.\]
+
+&lt;p&gt;This is also sometimes called &lt;em&gt;collocation&lt;/em&gt; in planning/robotics literature. Note the lifted formulation shares the same &lt;em&gt;global&lt;/em&gt; minimizers as the original rollout objective (both are zero exactly when the trajectory is dynamically feasible). But the optimization landscapes are very different, and we get two immediate benefits:&lt;/p&gt;
+
+&lt;ul&gt;
+  &lt;li&gt;Each world model evaluation $F_{\theta}(s_t,a_t)$ depends only on local variables, so all $T$ terms can be computed &lt;em&gt;in parallel across time&lt;/em&gt;, resulting in a huge speed-up for longer horizons, and&lt;/li&gt;
+  &lt;li&gt;You no longer backpropagate through a single deep $T$-step composition to get a learning signal, since the previous product of Jacobians now splits into a sum, e.g.:&lt;/li&gt;
+&lt;/ul&gt;
+
+\[D_{a_0} \mathcal{L} = 2(F_\theta(s_0, a_0) - s_1).\]
+
+&lt;p&gt;Being able to optimize states directly also helps with exploration, as we can temporarily navigate through unphysical domains to find the optimal plan:&lt;/p&gt;
+&lt;figure style="text-align: center;"&gt;
+  &lt;img src="https://bair.berkeley.edu/static/blog/grasp/ballnav_demo.gif" alt="Collocation planning in BallNav" style="max-width: 60%;" /&gt;
+  &lt;figcaption&gt;&lt;em&gt;Collocation-based planning allows us to directly perturb states and explore midpoints more effectively.&lt;/em&gt;&lt;/figcaption&gt;
+&lt;/figure&gt;
+
+&lt;p&gt;However, lunch is never free. And indeed, especially for deep learning-based world models, there is a critical issue that makes the above optimization quite difficult in practice.&lt;/p&gt;
+
+&lt;h2 id="an-issue-for-deep-learning-based-world-models-sensitivity-of-state-input-gradients"&gt;An issue for deep learning-based world models: sensitivity of state-input gradients&lt;/h2&gt;
+
+&lt;p&gt;The &lt;strong&gt;tl;dr&lt;/strong&gt; of this section is: directly optimizing states through a deep learning-based $F_{\theta}$ is incredibly brittle, à la &lt;em&gt;adversarial robustness&lt;/em&gt;. Even if you train your world model in a lower-dimensional state space, the training process for the world model makes unseen state landscapes very sharp, whether it be an unseen state itself or simply a normal/orthogonal direction to the data manifold.&lt;/p&gt;
+
+&lt;h3 id="adversarial-robustness-and-the-dimpled-manifold-model"&gt;Adversarial robustness and the “dimpled manifold” model&lt;/h3&gt;
+
+&lt;p&gt;Adversarial robustness originally looked at classification models $f_\theta : \mathbb{R}^{w\times h \times c} \to \mathbb{R}^K$, and showed that by following the gradient of a particular logit $\nabla f_\theta^k$ from a base image $x$ (not of class $k$), you did not have to move far along $x’ = x + \epsilon\nabla f_\theta^k$ to make $f_\theta$ classify $x’$ as $k$ (&lt;a href="https://arxiv.org/abs/1312.6199"&gt;Szegedy et al., 2014&lt;/a&gt;; &lt;a href="https://arxiv.org/abs/1412.6572"&gt;Goodfellow et al., 2015&lt;/a&gt;):&lt;/p&gt;
+
+&lt;figure style="text-align: center;"&gt;
+  &lt;img src="https://bair.berkeley.edu/static/blog/grasp/adversarial_animated.gif" alt="Adversarial example" style="max-width: 70%;" /&gt;
+  &lt;figcaption&gt;&lt;em&gt;Depiction of the classic example from (Goodfellow et al., 2015).&lt;/em&gt;&lt;/figcaption&gt;
+&lt;/figure&gt;
+
+&lt;p&gt;Later work has painted a geometric picture for what’s going on: for data near a low-dimensional manifold $\mathcal{M}$, the training process controls behavior in tangential directions, but does not regularize behavior in orthogonal directions, thus leading to sensitive behavior (&lt;a href="https://arxiv.org/pdf/1812.00740"&gt;Stutz et al., 2019&lt;/a&gt;). Another way stated: $f_\theta$ has a reasonable Lipschitz constant when considering only tangential directions to the data manifold $\mathcal{M}$, but can have very high Lipschitz constants in normal directions. In fact, it often benefits the model to be sharper in these normal directions, so it can fit more complicated functions more precisely.&lt;/p&gt;
+
+&lt;figure style="text-align: center;"&gt;
+  &lt;img src="https://bair.berkeley.edu/static/blog/grasp/manifold_adversarial.gif" alt="Adversarial perturbations leave the data manifold" style="max-width: 70%;" /&gt;
+&lt;/figure&gt;
+
+&lt;p&gt;As a result, such adversarial examples are incredibly common even for a single given model. Further, this is not just a computer vision phenomenon; adversarial examples also appear in LLMs (&lt;a href="https://arxiv.org/abs/1908.07125"&gt;Wallace et al., 2019&lt;/a&gt;) and in RL (&lt;a href="https://arxiv.org/abs/1905.10615"&gt;Gleave et al., 2019&lt;/a&gt;).&lt;/p&gt;
+
+&lt;p&gt;While there are methods to train for more adversarially robust models, there is a known trade-off between model performance and adversarial robustness (&lt;a href="https://arxiv.org/pdf/1805.12152"&gt;Tsipras et al., 2019&lt;/a&gt;): especially in the presence of many weakly-correlated variables, the model &lt;em&gt;must&lt;/em&gt; be sharper to achieve higher performance. Indeed, most modern training algorithms, whether in computer vision or LLMs, do not train adversarial robustness out. Thus, at least until deep learning sees a major regime change, &lt;strong&gt;this is a problem we’re stuck with&lt;/strong&gt;.&lt;/p&gt;
+
+&lt;h3 id="why-is-adversarial-robustness-an-issue-for-world-model-planning"&gt;Why is adversarial robustness an issue for world model planning?&lt;/h3&gt;
+
+&lt;p&gt;Consider a single component of the dynamics loss we’re optimizing in the lifted state approach:&lt;/p&gt;
+
+\[\min_{s_t, a_t, s_{t+1}} \|F_\theta(s_t, a_t) - s_{t+1}\|_2^2\]
+
+&lt;p&gt;Let’s further focus on just the base state:&lt;/p&gt;
+
+\[\min_{s_t} \|F_\theta(s_t, a_t) - s_{t+1}\|_2^2.\]
+
+&lt;p&gt;Since world models are typically trained on state/action trajectories $(s_1, a_1, s_2, a_2, \ldots)$, the state-data manifold for $F_{\theta}$ has dimensionality bounded by the action space:&lt;/p&gt;
+
+\[\mathrm{dim}(\mathcal{M}_s) \le \mathrm{dim}(\mathcal{A}) + 1 + \mathrm{dim}(\mathcal{R}),\]
+
+&lt;p&gt;where $\mathcal{R}$ is some optional space of augmentations (e.g. translations/rotations). Thus, we can typically expect $\mathrm{dim}(\mathcal{M}_s)$ to be much lower than $\mathrm{dim}(\mathcal{S})$, and thus: &lt;strong&gt;it is very easy to find adversarial examples that hack any state to any other desired state.&lt;/strong&gt;&lt;/p&gt;
+
+&lt;p&gt;As a result, the dynamics optimization&lt;/p&gt;
+
+\[\sum_{t=0}^{T-1} \big\|F_\theta(s_t,a_t) - s_{t+1}\big\|_2^2\]
+
+&lt;p&gt;feels incredibly “sticky,” as the base points $s_t$ can easily trick $F_{\theta}$ into thinking it’s already made its local goal.&lt;sup&gt;&lt;a href="#fn1" id="ref1"&gt;1&lt;/a&gt;&lt;/sup&gt;&lt;/p&gt;
+
+&lt;figure style="text-align: center;"&gt;
+  &lt;img src="https://bair.berkeley.edu/static/blog/grasp/pusht_adversarial.gif" alt="Adversarial world model example" style="max-width: 70%;" /&gt;
+&lt;/figure&gt;
+
+&lt;hr /&gt;
+
+&lt;div id="fn1" style="font-size: 0.88em; margin: 0.75em 0; padding-left: 1em; border-left: 3px solid #ddd; color: #5f5f5f;"&gt;
+
+  &lt;p&gt;&lt;strong&gt;1.&lt;/strong&gt; This adversarial robustness issue, while particularly bad for lifted-state approaches, is not unique to them. Even for serial optimization methods that optimize through the full rollout map $\mathcal{F}^T$, it is possible to get into unseen states, where it is very easy to have a normal component fed into the sensitive normal components of $D_s F_{\theta}$. The action Jacobian’s chain rule expansion is&lt;/p&gt;
+
+\[\Bigl(\prod_{t=1}^T D_s F_\theta(s_t, a_t)\Bigr) D_{a_0}F_\theta(s_0, a_0).\]
+
+  &lt;p&gt;See what happens if any stage of the product has any component normal to the data manifold. &lt;a href="#ref1" style="color: #4d6b92;"&gt;↩&lt;/a&gt;&lt;/p&gt;
+
+&lt;/div&gt;
+
+&lt;hr /&gt;
+
+&lt;h3 id="our-fix"&gt;Our fix&lt;/h3&gt;
+
+&lt;p&gt;This is where our new planner GRASP comes in. The main observation: while $D_s F_{\theta}$ is untrustworthy and adversarial, the action space is usually low-dimensional and exhaustively trained, so $D_a F_{\theta}$ is actually reasonable to optimize through and doesn’t suffer from the adversarial robustness issue!&lt;/p&gt;
+
+&lt;figure style="text-align: center;"&gt;
+  &lt;img src="https://bair.berkeley.edu/static/blog/grasp/network_diagram.jpg" alt="Network diagram showing high-dim state vs low-dim action" style="max-width: 65%;" /&gt;
+  &lt;figcaption&gt;&lt;em&gt;The action input is usually lower-dimensional and densely trained (the model has seen every action direction), so action gradients are much better behaved.&lt;/em&gt;&lt;/figcaption&gt;
+&lt;/figure&gt;
+
+&lt;p&gt;At its core, &lt;strong&gt;GRASP builds a first-order lifted state / collocation-based planner that is only dependent on action Jacobians through the world model.&lt;/strong&gt; We thus exploit the differentiability of learned world models $F_{\theta}$, while not falling victim to the inherent sensitivity of the state Jacobians $D_s F_{\theta}$.&lt;/p&gt;
+
+&lt;h2 id="grasp-gradient-relaxed-stochastic-planner"&gt;GRASP: Gradient &lt;strong&gt;RelAxed&lt;/strong&gt; &lt;strong&gt;S&lt;/strong&gt;tochastic &lt;strong&gt;P&lt;/strong&gt;lanner&lt;/h2&gt;
+
+&lt;p&gt;As noted before, we start with the collocation planning objective, where we lift the states and relax dynamics into a penalty:&lt;/p&gt;
+
+\[\min_{\mathbf{s},\mathbf{a}} \mathcal{L}(\mathbf{s}, \mathbf{a}) = \sum_{t=0}^{T-1} \big\|F_\theta(s_t,a_t) - s_{t+1}\big\|_2^2,
+\quad \text{with } s_0 \text{ fixed and } s_T=g.\]
+
+&lt;p&gt;We then make two key additions.&lt;/p&gt;
+
+&lt;h2 id="ingredient-1-exploration-by-noising-the-state-iterates"&gt;Ingredient 1: Exploration by noising the &lt;strong&gt;state iterates&lt;/strong&gt;&lt;/h2&gt;
+
+&lt;p&gt;Even with a smoother objective, planning is nonconvex. We introduce exploration by injecting Gaussian noise into the &lt;strong&gt;virtual state updates&lt;/strong&gt; during optimization.&lt;/p&gt;
+
+&lt;p&gt;A simple version:&lt;/p&gt;
+
+\[s_t \leftarrow s_t - \eta_s \nabla_{s_t}\mathcal{L} + \sigma_{\text{state}} \xi, \qquad \xi\sim\mathcal{N}(0,I).\]
+
+&lt;p&gt;Actions are still updated by non-stochastic descent:&lt;/p&gt;
+
+\[a_t \leftarrow a_t - \eta_a \nabla_{a_t}\mathcal{L}.\]
+
+&lt;p&gt;The state noise helps you “hop” between basins in the lifted space, while the actions remain guided by gradients. We found that specifically noising states here (as opposed to actions) finds a good balance of exploration and the ability to find sharper minima.&lt;sup&gt;&lt;a href="#fn2" id="ref2"&gt;2&lt;/a&gt;&lt;/sup&gt;&lt;/p&gt;
+
+&lt;hr /&gt;
+
+&lt;div id="fn2" style="font-size: 0.88em; margin: 0.75em 0; padding-left: 1em; border-left: 3px solid #ddd; color: #5f5f5f;"&gt;
+
+  &lt;p&gt;&lt;strong&gt;2.&lt;/strong&gt; Because we only noise the states (and not the actions), the corresponding dynamics are not truly Langevin dynamics. &lt;a href="#ref2" style="color: #4d6b92;"&gt;↩&lt;/a&gt;&lt;/p&gt;
+
+&lt;/div&gt;
+
+&lt;hr /&gt;
+
+&lt;h2 id="ingredient-2-reshape-gradients-stop-brittle-state-input-gradients-keep-action-gradients"&gt;Ingredient 2: Reshape gradients: stop brittle state-input gradients, keep action gradients&lt;/h2&gt;
+
+&lt;p&gt;As discussed, the fragile pathway is the gradient that flows &lt;em&gt;into the state input&lt;/em&gt; of the world model, &lt;span&gt;\(D_s F_{\theta}\)&lt;/span&gt;. The most straightforward way to do this initially is to just stop state gradients into &lt;span&gt;\(F_{\theta}\)&lt;/span&gt; directly:&lt;/p&gt;
+
+&lt;ul&gt;
+  &lt;li&gt;Let $\bar{s}_t$ be the same value as $s_t$, but with gradients stopped.&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;p&gt;Define the &lt;strong&gt;stop-gradient dynamics loss&lt;/strong&gt;:&lt;/p&gt;
+
+\[\mathcal{L}_{\text{dyn}}^{\text{sg}}(\mathbf{s},\mathbf{a})
+= \sum_{t=0}^{T-1} \big\|F_\theta(\bar{s}_t, a_t) - s_{t+1}\big\|_2^2.\]
+
+&lt;p&gt;This alone does not work. Notice now states only follow the previous state’s step, without anything forcing the base states to chase the next ones. As a result, there are trivial minima for just stopping at the origin, then only for the final action trying to get to the goal in one step.&lt;/p&gt;
+
+&lt;h3 id="dense-goal-shaping"&gt;Dense goal shaping&lt;/h3&gt;
+
+&lt;p&gt;We can view the above issue as the goal’s signal being cut off entirely from previous states. One way to fix this is to simply add a dense goal term throughout prediction:&lt;/p&gt;
+
+\[\mathcal{L}_{\text{goal}}^{\text{sg}}(\mathbf{s},\mathbf{a})
+= \sum_{t=0}^{T-1} \big\|F_\theta(\bar{s}_t, a_t) - g\big\|_2^2.\]
+
+&lt;p&gt;In normal settings this would over-bias towards the greedy solution of straight chasing the goal, but this is balanced in our setting by the stop-gradient dynamics loss’s bias towards feasible dynamics. The final objective is then as follows:&lt;/p&gt;
+
+\[\mathcal{L}(\mathbf{s},\mathbf{a}) = \mathcal{L}_{\text{dyn}}^{\text{sg}}(\mathbf{s},\mathbf{a}) + \gamma \, \mathcal{L}_{\text{goal}}^{\text{sg}}(\mathbf{s},\mathbf{a}).\]
+
+&lt;p&gt;The result is a planning optimization objective that does not have dependence on state gradients.&lt;/p&gt;
+
+&lt;hr /&gt;
+
+&lt;h2 id="periodic-sync-briefly-return-to-true-rollout-gradients"&gt;Periodic “sync”: briefly return to true rollout gradients&lt;/h2&gt;
+
+&lt;p&gt;The lifted stop-gradient objective is great for &lt;strong&gt;fast, guided exploration&lt;/strong&gt;, but it’s still an approximation of the original serial rollout objective.&lt;/p&gt;
+
+&lt;p&gt;So every $K_{\text{sync}}$ iterations, GRASP does a short refinement phase:&lt;/p&gt;
+
+&lt;ol&gt;
+  &lt;li&gt;Roll out from $s_0$ using current actions $\mathbf{a}$, and take a few small gradient steps on the original serial loss:&lt;/li&gt;
+&lt;/ol&gt;
+
+\[\mathbf{a} \leftarrow \mathbf{a} - \eta_{\text{sync}}\,\nabla_{\mathbf{a}}\,\|s_T(\mathbf{a})-g\|_2^2.\]
+
+&lt;p&gt;The lifted-state optimization still provides the core of the optimization, while this refinement step adds some assistance to keep states and actions grounded towards real trajectories. This refinement step can of course be replaced with a serial planner of your choice (e.g. CEM); the core idea is to still get some of the benefit of the full-path synchronization of serial planners, while still mostly using the benefits of the lifted-state planning.&lt;/p&gt;
+
+&lt;hr /&gt;
+
+&lt;h2 id="how-grasp-addresses-long-range-planning"&gt;How GRASP addresses long-range planning&lt;/h2&gt;
+
+&lt;p&gt;Collocation-based planners offer a natural fix for long-horizon planning, but this optimization is quite difficult through modern world models due to adversarial robustness issues. &lt;em&gt;GRASP proposes a simple solution for a smoother collocation-based planner, alongside stable stochasticity for exploration&lt;/em&gt;. As a result, longer-horizon planning ends up not only succeeding more, but also finding such successes faster:&lt;/p&gt;
+
+&lt;figure style="text-align: center; margin: 1.25em 0;"&gt;
+  &lt;img src="https://bair.berkeley.edu/static/blog/grasp/pusht_zoomout.gif" alt="Push-T planning demo" style="max-width: 90%; height: auto;" /&gt;
+  &lt;figcaption style="font-size: 0.95em; margin-top: 0.5em;"&gt;&lt;em&gt;Push-T demo: longer-horizon planning with GRASP.&lt;/em&gt;&lt;/figcaption&gt;
+&lt;/figure&gt;
+
+&lt;div class="grasp-results-table" style="overflow-x: auto; margin: 1em 0;"&gt;
+
+  &lt;table&gt;
+    &lt;thead&gt;
+      &lt;tr&gt;
+        &lt;th&gt;Horizon&lt;/th&gt;
+        &lt;th&gt;CEM&lt;/th&gt;
+        &lt;th&gt;GD&lt;/th&gt;
+        &lt;th&gt;LatCo&lt;/th&gt;
+        &lt;th&gt;&lt;strong&gt;GRASP&lt;/strong&gt;&lt;/th&gt;
+      &lt;/tr&gt;
+    &lt;/thead&gt;
+    &lt;tbody&gt;
+      &lt;tr&gt;
+        &lt;td&gt;H=40&lt;/td&gt;
+        &lt;td&gt;&lt;strong&gt;61.4%&lt;/strong&gt; / 35.3s&lt;/td&gt;
+        &lt;td&gt;51.0% / 18.0s&lt;/td&gt;
+        &lt;td&gt;15.0% / 598.0s&lt;/td&gt;
+        &lt;td&gt;59.0% / &lt;strong&gt;8.5s&lt;/strong&gt;&lt;/td&gt;
+      &lt;/tr&gt;
+      &lt;tr&gt;
+        &lt;td&gt;H=50&lt;/td&gt;
+        &lt;td&gt;30.2% / 96.2s&lt;/td&gt;
+        &lt;td&gt;37.6% / 76.3s&lt;/td&gt;
+        &lt;td&gt;4.2% / 1114.7s&lt;/td&gt;
+        &lt;td&gt;&lt;strong&gt;43.4%&lt;/strong&gt; / &lt;strong&gt;15.2s&lt;/strong&gt;&lt;/td&gt;
+      &lt;/tr&gt;
+      &lt;tr&gt;
+        &lt;td&gt;H=60&lt;/td&gt;
+        &lt;td&gt;7.2% / 83.1s&lt;/td&gt;
+        &lt;td&gt;16.4% / 146.5s&lt;/td&gt;
+        &lt;td&gt;2.0% / 231.5s&lt;/td&gt;
+        &lt;td&gt;&lt;strong&gt;26.2%&lt;/strong&gt; / &lt;strong&gt;49.1s&lt;/strong&gt;&lt;/td&gt;
+      &lt;/tr&gt;
+      &lt;tr&gt;
+        &lt;td&gt;H=70&lt;/td&gt;
+        &lt;td&gt;7.8% / 156.1s&lt;/td&gt;
+        &lt;td&gt;12.0% / 103.1s&lt;/td&gt;
+        &lt;td&gt;0.0% / —&lt;/td&gt;
+        &lt;td&gt;&lt;strong&gt;16.0%&lt;/strong&gt; / &lt;strong&gt;79.9s&lt;/strong&gt;&lt;/td&gt;
+      &lt;/tr&gt;
+      &lt;tr&gt;
+        &lt;td&gt;H=80&lt;/td&gt;
+        &lt;td&gt;2.8% / 132.2s&lt;/td&gt;
+        &lt;td&gt;6.4% / 161.3s&lt;/td&gt;
+        &lt;td&gt;0.0% / —&lt;/td&gt;
+        &lt;td&gt;&lt;strong&gt;10.4%&lt;/strong&gt; / &lt;strong&gt;58.9s&lt;/strong&gt;&lt;/td&gt;
+      &lt;/tr&gt;
+    &lt;/tbody&gt;
+  &lt;/table&gt;
+
+&lt;/div&gt;
+
+&lt;p style="text-align: center; margin-top: 0.75em;"&gt;&lt;em&gt;Push-T results. Success rate (%) / median time to success. Bold = best in row. Note the median success time will bias higher with higher success rate; GRASP manages to be faster despite higher success rate.&lt;/em&gt;&lt;/p&gt;
+
+&lt;hr /&gt;
+
+&lt;h2 id="whats-next"&gt;What’s next?&lt;/h2&gt;
+
+&lt;p&gt;There is still plenty of work to be done for modern world model planners. We want to exploit the gradient structure of learned world models, and collocation (lifted-state optimization) is a natural approach for long-horizon planning, but it’s crucial to understand typical gradient structure here: smooth and informative action gradients and brittle state gradients. We view GRASP as an initial iteration for such planners.&lt;/p&gt;
+
+&lt;p&gt;Extension to diffusion-based world models (deeper latent timesteps can be viewed as smoothed versions of the world model itself), more sophisticated optimizers and noising strategies, and integrating GRASP into either a closed-loop system or RL policy learning for adaptive long-horizon planning are all natural and interesting next steps.&lt;/p&gt;
+
+&lt;p&gt;I do genuinely think it’s an exciting time to be working on world model planners. It’s a funny sweet spot where the background literature (planning and control overall) is incredibly mature and well-developed, but the current setting (pure planning optimization over modern, large-scale world models) is still heavily underexplored. But, once we figure out all the right ideas, world model planners will likely become as commonplace as RL.&lt;/p&gt;
+
+&lt;hr /&gt;
+
+&lt;p&gt;For more details, read the &lt;a href="https://arxiv.org/pdf/2602.00475"&gt;full paper&lt;/a&gt; or visit the &lt;a href="https://www.michaelpsenka.io/grasp/"&gt;project website&lt;/a&gt;.&lt;/p&gt;
+
+&lt;hr /&gt;
+
+&lt;h2 id="citation"&gt;Citation&lt;/h2&gt;
+
+&lt;div class="language-bibtex highlighter-rouge"&gt;&lt;div class="highlight"&gt;&lt;pre class="highlight"&gt;&lt;code&gt;&lt;span class="nc"&gt;@article&lt;/span&gt;&lt;span class="p"&gt;{&lt;/span&gt;&lt;span class="nl"&gt;psenka2026grasp&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt;
+  &lt;span class="na"&gt;title&lt;/span&gt;&lt;span class="p"&gt;=&lt;/span&gt;&lt;span class="s"&gt;{Parallel Stochastic Gradient-Based Planning for World Models}&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt;
+  &lt;span class="na"&gt;author&lt;/span&gt;&lt;span class="p"&gt;=&lt;/span&gt;&lt;span class="s"&gt;{Michael Psenka and Michael Rabbat and Aditi Krishnapriyan and Yann LeCun and Amir Bar}&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt;
+  &lt;span class="na"&gt;year&lt;/span&gt;&lt;span class="p"&gt;=&lt;/span&gt;&lt;span class="s"&gt;{2026}&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt;
+  &lt;span class="na"&gt;eprint&lt;/span&gt;&lt;span class="p"&gt;=&lt;/span&gt;&lt;span class="s"&gt;{2602.00475}&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt;
+  &lt;span class="na"&gt;archivePrefix&lt;/span&gt;&lt;span class="p"&gt;=&lt;/span&gt;&lt;span class="s"&gt;{arXiv}&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt;
+  &lt;span class="na"&gt;primaryClass&lt;/span&gt;&lt;span class="p"&gt;=&lt;/span&gt;&lt;span class="s"&gt;{cs.LG}&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt;
+  &lt;span class="na"&gt;url&lt;/span&gt;&lt;span class="p"&gt;=&lt;/span&gt;&lt;span class="s"&gt;{https://arxiv.org/abs/2602.00475}&lt;/span&gt;
+&lt;span class="p"&gt;}&lt;/span&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+</description>
+        <pubDate>Mon, 20 Apr 2026 02:00:00 -0700</pubDate>
+        <link>http://bair.berkeley.edu/blog/2026/04/20/grasp/</link>
+        <guid isPermaLink="true">http://bair.berkeley.edu/blog/2026/04/20/grasp/</guid>
+      </item>
+     
+    
+     
+      <item>
+        <title>Identifying Interactions at Scale for LLMs</title>
+        <description>&lt;!-- twitter --&gt;
+&lt;meta name="twitter:title" content="Identifying Interactions at Scale for LLMs" /&gt;
+
+&lt;meta name="twitter:card" content="summary_large_image" /&gt;
+
+&lt;meta name="twitter:image" content="https://bair.berkeley.edu/static/blog/spex/teaser.png" /&gt;
+
+&lt;meta name="keywords" content="" /&gt;
+
+&lt;meta name="description" content="The BAIR Blog" /&gt;
+
+&lt;meta name="author" content="Landon Butler, Justin Singh Kang, Yigit Efe Erginbas, Abhineet Agarwal, Bin Yu, Kannan Ramchandran" /&gt;
+
+&lt;p style="text-align:center;"&gt;
+&lt;!-- &lt;img src="https://bair.berkeley.edu/static/blog/spex/image1.png" alt="different_tests" width="600"&gt;&lt;br&gt; --&gt;
+&lt;img src="https://bair.berkeley.edu/static/blog/spex/image1.png" alt="different_tests" width="600" /&gt;&lt;br /&gt;
+&lt;i style="font-size: 0.9em;"&gt;
+&lt;/i&gt;
+&lt;/p&gt;
+
+&lt;p&gt;Understanding the behavior of complex machine learning systems, particularly Large Language Models (LLMs), is a critical challenge in modern artificial intelligence. Interpretability research aims to make the decision-making process more transparent to model builders and impacted humans, a step toward safer and more trustworthy AI. To gain a comprehensive understanding, we can analyze these systems through different lenses: &lt;strong&gt;feature attribution&lt;/strong&gt;, which isolates the specific input features driving a prediction (&lt;a href="https://proceedings.neurips.cc/paper/2017/hash/8a20a8621978632d76c43dfd28b67767-Abstract.html"&gt;Lundberg &amp;amp; Lee, 2017&lt;/a&gt;; &lt;a href="https://dl.acm.org/doi/abs/10.1145/2939672.2939778"&gt;Ribeiro et al., 2022&lt;/a&gt;); &lt;strong&gt;data attribution&lt;/strong&gt;, which links model behaviors to influential training examples (&lt;a href="https://proceedings.mlr.press/v70/koh17a/koh17a.pdf"&gt;Koh &amp;amp; Liang, 2017&lt;/a&gt;; &lt;a href="https://proceedings.mlr.press/v162/ilyas22a/ilyas22a.pdf"&gt;Ilyas et al., 2022&lt;/a&gt;); and &lt;strong&gt;mechanistic interpretability&lt;/strong&gt;, which dissects the functions of internal components (&lt;a href="https://papers.nips.cc/paper_files/paper/2023/hash/34e1dbe95d34d7ebaf99b9bcaeb5b2be-Abstract-Conference.html"&gt;Conmy et al., 2023&lt;/a&gt;; &lt;a href="https://openreview.net/forum?id=91H76m9Z94"&gt;Sharkey et al., 2025&lt;/a&gt;).&lt;/p&gt;
+
+&lt;!--more--&gt;
+
+&lt;p&gt;Across these perspectives, the same fundamental hurdle persists: &lt;strong&gt;&lt;em&gt;complexity at scale&lt;/em&gt;&lt;/strong&gt;. Model behavior is rarely the result of isolated components; rather, it emerges from complex dependencies and patterns. To achieve state-of-the-art performance, models synthesize complex feature relationships, find shared patterns from diverse training examples, and process information through highly interconnected internal components.&lt;/p&gt;
+
+&lt;p&gt;Therefore, grounded or reality-checked interpretability methods must also be able to capture these &lt;strong&gt;influential interactions&lt;/strong&gt;. As the number of features, training data points, and model components grow, the number of potential interactions grows exponentially, making exhaustive analysis computationally infeasible. In this blog post, we describe the fundamental ideas behind &lt;a href="https://openreview.net/forum?id=pRlKbAwczl"&gt;SPEX&lt;/a&gt; and &lt;a href="https://openreview.net/forum?id=KI8qan2EA7"&gt;ProxySPEX&lt;/a&gt;, algorithms capable of identifying these critical interactions at scale.&lt;/p&gt;
+
+&lt;h3 id="attribution-through-ablation"&gt;Attribution through Ablation&lt;/h3&gt;
+
+&lt;p&gt;Central to our approach is the concept of &lt;strong&gt;ablation&lt;/strong&gt;, measuring influence by observing what changes when a component is removed.&lt;/p&gt;
+
+&lt;ul&gt;
+  &lt;li&gt;&lt;strong&gt;Feature Attribution:&lt;/strong&gt; We mask or remove specific segments of the input prompt and measure the resulting shift in the predictions.&lt;/li&gt;
+  &lt;li&gt;&lt;strong&gt;Data Attribution:&lt;/strong&gt; We train models on different subsets of the training set, assessing how the model’s output on a test point shifts in the absence of specific training data.&lt;/li&gt;
+  &lt;li&gt;&lt;strong&gt;Model Component Attribution (Mechanistic Interpretability):&lt;/strong&gt; We intervene on the model’s forward pass by removing the influence of specific internal components, determining which internal structures are responsible for the model’s prediction.&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;p&gt;In each case, the goal is the same: to isolate the drivers of a decision by systematically perturbing the system, in hopes of discovering influential interactions. Since each ablation incurs a significant cost, whether through expensive inference calls or retrainings, we aim to compute attributions with the &lt;strong&gt;&lt;em&gt;fewest possible ablations&lt;/em&gt;&lt;/strong&gt;.&lt;/p&gt;
+
+&lt;p style="text-align:center;"&gt;
+&lt;!-- &lt;img src="https://bair.berkeley.edu/static/blog/spex/image1.png" alt="different_tests" width="600"&gt;&lt;br&gt; --&gt;
+&lt;img src="https://bair.berkeley.edu/static/blog/spex/image1.png" alt="different_tests" width="600" /&gt;&lt;br /&gt;
+&lt;i style="font-size: 0.9em;"&gt;
+Masking different parts of the input, we measure the difference between the original and ablated outputs.
+&lt;/i&gt;
+&lt;/p&gt;
+
+&lt;h3 id="spex-and-proxyspex-framework"&gt;SPEX and ProxySPEX Framework&lt;/h3&gt;
+
+&lt;p&gt;To discover influential interactions with a tractable number of ablations, we have developed &lt;a href="https://openreview.net/forum?id=pRlKbAwczl"&gt;SPEX&lt;/a&gt; (Spectral Explainer). This framework draws on signal processing and coding theory to advance interaction discovery to scales orders of magnitude greater than prior methods. SPEX circumvents this by exploiting a key structural observation: while the number of total interactions is prohibitively large, the number of &lt;strong&gt;&lt;em&gt;influential&lt;/em&gt;&lt;/strong&gt; interactions is actually quite small.&lt;/p&gt;
+
+&lt;p&gt;We formalize this through two observations: &lt;strong&gt;sparsity&lt;/strong&gt; (relatively few interactions truly drive the output) and &lt;strong&gt;low-degreeness&lt;/strong&gt; (influential interactions typically involve only a small subset of features). These properties allow us to reframe the difficult search problem into a solvable &lt;strong&gt;sparse recovery&lt;/strong&gt; problem. Drawing on powerful tools from signal processing and coding theory, SPEX uses strategically selected ablations to combine many candidate interactions together. Then, using efficient decoding algorithms, we disentangle these combined signals to isolate the specific interactions responsible for the model’s behavior.&lt;/p&gt;
+
+&lt;p style="text-align:center;"&gt;
+&lt;!-- &lt;img src="https://bair.berkeley.edu/static/blog/spex/image2.png" alt="image2" width="600"&gt;&lt;br&gt; --&gt;
+&lt;img src="https://bair.berkeley.edu/static/blog/spex/image2.png" alt="image2" width="600" /&gt;
+&lt;/p&gt;
+
+&lt;p&gt;In a subsequent algorithm, &lt;a href="https://openreview.net/forum?id=KI8qan2EA7"&gt;ProxySPEX&lt;/a&gt;, we identified another structural property common in complex machine learning models: &lt;strong&gt;hierarchy&lt;/strong&gt;. This means that where a higher-order interaction is important, its lower-order subsets are likely to be important as well. This additional structural observation yields a dramatic improvement in computational cost: it matches the performance of SPEX with around &lt;strong&gt;&lt;em&gt;10x fewer ablations&lt;/em&gt;&lt;/strong&gt;. Collectively, these frameworks enable efficient interaction discovery, unlocking new applications in feature, data, and model component attribution.&lt;/p&gt;
+
+&lt;h3 id="feature-attribution"&gt;Feature Attribution&lt;/h3&gt;
+
+&lt;p&gt;Feature attribution techniques assign importance scores to input features based on their influence on the model’s output. For example, if an LLM were used to make a medical diagnosis, this approach could identify exactly which symptoms led the model to its conclusion. While attributing importance to individual features can be valuable, the true power of sophisticated models lies in their ability to capture complex relationships between features. The figure below illustrates examples of these influential interactions: from a double negative changing sentiment (left) to the necessary synthesis of multiple documents in a RAG task (right).&lt;/p&gt;
+
+&lt;p style="text-align:center;"&gt;
+&lt;!-- &lt;img src="https://bair.berkeley.edu/static/blog/spex/image3.png" alt="image3" width="600"&gt;&lt;br&gt; --&gt;
+&lt;img src="https://bair.berkeley.edu/static/blog/spex/image3.png" alt="image3" width="600" /&gt;
+&lt;/p&gt;
+
+&lt;p&gt;The figure below illustrates the feature attribution performance of SPEX on a sentiment analysis task. We evaluate performance using &lt;em&gt;faithfulness&lt;/em&gt;: a measure of how accurately the recovered attributions can predict the model’s output on unseen test ablations. We find that SPEX matches the high faithfulness of existing interaction techniques (Faith-Shap, Faith-Banzhaf) on short inputs, but uniquely retains this performance as the context scales to thousands of features. In contrast, while marginal approaches (LIME, Banzhaf) can also operate at this scale, they exhibit significantly lower faithfulness because they fail to capture the complex interactions driving the model’s output.&lt;/p&gt;
+
+&lt;p style="text-align:center;"&gt;
+&lt;!-- &lt;img src="https://bair.berkeley.edu/static/blog/spex/image4.png" alt="image4" width="600"&gt;&lt;br&gt; --&gt;
+&lt;img src="https://bair.berkeley.edu/static/blog/spex/image4.png" alt="image4" width="600" /&gt;
+&lt;/p&gt;
+
+&lt;p&gt;SPEX was also applied to a modified version of the trolley problem, where the moral ambiguity of the problem is removed, making “True” the clear correct answer. Given the modification below, GPT-4o mini answered correctly only 8% of the time. When we applied standard feature attribution (SHAP), it identified individual instances of the word &lt;em&gt;trolley&lt;/em&gt; as the primary factors driving the incorrect response. However, replacing &lt;em&gt;trolley&lt;/em&gt; with synonyms such as &lt;em&gt;tram&lt;/em&gt; or &lt;em&gt;streetcar&lt;/em&gt; had little impact on the prediction of the model. SPEX revealed a much richer story, identifying a dominant high-order synergy between the two instances of &lt;em&gt;trolley&lt;/em&gt;, as well as the words &lt;em&gt;pulling&lt;/em&gt; and &lt;em&gt;lever,&lt;/em&gt; a finding that aligns with human intuition about the core components of the dilemma. When these four words were replaced with synonyms, the model’s failure rate dropped to near zero.&lt;/p&gt;
+
+&lt;p style="text-align:center;"&gt;
+&lt;!-- &lt;img src="https://bair.berkeley.edu/static/blog/spex/image5.png" alt="image5" width="600"&gt;&lt;br&gt; --&gt;
+&lt;img src="https://bair.berkeley.edu/static/blog/spex/image5.png" alt="image5" width="600" /&gt;
+&lt;/p&gt;
+
+&lt;h3 id="data-attribution"&gt;Data Attribution&lt;/h3&gt;
+
+&lt;p&gt;Data attribution identifies which training data points are most responsible for a model’s prediction on a new test point. Identifying influential interactions between these data points is key to explaining unexpected model behaviors. Redundant interactions, such as semantic duplicates, often reinforce specific (and possibly incorrect) concepts, while synergistic interactions are essential for defining decision boundaries that no single sample could form alone. To demonstrate this, we applied ProxySPEX to a ResNet model trained on CIFAR-10, identifying the most significant examples of both interaction types for a variety of difficult test points, as shown in the figure below.&lt;/p&gt;
+
+&lt;p style="text-align:center;"&gt;
+&lt;!-- &lt;img src="https://bair.berkeley.edu/static/blog/spex/image6.png" alt="image6" width="600"&gt;&lt;br&gt; --&gt;
+&lt;img src="https://bair.berkeley.edu/static/blog/spex/image6.png" alt="image6" width="600" /&gt;
+&lt;/p&gt;
+&lt;p&gt;As illustrated, &lt;strong&gt;synergistic interactions&lt;/strong&gt; (left) often involve semantically distinct classes working together to define a decision boundary. For example, grounding the synergy in human perception, the &lt;em&gt;automobile&lt;/em&gt; (bottom left) shares visual traits with the provided training images, including the low-profile chassis of the sports car, the boxy shape of the yellow truck, and the horizontal stripe of the red delivery vehicle. On the other hand, &lt;strong&gt;redundant interactions&lt;/strong&gt; (right) tend to capture visual duplicates that reinforce a specific concept. For instance, the &lt;em&gt;horse&lt;/em&gt; prediction (middle right) is heavily influenced by a cluster of dog images with similar silhouettes. This fine-grained analysis allows for the development of new data selection techniques that preserve necessary synergies while safely removing redundancies.&lt;/p&gt;
+
+&lt;h3 id="attention-head-attribution-mechanistic-interpretability"&gt;Attention Head Attribution (Mechanistic Interpretability)&lt;/h3&gt;
+
+&lt;p&gt;The goal of &lt;strong&gt;model component attribution&lt;/strong&gt; is to identify which internal parts of the model, such as specific layers or attention heads, are most responsible for a particular behavior. Here too, ProxySPEX uncovers the responsible interactions between different parts of the architecture. Understanding these structural dependencies is vital for architectural interventions, such as task-specific attention head pruning. On an MMLU dataset (highschool‐us‐history), we demonstrate that a ProxySPEX-informed pruning strategy not only outperforms competing methods, but can actually &lt;em&gt;improve model performance on the target task&lt;/em&gt;.&lt;/p&gt;
+
+&lt;p style="text-align:center;"&gt;
+&lt;!-- &lt;img src="https://bair.berkeley.edu/static/blog/spex/image7.png" alt="image7" width="600"&gt;&lt;br&gt; --&gt;
+&lt;img src="https://bair.berkeley.edu/static/blog/spex/image7.png" alt="image7" width="600" /&gt;
+&lt;/p&gt;
+&lt;p&gt;On this task, we also analyzed the interaction structure across the model’s depth. We observe that early layers function in a predominantly linear regime, where heads contribute largely independently to the target task. In later layers, the role of interactions between attention heads becomes more pronounced, with most of the contribution coming from interactions among heads in the same layer.&lt;/p&gt;
+
+&lt;p style="text-align:center;"&gt;
+&lt;!-- &lt;img src="https://bair.berkeley.edu/static/blog/spex/image8.png" alt="image8" width="600"&gt;&lt;br&gt; --&gt;
+&lt;img src="https://bair.berkeley.edu/static/blog/spex/image8.png" alt="image8" width="600" /&gt;
+&lt;/p&gt;
+
+&lt;h3 id="whats-next"&gt;What’s Next?&lt;/h3&gt;
+
+&lt;p&gt;The SPEX framework represents a significant step forward for interpretability, extending interaction discovery from &lt;strong&gt;&lt;em&gt;dozens to thousands of components&lt;/em&gt;&lt;/strong&gt;. We have demonstrated the versatility of the framework across the entire model lifecycle: exploring feature attribution on long-context inputs, identifying synergies and redundancies among training data points, and discovering interactions between internal model components. Moving forwards, many interesting research questions remain around &lt;em&gt;unifying&lt;/em&gt; these different perspectives, providing a more holistic understanding of a machine learning system. It is also of great interest to systematically evaluate interaction discovery methods against existing scientific knowledge in fields such as genomics and materials science, serving to both ground model findings and generate new, testable hypotheses.&lt;/p&gt;
+
+&lt;p&gt;We invite the research community to join us in this effort: the code for both SPEX and ProxySPEX is fully integrated and available within the popular SHAP-IQ repository (link).&lt;/p&gt;
+
+&lt;ul&gt;
+  &lt;li&gt;&lt;a href="https://github.com/mmschlk/shapiq"&gt;https://github.com/mmschlk/shapiq&lt;/a&gt; (SHAP-IQ Github)&lt;/li&gt;
+  &lt;li&gt;&lt;a href="https://openreview.net/forum?id=KI8qan2EA7"&gt;https://openreview.net/forum?id=KI8qan2EA7&lt;/a&gt; (ProxySPEX NeurIPS 2025)&lt;/li&gt;
+  &lt;li&gt;&lt;a href="https://openreview.net/forum?id=pRlKbAwczl"&gt;https://openreview.net/forum?id=pRlKbAwczl&lt;/a&gt; (SPEX ICML 2025)&lt;/li&gt;
+  &lt;li&gt;&lt;a href="https://openreview.net/forum?id=glGeXu1zG4"&gt;https://openreview.net/forum?id=glGeXu1zG4&lt;/a&gt; (Learning to Understand NeurIPS 2024)&lt;/li&gt;
+&lt;/ul&gt;
+</description>
+        <pubDate>Fri, 13 Mar 2026 02:00:00 -0700</pubDate>
+        <link>http://bair.berkeley.edu/blog/2026/03/13/spex/</link>
+        <guid isPermaLink="true">http://bair.berkeley.edu/blog/2026/03/13/spex/</guid>
+      </item>
+     
+    
+     
+      <item>
+        <title>Information-Driven Design of Imaging Systems</title>
+        <description>&lt;!--
+These are comments in HTML. The above header text is needed to format the
+title, authors, etc. The "information-driven-imaging" is the representative image
+that we use for each post for tweeting (see below as well) and for the
+emails to subscribers.
+
+The `static/blog` directory is a location on the blog server which permanently
+stores the images/GIFs in BAIR Blog posts. Each post has a subdirectory under
+this for its images (titled `information-driven-imaging` here).
+
+Keeping the post visibility as False will mean the post is only accessible if
+you know the exact URL.
+--&gt;
+
+&lt;!-- twitter --&gt;
+&lt;meta name="twitter:title" content="Measuring What Matters: Information-Driven Design of Imaging Systems" /&gt;
+
+&lt;meta name="twitter:card" content="summary_large_image" /&gt;
+
+&lt;meta name="twitter:image" content="https://bair.berkeley.edu/static/blog/information-driven-imaging/info_estimation_overview.png" /&gt;
+
+&lt;meta name="keywords" content="information theory, computational imaging, optical design, imaging systems, machine learning, optimization" /&gt;
+
+&lt;meta name="description" content="The BAIR Blog" /&gt;
+
+&lt;meta name="author" content="Henry Pinkard, Leyla Kabuli, Eric Markley, Tiffany Chien, Jiantao Jiao, Laura Waller" /&gt;
+
+&lt;p style="text-align:center;"&gt;
+&lt;img src="https://bair.berkeley.edu/static/blog/information-driven-imaging/info_estimation_overview.png" width="100%" /&gt;
+&lt;br /&gt;
+&lt;i&gt;An encoder (optical system) maps objects to noiseless images, which noise corrupts into measurements. Our information estimator uses only these noisy measurements and a noise model to quantify how well measurements distinguish objects.&lt;/i&gt;
+&lt;/p&gt;
+
+&lt;p&gt;Many imaging systems produce measurements that humans never see or cannot interpret directly. Your smartphone processes raw sensor data through algorithms before producing the final photo. MRI scanners collect frequency-space measurements that require reconstruction before doctors can view them. Self-driving cars process camera and LiDAR data directly with neural networks.&lt;/p&gt;
+
+&lt;p&gt;What matters in these systems is not how measurements look, but how much useful information they contain. AI can extract this information even when it is encoded in ways that humans cannot interpret.&lt;/p&gt;
+
+&lt;!--more--&gt;
+
+&lt;p&gt;And yet we rarely evaluate information content directly. Traditional metrics like resolution and signal-to-noise ratio assess individual aspects of quality separately, making it difficult to compare systems that trade off between these factors. The common alternative, training neural networks to reconstruct or classify images, conflates the quality of the imaging hardware with the quality of the algorithm.&lt;/p&gt;
+
+&lt;p&gt;We developed a framework that enables direct evaluation and optimization of imaging systems based on their information content. In our &lt;a href="https://arxiv.org/abs/2405.20559"&gt;NeurIPS 2025 paper&lt;/a&gt;, we show that this information metric predicts system performance across four imaging domains, and that optimizing it produces designs that match state-of-the-art end-to-end methods while requiring less memory, less compute, and no task-specific decoder design.&lt;/p&gt;
+
+&lt;h2 id="why-mutual-information"&gt;Why mutual information?&lt;/h2&gt;
+
+&lt;p&gt;Mutual information quantifies how much a measurement reduces uncertainty about the object that produced it. Two systems with the same mutual information are equivalent in their ability to distinguish objects, even if their measurements look completely different.&lt;/p&gt;
+
+&lt;p&gt;This single number captures the combined effect of resolution, noise, sampling, and all other factors that affect measurement quality. A blurry, noisy image that preserves the features needed to distinguish objects can contain more information than a sharp, clean image that loses those features.&lt;/p&gt;
+
+&lt;p style="text-align:center;"&gt;
+&lt;img src="https://bair.berkeley.edu/static/blog/information-driven-imaging/noise_res_spectrum.png" width="90%" /&gt;
+&lt;br /&gt;
+&lt;i&gt;Information unifies traditionally separate quality metrics. It accounts for noise, resolution, and spectral sensitivity together rather than treating them as independent factors.&lt;/i&gt;
+&lt;/p&gt;
+
+&lt;p&gt;Previous attempts to apply information theory to imaging faced two problems. The first approach treated imaging systems as unconstrained communication channels, ignoring the physical limitations of lenses and sensors. This produced wildly inaccurate estimates. The second approach required explicit models of the objects being imaged, limiting generality.&lt;/p&gt;
+
+&lt;p&gt;Our method avoids both problems by estimating information directly from measurements.&lt;/p&gt;
+
+&lt;h2 id="estimating-information-from-measurements"&gt;Estimating information from measurements&lt;/h2&gt;
+
+&lt;p&gt;Estimating mutual information between high-dimensional variables is notoriously difficult. Sample requirements grow exponentially with dimensionality, and estimates suffer from high bias and variance.&lt;/p&gt;
+
+&lt;p&gt;However, imaging systems have properties that enable decomposing this hard problem into simpler subproblems. Mutual information can be written as:&lt;/p&gt;
+
+\[I(X; Y) = H(Y) - H(Y \mid X)\]
+
+&lt;p&gt;The first term, $H(Y)$, measures total variation in measurements from both object differences and noise. The second term, $H(Y \mid X)$, measures variation from noise alone.&lt;/p&gt;
+
+&lt;p style="text-align:center;"&gt;
+&lt;img src="https://bair.berkeley.edu/static/blog/information-driven-imaging/entropies_decomposition.png" width="70%" /&gt;
+&lt;br /&gt;
+&lt;i&gt;Mutual information equals the difference between total measurement variation and noise-only variation.&lt;/i&gt;
+&lt;/p&gt;
+
+&lt;p&gt;Imaging systems have well-characterized noise. Photon shot noise follows a Poisson distribution. Electronic readout noise is Gaussian. This known noise physics means we can compute $H(Y \mid X)$ directly, leaving only $H(Y)$ to be learned from data.&lt;/p&gt;
+
+&lt;p&gt;For $H(Y)$, we fit a probabilistic model (e.g. a transformer or other autoregressive model) to a dataset of measurements. The model learns the distribution of all possible measurements. We tested three models spanning efficiency-accuracy tradeoffs: a stationary Gaussian process (fastest), a full Gaussian (intermediate), and an autoregressive PixelCNN (most accurate). The approach provides an upper bound on true information; any modeling error can only overestimate, never underestimate.&lt;/p&gt;
+
+&lt;h2 id="validation-across-four-imaging-domains"&gt;Validation across four imaging domains&lt;/h2&gt;
+
+&lt;p&gt;Information estimates should predict decoder performance if they capture what limits real systems. We tested this relationship across four imaging applications.&lt;/p&gt;
+
+&lt;p style="text-align:center;"&gt;
+&lt;img src="https://bair.berkeley.edu/static/blog/information-driven-imaging/applications_figure.png" width="100%" /&gt;
+&lt;br /&gt;
+&lt;i&gt;Information estimates predict decoder performance across color photography, radio astronomy, lensless imaging, and microscopy. Higher information consistently produces better results on downstream tasks.&lt;/i&gt;
+&lt;/p&gt;
+
+&lt;p&gt;&lt;strong&gt;Color photography.&lt;/strong&gt; Digital cameras encode color using filter arrays that restrict each pixel to detect only certain wavelengths. We compared three filter designs: the traditional Bayer pattern, a random arrangement, and a learned arrangement. Information estimates correctly ranked which designs would produce better color reconstructions, matching the rankings from neural network demosaicing without requiring any reconstruction algorithm.&lt;/p&gt;
+
+&lt;p&gt;&lt;strong&gt;Radio astronomy.&lt;/strong&gt; Telescope arrays achieve high angular resolution by combining signals from sites across the globe. Selecting optimal telescope locations is computationally intractable because each site’s value depends on all others. Information estimates predicted reconstruction quality across telescope configurations, enabling site selection without expensive image reconstruction.&lt;/p&gt;
+
+&lt;p&gt;&lt;strong&gt;Lensless imaging.&lt;/strong&gt; Lensless cameras replace traditional optics with light-modulating masks. Their measurements bear no visual resemblance to scenes. Information estimates predicted reconstruction accuracy across a lens, microlens array, and diffuser design at various noise levels.&lt;/p&gt;
+
+&lt;p&gt;&lt;strong&gt;Microscopy.&lt;/strong&gt; LED array microscopes use programmable illumination to generate different contrast modes. Information estimates correlated with neural network accuracy at predicting protein expression from cell images, enabling evaluation without expensive protein labeling experiments.&lt;/p&gt;
+
+&lt;p&gt;In all cases, higher information meant better downstream performance.&lt;/p&gt;
+
+&lt;h2 id="designing-systems-with-ideal"&gt;Designing systems with IDEAL&lt;/h2&gt;
+
+&lt;p&gt;Information estimates can do more than evaluate existing systems. Our Information-Driven Encoder Analysis Learning (IDEAL) method uses gradient ascent on information estimates to optimize imaging system parameters.&lt;/p&gt;
+
+&lt;p style="text-align:center;"&gt;
+&lt;img src="https://bair.berkeley.edu/static/blog/information-driven-imaging/IDEAL_overview.png" width="100%" /&gt;
+&lt;br /&gt;
+&lt;i&gt;IDEAL optimizes imaging system parameters through gradient feedback on information estimates, without requiring a decoder network.&lt;/i&gt;
+&lt;/p&gt;
+
+&lt;p&gt;The standard approach to computational imaging design, end-to-end optimization, jointly trains the imaging hardware and a neural network decoder. This requires backpropagating through the entire decoder, creating memory constraints and potential optimization difficulties.&lt;/p&gt;
+
+&lt;p&gt;IDEAL avoids these problems by optimizing the encoder alone. We tested it on color filter design. Starting from a random filter arrangement, IDEAL progressively improved the design. The final result matched end-to-end optimization in both information content and reconstruction quality.&lt;/p&gt;
+
+&lt;p style="text-align:center;"&gt;
+&lt;img src="https://bair.berkeley.edu/static/blog/information-driven-imaging/IDEAL_perf.png" width="50%" /&gt;
+&lt;br /&gt;
+&lt;i&gt;IDEAL matches end-to-end optimization performance while avoiding decoder complexity during training.&lt;/i&gt;
+&lt;/p&gt;
+
+&lt;h2 id="implications"&gt;Implications&lt;/h2&gt;
+
+&lt;p&gt;Information-based evaluation creates new possibilities for rigorous assessment of imaging systems in real-world conditions. Current approaches require either subjective visual assessment, ground truth data that is unavailable in deployment, or isolated metrics that miss overall capability. Our method provides an objective, unified metric from measurements alone.&lt;/p&gt;
+
+&lt;p&gt;The computational efficiency of IDEAL suggests possibilities for designing imaging systems that were previously intractable. By avoiding decoder backpropagation, the approach reduces memory requirements and training complexity. We explore these capabilities more extensively in &lt;a href="https://arxiv.org/abs/2507.07789"&gt;follow-on work&lt;/a&gt;.&lt;/p&gt;
+
+&lt;p&gt;The framework may extend beyond imaging to other sensing domains. Any system that can be modeled as deterministic encoding with known noise characteristics could benefit from information-based evaluation and design, including electronic, biological, and chemical sensors.&lt;/p&gt;
+
+&lt;hr /&gt;
+
+&lt;p&gt;&lt;em&gt;This post is based on our NeurIPS 2025 paper &lt;a href="https://arxiv.org/abs/2405.20559"&gt;“Information-driven design of imaging systems”&lt;/a&gt;. Code is available on &lt;a href="https://github.com/Waller-Lab/EncodingInformation"&gt;GitHub&lt;/a&gt;. A video summary is available on the &lt;a href="https://waller-lab.github.io/EncodingInformationWebsite/"&gt;project website&lt;/a&gt;.&lt;/em&gt;&lt;/p&gt;
+
+</description>
+        <pubDate>Sat, 10 Jan 2026 01:00:00 -0800</pubDate>
+        <link>http://bair.berkeley.edu/blog/2026/01/10/information-driven-imaging/</link>
+        <guid isPermaLink="true">http://bair.berkeley.edu/blog/2026/01/10/information-driven-imaging/</guid>
+      </item>
+     
+    
+     
+      </channel>
+</rss>

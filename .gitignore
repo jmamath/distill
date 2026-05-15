@@ -1,0 +1,19 @@
+# Environment
+.env
+.venv/
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+*.egg-info/
+dist/
+build/
+
+# Raw credibility data (generated files are committed; source CSVs are not)
+data/credibility/*.csv
+
+# Editor / OS
+.DS_Store
+.idea/
+.vscode/
+*.swp

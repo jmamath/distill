@@ -1,0 +1,84 @@
+[
+  {
+    "id": "synthetic-pretraining-scaling",
+    "question": "Does synthetic pretraining data (Phi/Cosmopedia-style) scale past ~14B parameters, or does it hit a benchmark-gaming ceiling that independent evaluations will continue to expose?",
+    "theme_ids": [
+      "synthetic-data-generation"
+    ],
+    "priority": "high"
+  },
+  {
+    "id": "reasoning-trace-transfer-limits",
+    "question": "How far does R1-style reasoning-trace distillation transfer beyond math and code into domains without verifiable rewards (medicine, law, open-ended science), and is the quality ceiling set by the teacher model or by the verifier?",
+    "theme_ids": [
+      "synthetic-data-generation"
+    ],
+    "priority": "high"
+  },
+  {
+    "id": "data-wall-vs-filtering",
+    "question": "Is the 'data wall' real, or is it an artifact of stopping before we learn to filter better? DCLM and FineWeb-Edu suggest most web tokens are still wasted; how many more MMLU points remain to be extracted from existing Common Crawl via better curation?",
+    "theme_ids": [
+      "quality-filtering-curation"
+    ],
+    "priority": "medium"
+  },
+  {
+    "id": "robotics-data-bottleneck",
+    "question": "Can robotics reach a GPT-3-like scale moment via consortium data collection (Open X-Embodiment, DROID), or is embodiment-specific teleoperation inherently non-scaling, requiring a sim-to-real or video-learning breakthrough instead?",
+    "theme_ids": [
+      "domain-specific-unlocks"
+    ],
+    "priority": "medium"
+  },
+  {
+    "id": "preference-data-scaling-law",
+    "question": "Is there a preference-data scaling law, or does quality dominate quantity past ~50K pairs? If the latter, the economics of alignment are structurally different from pretraining and DPO on small curated sets is near-optimal.",
+    "theme_ids": [
+      "human-preference-alignment"
+    ],
+    "priority": "medium"
+  },
+  {
+    "id": "model-collapse-in-practice",
+    "question": "Does model collapse actually constrain frontier training in 2026 given that top labs accumulate rather than replace real data, or is it primarily a risk for downstream fine-tuners who train only on synthetic outputs?",
+    "theme_ids": [
+      "synthetic-data-generation"
+    ],
+    "priority": "low"
+  },
+  {
+    "id": "licensing-moat-durability",
+    "question": "Will exclusive licensing deals (OpenAI-Reddit, Google-Reddit, OpenAI-News Corp) produce a durable data moat, or will court rulings on fair use (Bartz, Kadrey) commoditize access to copyrighted training data?",
+    "theme_ids": [
+      "provenance-and-licensing"
+    ],
+    "priority": "high"
+  },
+  {
+    "id": "multilingual-long-tail-approach",
+    "question": "Is the right approach for low-resource languages real data collection (Masakhane, Aya) or LLM-translated synthetic data? Early evidence suggests translated synthetic works for benchmarks but leaves cultural and dialect gaps hard to quantify.",
+    "theme_ids": [
+      "diversity-coverage-expansion"
+    ],
+    "priority": "low"
+  },
+  {
+    "id": "process-vs-outcome-supervision",
+    "question": "How much of reasoning-model capability comes from explicit process supervision (PRM800K-style step labels) versus outcome verification alone? DeepSeek-R1-Zero's emergent CoT from pure outcome RL argues the verifier carries most of the signal.",
+    "theme_ids": [
+      "human-preference-alignment",
+      "synthetic-data-generation"
+    ],
+    "priority": "medium"
+  },
+  {
+    "id": "video-pretraining-bottleneck",
+    "question": "Will open video pretraining ever reach LAION-scale parity given licensing complexity (WebVid takedown, Shutterstock deals), or will text-to-video remain dominated by labs with proprietary video library access?",
+    "theme_ids": [
+      "diversity-coverage-expansion",
+      "scale-unlocking-corpora"
+    ],
+    "priority": "medium"
+  }
+]

@@ -1,0 +1,411 @@
+[
+  {
+    "id": "2009-06-20-imagenet-release",
+    "date": "2009-06-20",
+    "title": "ImageNet released at CVPR",
+    "theme_ids": [
+      "scale-unlocking-corpora",
+      "annotation-dense-datasets"
+    ],
+    "entity_ids": [
+      "imagenet"
+    ],
+    "body": "Deng, Li et al. publish ImageNet with 1.2M+ labeled images across 1,000 classes; three years later it triggers the deep learning era."
+  },
+  {
+    "id": "2012-09-30-alexnet-ilsvrc",
+    "date": "2012-09-30",
+    "title": "AlexNet wins ILSVRC-2012",
+    "theme_ids": [
+      "scale-unlocking-corpora"
+    ],
+    "entity_ids": [
+      "alexnet",
+      "imagenet"
+    ],
+    "body": "Krizhevsky/Sutskever/Hinton cut top-5 error to 15.3% on ImageNet, proving deep CNNs at scale; the enabling artifact was the dataset."
+  },
+  {
+    "id": "2014-05-01-coco-released",
+    "date": "2014-05-01",
+    "title": "MS COCO dataset released",
+    "theme_ids": [
+      "annotation-dense-datasets"
+    ],
+    "entity_ids": [
+      "coco"
+    ],
+    "body": "Lin et al. release 330K images with 2.5M object instances, masks, and captions, defining dense vision supervision for a decade."
+  },
+  {
+    "id": "2019-10-23-t5-c4",
+    "date": "2019-10-23",
+    "title": "T5 and C4 establish web-cleaning recipe",
+    "theme_ids": [
+      "quality-filtering-curation",
+      "scale-unlocking-corpora"
+    ],
+    "entity_ids": [
+      "c4"
+    ],
+    "body": "Raffel et al.'s C4 standardizes langID, boilerplate, and bad-word filters for Common Crawl; the template for nearly every subsequent web corpus."
+  },
+  {
+    "id": "2020-05-28-gpt3-paper",
+    "date": "2020-05-28",
+    "title": "GPT-3 demonstrates in-context learning at 300B tokens",
+    "theme_ids": [
+      "scale-unlocking-corpora"
+    ],
+    "entity_ids": [
+      "gpt-3",
+      "common-crawl"
+    ],
+    "body": "Brown et al. show capability emergence at filtered-CC scale; begins the LLM pretraining data race."
+  },
+  {
+    "id": "2020-12-31-the-pile",
+    "date": "2020-12-31",
+    "title": "The Pile released by EleutherAI",
+    "theme_ids": [
+      "scale-unlocking-corpora"
+    ],
+    "entity_ids": [
+      "the-pile"
+    ],
+    "body": "825GB across 22 curated sources; substrate for GPT-J, Pythia, and most non-proprietary LLMs of 2021–2022."
+  },
+  {
+    "id": "2021-07-15-alphafold2-nature",
+    "date": "2021-07-15",
+    "title": "AlphaFold 2 solves protein structure via PDB + MSAs",
+    "theme_ids": [
+      "domain-specific-unlocks"
+    ],
+    "entity_ids": [
+      "alphafold",
+      "pdb"
+    ],
+    "body": "Jumper et al. Nature paper demonstrates the clearest regime change from pairing a decades-old curated dataset with the right model."
+  },
+  {
+    "id": "2021-07-07-gsm8k-release",
+    "date": "2021-07-07",
+    "title": "GSM8K defines LLM math evaluation",
+    "theme_ids": [
+      "domain-specific-unlocks"
+    ],
+    "entity_ids": [
+      "gsm8k"
+    ],
+    "body": "Cobbe et al. release 8.5K grade-school math problems; becomes cornerstone of reasoning benchmarking."
+  },
+  {
+    "id": "2021-08-24-laion-400m",
+    "date": "2021-08-24",
+    "title": "LAION-400M released",
+    "theme_ids": [
+      "scale-unlocking-corpora",
+      "diversity-coverage-expansion"
+    ],
+    "entity_ids": [
+      "laion-5b"
+    ],
+    "body": "Schuhmann et al. release 400M CLIP-filtered image-text pairs; predecessor to LAION-5B and Stable Diffusion's training substrate."
+  },
+  {
+    "id": "2022-01-27-instructgpt",
+    "date": "2022-01-27",
+    "title": "InstructGPT paper establishes RLHF pipeline",
+    "theme_ids": [
+      "human-preference-alignment"
+    ],
+    "entity_ids": [
+      "instructgpt"
+    ],
+    "body": "Ouyang et al. define SFT→RM→PPO; the template for every subsequent aligned LLM."
+  },
+  {
+    "id": "2022-04-12-anthropic-hh",
+    "date": "2022-04-12",
+    "title": "Anthropic HH-RLHF dataset released",
+    "theme_ids": [
+      "human-preference-alignment"
+    ],
+    "entity_ids": [
+      "anthropic-hh"
+    ],
+    "body": "~170K human preference pairs for helpfulness and harmlessness become the canonical open RLHF corpus."
+  },
+  {
+    "id": "2022-11-03-the-stack",
+    "date": "2022-11-03",
+    "title": "The Stack released by BigCode",
+    "theme_ids": [
+      "domain-specific-unlocks",
+      "provenance-and-licensing"
+    ],
+    "entity_ids": [
+      "the-stack"
+    ],
+    "body": "6TB of permissively-licensed code; replaces opaque GitHub scrapes and becomes StarCoder's substrate."
+  },
+  {
+    "id": "2022-12-15-constitutional-ai",
+    "date": "2022-12-15",
+    "title": "Constitutional AI / RLAIF",
+    "theme_ids": [
+      "human-preference-alignment",
+      "synthetic-data-generation"
+    ],
+    "entity_ids": [
+      "constitutional-ai"
+    ],
+    "body": "Anthropic shows model-written critiques can substitute for human harmlessness labels — first scaled AI-feedback result."
+  },
+  {
+    "id": "2022-12-20-self-instruct",
+    "date": "2022-12-20",
+    "title": "Self-Instruct paper",
+    "theme_ids": [
+      "synthetic-data-generation"
+    ],
+    "entity_ids": [
+      "self-instruct"
+    ],
+    "body": "Wang et al. bootstrap 52K instructions from a seed LM; sparks the distilled instruction-tuning era."
+  },
+  {
+    "id": "2023-03-13-alpaca-released",
+    "date": "2023-03-13",
+    "title": "Stanford Alpaca released",
+    "theme_ids": [
+      "synthetic-data-generation"
+    ],
+    "entity_ids": [
+      "alpaca"
+    ],
+    "body": "52K instructions from text-davinci-003 at ~$600; demonstrates cheap instruction tuning and triggers the open chat-model wave."
+  },
+  {
+    "id": "2023-04-05-segment-anything",
+    "date": "2023-04-05",
+    "title": "Segment Anything / SA-1B released",
+    "theme_ids": [
+      "annotation-dense-datasets",
+      "scale-unlocking-corpora"
+    ],
+    "entity_ids": [
+      "sam-sa1b"
+    ],
+    "body": "Kirillov et al. release 11M images with 1.1B masks via model-in-the-loop annotation, a ~400× scale increase over prior segmentation data."
+  },
+  {
+    "id": "2023-05-29-dpo-paper",
+    "date": "2023-05-29",
+    "title": "DPO collapses the RLHF pipeline",
+    "theme_ids": [
+      "human-preference-alignment"
+    ],
+    "entity_ids": [
+      "dpo"
+    ],
+    "body": "Rafailov et al. reformulate preference optimization as a single contrastive loss, reshaping post-training economics."
+  },
+  {
+    "id": "2023-06-01-refinedweb",
+    "date": "2023-06-01",
+    "title": "RefinedWeb shows web-only can match curated mixes",
+    "theme_ids": [
+      "quality-filtering-curation"
+    ],
+    "entity_ids": [
+      "refinedweb"
+    ],
+    "body": "Penedo et al. TII paper; Falcon-40B on RefinedWeb matches LLaMA without books or code, upending priors on corpus composition."
+  },
+  {
+    "id": "2023-06-20-phi-textbooks",
+    "date": "2023-06-20",
+    "title": "Phi-1 'Textbooks Are All You Need'",
+    "theme_ids": [
+      "synthetic-data-generation"
+    ],
+    "entity_ids": [
+      "phi"
+    ],
+    "body": "Gunasekar et al. argue synthetic textbook-style data produces disproportionate small-model capability; begins the most contested line of data-centric work."
+  },
+  {
+    "id": "2023-10-04-open-x-embodiment",
+    "date": "2023-10-04",
+    "title": "Open X-Embodiment / RT-X released",
+    "theme_ids": [
+      "domain-specific-unlocks"
+    ],
+    "entity_ids": [
+      "open-x-embodiment"
+    ],
+    "body": "Cross-institution consortium releases 22-embodiment, ~1M-trajectory robot dataset from 34 labs; enables cross-embodiment transfer."
+  },
+  {
+    "id": "2023-10-02-ultrafeedback",
+    "date": "2023-10-02",
+    "title": "UltraFeedback released",
+    "theme_ids": [
+      "human-preference-alignment"
+    ],
+    "entity_ids": [
+      "ultrafeedback"
+    ],
+    "body": "Cui et al. release 64K × 4 GPT-4-labeled preferences; combined with DPO powers Zephyr-7B and becomes default open post-training corpus."
+  },
+  {
+    "id": "2023-12-19-laion-csam-report",
+    "date": "2023-12-19",
+    "title": "Stanford identifies CSAM in LAION-5B",
+    "theme_ids": [
+      "provenance-and-licensing"
+    ],
+    "entity_ids": [
+      "re-laion-5b"
+    ],
+    "body": "Stanford Internet Observatory finds 1,008 suspected CSAM URLs; LAION-5B pulled, Stable Diffusion 1.5 later withdrawn, triggers industry hygiene reckoning."
+  },
+  {
+    "id": "2023-12-27-nyt-sues-openai",
+    "date": "2023-12-27",
+    "title": "New York Times sues OpenAI and Microsoft",
+    "theme_ids": [
+      "provenance-and-licensing"
+    ],
+    "entity_ids": [
+      "nyt-v-openai",
+      "openai"
+    ],
+    "body": "First major news-publisher copyright suit over LLM training data; proceeds to trial through 2025–2026 and reshapes licensing-deal dynamics."
+  },
+  {
+    "id": "2024-03-19-droid-released",
+    "date": "2024-03-19",
+    "title": "DROID robot manipulation dataset released",
+    "theme_ids": [
+      "domain-specific-unlocks"
+    ],
+    "entity_ids": [
+      "droid"
+    ],
+    "body": "Khazatsky et al. publish 76K teleoperated trajectories across 564 scenes and 13 institutions on standardized Franka Panda hardware."
+  },
+  {
+    "id": "2024-05-08-alphafold3",
+    "date": "2024-05-08",
+    "title": "AlphaFold 3 extends to complexes",
+    "theme_ids": [
+      "domain-specific-unlocks"
+    ],
+    "entity_ids": [
+      "alphafold"
+    ],
+    "body": "DeepMind extends protein structure prediction to protein-nucleic-acid and protein-ligand complexes, re-using and extending PDB-derived supervision."
+  },
+  {
+    "id": "2024-05-31-fineweb-released",
+    "date": "2024-05-31",
+    "title": "FineWeb and FineWeb-Edu released",
+    "theme_ids": [
+      "quality-filtering-curation"
+    ],
+    "entity_ids": [
+      "fineweb",
+      "fineweb-edu"
+    ],
+    "body": "HuggingFace releases 15T-token FineWeb and its Llama-3-classified 1.3T-token educational subset with extensive ablations — largest open documented pretraining pipeline."
+  },
+  {
+    "id": "2024-06-17-dclm-baseline",
+    "date": "2024-06-17",
+    "title": "DCLM-Baseline achieves 64% MMLU at 7B",
+    "theme_ids": [
+      "quality-filtering-curation"
+    ],
+    "entity_ids": [
+      "dclm"
+    ],
+    "body": "Li et al. publish DCLM with a 240T-token pool and fixed training recipe; fastText-based filtering produces a 7B model at 64% MMLU on 2.6T tokens, a 6.6-point jump over MAP-Neo with 40% less compute."
+  },
+  {
+    "id": "2024-07-24-shumailov-collapse-nature",
+    "date": "2024-07-24",
+    "title": "Model collapse paper in Nature",
+    "theme_ids": [
+      "synthetic-data-generation"
+    ],
+    "entity_ids": [
+      "shumailov-collapse"
+    ],
+    "body": "Shumailov et al. demonstrate recursive training on self-generated data degrades models; Gerstgrasser et al. shortly after show accumulation (not replacement) avoids collapse."
+  },
+  {
+    "id": "2024-08-30-re-laion-5b",
+    "date": "2024-08-30",
+    "title": "Re-LAION-5B released with CSAM removed",
+    "theme_ids": [
+      "provenance-and-licensing"
+    ],
+    "entity_ids": [
+      "re-laion-5b"
+    ],
+    "body": "LAION partners with IWF, C3P, and Stanford to remove 2,236 links and re-release the dataset with new safety standards."
+  },
+  {
+    "id": "2024-09-12-openai-o1-preview",
+    "date": "2024-09-12",
+    "title": "OpenAI o1 preview launches",
+    "theme_ids": [
+      "synthetic-data-generation",
+      "domain-specific-unlocks"
+    ],
+    "entity_ids": [
+      "openai-o1"
+    ],
+    "body": "First public reasoning model trained via RL on long chains-of-thought; starts the inference-time-scaling era."
+  },
+  {
+    "id": "2025-01-20-deepseek-r1",
+    "date": "2025-01-20",
+    "title": "DeepSeek-R1 released with open reasoning-trace distillation",
+    "theme_ids": [
+      "synthetic-data-generation",
+      "domain-specific-unlocks"
+    ],
+    "entity_ids": [
+      "deepseek-r1"
+    ],
+    "body": "R1-Zero's pure-RL emergent CoT and R1-distilled Qwen-32B at 72.6% AIME 2024 make reasoning-trace distillation the dominant post-training paradigm; Nature publishes the peer-reviewed version in Sept 2025."
+  },
+  {
+    "id": "2025-06-23-bartz-anthropic-ruling",
+    "date": "2025-06-23",
+    "title": "Bartz v. Anthropic fair-use ruling",
+    "theme_ids": [
+      "provenance-and-licensing"
+    ],
+    "entity_ids": [
+      "bartz-v-anthropic"
+    ],
+    "body": "Judge Alsup rules AI training on lawfully-acquired books is 'quintessentially transformative' fair use but pirated library retention is not; class certification and $70B+ exposure force a Sept 2025 settlement."
+  },
+  {
+    "id": "2025-06-25-kadrey-meta-ruling",
+    "date": "2025-06-25",
+    "title": "Kadrey v. Meta fair-use ruling",
+    "theme_ids": [
+      "provenance-and-licensing"
+    ],
+    "entity_ids": [
+      "kadrey-v-meta"
+    ],
+    "body": "Judge Chhabria reaches similar fair-use conclusion two days after Bartz, emphasizing market-harm evidence as the decisive factor in future cases."
+  }
+]

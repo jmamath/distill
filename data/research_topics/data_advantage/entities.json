@@ -1,0 +1,386 @@
+[
+  {
+    "id": "imagenet",
+    "name": "ImageNet",
+    "entity_type": "dataset",
+    "description": "1.2M+ labeled images across 1,000 classes (Deng et al. 2009); catalyzed AlexNet (2012) and the supervised-vision era."
+  },
+  {
+    "id": "alexnet",
+    "name": "AlexNet",
+    "entity_type": "method",
+    "description": "2012 ILSVRC-winning CNN (Krizhevsky, Sutskever, Hinton) whose result depended fundamentally on ImageNet scale."
+  },
+  {
+    "id": "common-crawl",
+    "name": "Common Crawl",
+    "entity_type": "dataset",
+    "description": "Open web crawl corpus, founded 2007, underlying nearly every open LLM pretraining mix."
+  },
+  {
+    "id": "gpt-3",
+    "name": "GPT-3",
+    "entity_type": "product",
+    "description": "OpenAI 2020 model trained on ~300B filtered tokens; demonstrated in-context learning at scale."
+  },
+  {
+    "id": "the-pile",
+    "name": "The Pile",
+    "entity_type": "dataset",
+    "description": "EleutherAI's 825GB open corpus (Gao et al. 2020) across 22 curated sources; substrate for GPT-J, Pythia, and most early open LLMs."
+  },
+  {
+    "id": "c4",
+    "name": "C4 (Colossal Clean Crawled Corpus)",
+    "entity_type": "dataset",
+    "description": "Raffel et al. 2019/2020 cleaned Common Crawl dump from the T5 paper; established the standard web-filtering recipe."
+  },
+  {
+    "id": "refinedweb",
+    "name": "RefinedWeb",
+    "entity_type": "dataset",
+    "description": "Penedo et al. 2023 (TII/Falcon); demonstrated heavy dedup + aggressive filtering on web-only matches curated mixes."
+  },
+  {
+    "id": "redpajama",
+    "name": "RedPajama",
+    "entity_type": "dataset",
+    "description": "Together AI 2023 open reproduction of LLaMA's 1.2T-token mix; v2 (30T CC tokens with quality signals) followed."
+  },
+  {
+    "id": "fineweb",
+    "name": "FineWeb",
+    "entity_type": "dataset",
+    "description": "HuggingFace 2024 15T-token filtered CC corpus with fully documented pipeline and extensive ablations."
+  },
+  {
+    "id": "fineweb-edu",
+    "name": "FineWeb-Edu",
+    "entity_type": "dataset",
+    "description": "Llama-3-annotated educational classifier filter reducing FineWeb to 1.3T high-quality tokens with large MMLU/ARC gains."
+  },
+  {
+    "id": "fineweb-2",
+    "name": "FineWeb-2",
+    "entity_type": "dataset",
+    "description": "HuggingFace Dec 2024 multilingual extension: 20TB across 1,868 language-script pairs, beats CC-100/mC4/CulturaX on 9-language ablations."
+  },
+  {
+    "id": "dolma",
+    "name": "Dolma",
+    "entity_type": "dataset",
+    "description": "AI2's 3T-token open corpus (2024) with fully documented pipeline; powers OLMo."
+  },
+  {
+    "id": "dclm",
+    "name": "DCLM (DataComp for Language Models)",
+    "entity_type": "benchmark",
+    "description": "Li et al. 2024 testbed with 240T CC pool and fixed training recipe; DCLM-Baseline reaches 64% MMLU at 7B/2.6T."
+  },
+  {
+    "id": "nemotron-cc",
+    "name": "Nemotron-CC",
+    "entity_type": "dataset",
+    "description": "NVIDIA 2024 ~6.3T-token CC pipeline using multi-classifier ensemble filtering."
+  },
+  {
+    "id": "doremi",
+    "name": "DoReMi",
+    "entity_type": "method",
+    "description": "Xie et al. 2023 group-DRO method for learning domain mixture weights via a proxy model."
+  },
+  {
+    "id": "laion-5b",
+    "name": "LAION-5B",
+    "entity_type": "dataset",
+    "description": "Schuhmann et al. 2022 open CLIP-filtered image-text pair dataset (5.85B pairs); precondition for Stable Diffusion."
+  },
+  {
+    "id": "coyo-700m",
+    "name": "COYO-700M",
+    "entity_type": "dataset",
+    "description": "Kakao 2022 open 700M image-text pairs; alternative/complement to LAION."
+  },
+  {
+    "id": "datacomp",
+    "name": "DataComp",
+    "entity_type": "benchmark",
+    "description": "Gadre et al. 2023 benchmark for image-text curation with fixed CLIP training recipe; analog of DCLM for multimodal."
+  },
+  {
+    "id": "obelics",
+    "name": "OBELICS",
+    "entity_type": "dataset",
+    "description": "HuggingFace 2023 open interleaved image-text web documents (141M) enabling IDEFICS and open multimodal models."
+  },
+  {
+    "id": "self-instruct",
+    "name": "Self-Instruct",
+    "entity_type": "method",
+    "description": "Wang et al. Dec 2022 pipeline bootstrapping 52K instructions from a seed LM; foundational for distilled instruction tuning."
+  },
+  {
+    "id": "alpaca",
+    "name": "Alpaca",
+    "entity_type": "dataset",
+    "description": "Stanford March 2023 52K instruction dataset generated from text-davinci-003 at ~$600 cost."
+  },
+  {
+    "id": "sharegpt",
+    "name": "ShareGPT / Vicuna",
+    "entity_type": "dataset",
+    "description": "User-shared ChatGPT conversations (2023) used to train LMSYS's Vicuna; popularized distilled chat tuning."
+  },
+  {
+    "id": "phi",
+    "name": "Phi series",
+    "entity_type": "product",
+    "description": "Microsoft's small models (Phi-1 through Phi-4, 2023–2024) trained heavily on synthetic textbook-style data; results strong on benchmarks, contested on Arena-style evaluation."
+  },
+  {
+    "id": "orca",
+    "name": "Orca / Orca 2",
+    "entity_type": "dataset",
+    "description": "Microsoft 2023 distilled datasets using GPT-4 explanation traces on FLAN collections."
+  },
+  {
+    "id": "cosmopedia",
+    "name": "Cosmopedia",
+    "entity_type": "dataset",
+    "description": "HuggingFace 2024 open 25B-token synthetic textbook-style corpus; open analog of Phi's data."
+  },
+  {
+    "id": "star-method",
+    "name": "STaR",
+    "entity_type": "method",
+    "description": "Zelikman et al. 2022 Self-Taught Reasoner; generate CoT, filter by correct answer, fine-tune; foundational for reasoning distillation."
+  },
+  {
+    "id": "deepseek-r1",
+    "name": "DeepSeek-R1",
+    "entity_type": "product",
+    "description": "DeepSeek Jan 2025 reasoning model; R1-Zero uses pure RL with verifiable rewards, R1 adds SFT, R1-distilled fine-tunes Qwen/Llama on 800K traces."
+  },
+  {
+    "id": "openai-o1",
+    "name": "OpenAI o1",
+    "entity_type": "product",
+    "description": "OpenAI Sept 2024 reasoning model using RL over long CoTs; training data and recipe remain closed."
+  },
+  {
+    "id": "openthoughts",
+    "name": "OpenThoughts / OpenThinker",
+    "entity_type": "dataset",
+    "description": "Open 2025 reasoning-trace corpus (OpenThoughts3: 1.2M QwQ-32B traces) enabling open R1-parity distilled models."
+  },
+  {
+    "id": "shumailov-collapse",
+    "name": "Shumailov et al. model collapse",
+    "entity_type": "method",
+    "description": "Nature 2024 paper showing recursive training on self-generated data degrades models; Gerstgrasser et al. 2024 showed accumulation (not replacement) avoids collapse."
+  },
+  {
+    "id": "instructgpt",
+    "name": "InstructGPT",
+    "entity_type": "method",
+    "description": "Ouyang et al. OpenAI 2022; established SFT→RM→PPO RLHF pipeline."
+  },
+  {
+    "id": "anthropic-hh",
+    "name": "Anthropic HH-RLHF",
+    "entity_type": "dataset",
+    "description": "Bai et al. April 2022; ~170K human preference pairs on helpfulness and harmlessness; canonical open RLHF dataset."
+  },
+  {
+    "id": "constitutional-ai",
+    "name": "Constitutional AI / RLAIF",
+    "entity_type": "method",
+    "description": "Anthropic Dec 2022; model-written critiques substitute for human harmlessness labels — first scaled AI-feedback result."
+  },
+  {
+    "id": "openassistant",
+    "name": "OpenAssistant / OASST",
+    "entity_type": "dataset",
+    "description": "LAION April 2023; 161K community-sourced messages across 66K conversation trees."
+  },
+  {
+    "id": "ultrafeedback",
+    "name": "UltraFeedback",
+    "entity_type": "dataset",
+    "description": "Cui et al. Oct 2023; 64K prompts × 4 responses × GPT-4 multi-attribute scoring; default DPO corpus."
+  },
+  {
+    "id": "dpo",
+    "name": "DPO (Direct Preference Optimization)",
+    "entity_type": "method",
+    "description": "Rafailov et al. May 2023; single-loss alternative to PPO that collapsed the RLHF pipeline and reshaped post-training economics."
+  },
+  {
+    "id": "helpsteer",
+    "name": "HelpSteer / HelpSteer2",
+    "entity_type": "dataset",
+    "description": "NVIDIA 2023–2024 multi-attribute preference datasets."
+  },
+  {
+    "id": "tulu",
+    "name": "Tulu 2/3",
+    "entity_type": "dataset",
+    "description": "AI2 2023–2024 fully documented open post-training datasets; Tulu 3 introduced RLVR (RL with verifiable rewards)."
+  },
+  {
+    "id": "rewardbench",
+    "name": "RewardBench",
+    "entity_type": "benchmark",
+    "description": "Lambert et al. March 2024; standardized reward-model evaluation; exposed length-bias in many open RMs."
+  },
+  {
+    "id": "prm800k",
+    "name": "PRM800K",
+    "entity_type": "dataset",
+    "description": "Lightman et al. 2023 OpenAI; 800K step-level process-reward labels on MATH problems."
+  },
+  {
+    "id": "the-stack",
+    "name": "The Stack (v1/v2)",
+    "entity_type": "dataset",
+    "description": "BigCode/HuggingFace 2022 and 2024; permissively-licensed code corpus (v2: 900B tokens) underlying StarCoder."
+  },
+  {
+    "id": "humaneval",
+    "name": "HumanEval",
+    "entity_type": "benchmark",
+    "description": "Chen et al. 2021 OpenAI; 164 Python programming problems; universal code benchmark."
+  },
+  {
+    "id": "gsm8k",
+    "name": "GSM8K",
+    "entity_type": "benchmark",
+    "description": "Cobbe et al. OpenAI 2021; 8.5K grade-school math word problems; cornerstone of reasoning evaluation."
+  },
+  {
+    "id": "math-dataset",
+    "name": "MATH dataset",
+    "entity_type": "benchmark",
+    "description": "Hendrycks et al. 2021; 12.5K competition-level math problems with step-by-step solutions."
+  },
+  {
+    "id": "coco",
+    "name": "MS COCO",
+    "entity_type": "dataset",
+    "description": "Lin et al. 2014; 330K images with 2.5M object instances, segmentation masks, and captions; defined dense vision supervision."
+  },
+  {
+    "id": "visual-genome",
+    "name": "Visual Genome",
+    "entity_type": "dataset",
+    "description": "Krishna et al. 2016; dense scene graphs with objects, attributes, and relations."
+  },
+  {
+    "id": "sam-sa1b",
+    "name": "Segment Anything / SA-1B",
+    "entity_type": "dataset",
+    "description": "Kirillov et al. Meta 2023; 11M images with 1.1B masks generated via model-in-the-loop annotation flywheel."
+  },
+  {
+    "id": "ego4d",
+    "name": "Ego4D",
+    "entity_type": "dataset",
+    "description": "Meta 2021; 3,670 hours of egocentric video; foundational for embodied-AI pretraining."
+  },
+  {
+    "id": "open-x-embodiment",
+    "name": "Open X-Embodiment / RT-X",
+    "entity_type": "dataset",
+    "description": "Oct 2023 consortium dataset across 22 robot embodiments and ~1M trajectories from 34 labs; enabled cross-embodiment transfer."
+  },
+  {
+    "id": "droid",
+    "name": "DROID",
+    "entity_type": "dataset",
+    "description": "Khazatsky et al. RSS 2024; 76K teleoperated trajectories, 350 hours, 564 scenes, 86 tasks, 13 institutions, Franka Panda-standardized, CC-BY-4.0."
+  },
+  {
+    "id": "pdb",
+    "name": "Protein Data Bank (PDB)",
+    "entity_type": "dataset",
+    "description": "RCSB repository of experimental protein structures (1971–); foundational substrate for AlphaFold."
+  },
+  {
+    "id": "alphafold",
+    "name": "AlphaFold 2/3",
+    "entity_type": "product",
+    "description": "DeepMind 2021/2024; solved protein structure prediction by combining PDB with MSA-derived co-evolution signals."
+  },
+  {
+    "id": "roots-bloom",
+    "name": "ROOTS / BLOOM",
+    "entity_type": "dataset",
+    "description": "BigScience 2022; 1.6TB multilingual corpus across 46 natural and 13 programming languages; trained BLOOM."
+  },
+  {
+    "id": "nllb",
+    "name": "NLLB-200",
+    "entity_type": "product",
+    "description": "Meta 2022 No Language Left Behind; MT across 200 languages with accompanying parallel data."
+  },
+  {
+    "id": "madlad-400",
+    "name": "MADLAD-400",
+    "entity_type": "dataset",
+    "description": "Google 2023; 3T tokens across 419 languages with document-level audits."
+  },
+  {
+    "id": "aya",
+    "name": "Aya Collection",
+    "entity_type": "dataset",
+    "description": "Cohere for AI 2024; 513M multilingual instruction instances across 114 languages, including 204K human-curated."
+  },
+  {
+    "id": "bartz-v-anthropic",
+    "name": "Bartz v. Anthropic",
+    "entity_type": "benchmark",
+    "description": "N.D. Cal., Judge Alsup, June 2025; training fair use but piracy-sourced library not; class-certified, settled Sept 2025."
+  },
+  {
+    "id": "kadrey-v-meta",
+    "name": "Kadrey v. Meta",
+    "entity_type": "benchmark",
+    "description": "N.D. Cal., Judge Chhabria, June 2025; fair-use ruling on Llama training with market-harm emphasis."
+  },
+  {
+    "id": "nyt-v-openai",
+    "name": "NYT v. OpenAI/Microsoft",
+    "entity_type": "benchmark",
+    "description": "Filed Dec 2023; motion to dismiss largely denied March 2025; proceeding to trial; includes contested preservation order."
+  },
+  {
+    "id": "getty-v-stability",
+    "name": "Getty v. Stability AI",
+    "entity_type": "benchmark",
+    "description": "UK and US cases against Stable Diffusion training on Getty-watermarked images; key test of image-copyright claims."
+  },
+  {
+    "id": "re-laion-5b",
+    "name": "Re-LAION-5B",
+    "entity_type": "dataset",
+    "description": "Aug 2024 re-release after Dec 2023 Stanford CSAM report; 2,236 links removed with IWF/C3P partnership."
+  },
+  {
+    "id": "data-provenance-initiative",
+    "name": "Data Provenance Initiative",
+    "entity_type": "lab",
+    "description": "Longpre et al. 2023–2024; audited licenses on 1,800+ datasets; 'Consent in Crisis' documented rapid robots.txt closure."
+  },
+  {
+    "id": "common-pile",
+    "name": "Common Pile",
+    "entity_type": "dataset",
+    "description": "EleutherAI 2024–2025 open-licensed-only corpus; reaches ~80% of mixed-corpus performance at 7B scale."
+  },
+  {
+    "id": "openai",
+    "name": "OpenAI",
+    "entity_type": "company",
+    "description": "Frontier lab whose GPT series, InstructGPT, Codex, and o1 defined several data paradigms; extensive 2024–2025 licensing deals."
+  }
+]

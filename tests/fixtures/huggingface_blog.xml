@@ -1,0 +1,27 @@
+<rss xmlns:atom="http://www.w3.org/2005/Atom" version="2.0">
+ <channel>
+  <atom:link href="https://huggingface.co/blog/feed.xml" rel="self" type="application/rss+xml" />
+  <title>Hugging Face - Blog</title>
+  <link>https://huggingface.co/blog</link>
+  <description>The Hugging Face blog</description>
+  <language>en-US</language>
+  <item>
+   <title>How to build scalable web apps with OpenAI's Privacy Filter</title>
+   <pubDate>Mon, 27 Apr 2026 00:00:00 GMT</pubDate>
+   <link>https://huggingface.co/blog/openai-privacy-filter-web-apps</link>
+   <guid isPermaLink="true">https://huggingface.co/blog/openai-privacy-filter-web-apps</guid>
+  </item>
+  <item>
+   <title>DeepSeek-V4: a million-token context that agents can actually use</title>
+   <pubDate>Fri, 24 Apr 2026 00:00:00 GMT</pubDate>
+   <link>https://huggingface.co/blog/deepseekv4</link>
+   <guid isPermaLink="true">https://huggingface.co/blog/deepseekv4</guid>
+  </item>
+  <item>
+   <title>How to Use Transformers.js in a Chrome Extension</title>
+   <pubDate>Thu, 23 Apr 2026 00:00:00 GMT</pubDate>
+   <link>https://huggingface.co/blog/transformersjs-chrome-extension</link>
+   <guid isPermaLink="true">https://huggingface.co/blog/transformersjs-chrome-extension</guid>
+  </item>
+  </channel>
+</rss>

@@ -1,0 +1,2260 @@
+<rss xmlns:atom="http://www.w3.org/2005/Atom" xmlns:content="http://purl.org/rss/1.0/modules/content/" xmlns:dc="http://purl.org/dc/elements/1.1/" xmlns:sy="http://purl.org/rss/1.0/modules/syndication/" version="2.0">
+
+<channel>
+	<title>Vector Institute for Artificial Intelligence</title>
+	<atom:link href="https://vectorinstitute.ai/feed/" rel="self" type="application/rss+xml" />
+	<link>https://vectorinstitute.ai/</link>
+	<description>The Vector Institute is an independent, not-for-profit corporation dedicated to AI research.</description>
+	<lastBuildDate>Thu, 23 Apr 2026 13:48:03 +0000</lastBuildDate>
+	<language>en-CA</language>
+	<sy:updatePeriod>
+	hourly	</sy:updatePeriod>
+	<sy:updateFrequency>
+	1	</sy:updateFrequency>
+	<generator>https://wordpress.org/?v=6.8.2</generator>
+
+<image>
+	<url>https://vectorinstitute.ai/wp-content/uploads/2023/01/favicon-vector-institute-32x32-1.png</url>
+	<title>Vector Institute for Artificial Intelligence</title>
+	<link>https://vectorinstitute.ai/</link>
+	<width>32</width>
+	<height>32</height>
+</image> 
+	<item>
+		<title>Vector researchers advance representation learning and deep learning research at ICLR 2026</title>
+		<link>https://vectorinstitute.ai/vector-researchers-advance-representation-learning-and-deep-learning-research-at-iclr-2026/</link>
+		
+		<dc:creator>Kylie Williams</dc:creator>
+		<pubDate>Thu, 23 Apr 2026 13:48:00 +0000</pubDate>
+				<category>Research</category>
+		<guid isPermaLink="false">https://vectorinstitute.ai/?p=26509</guid>
+
+					<description>&lt;p&gt;Vector researchers made significant contributions to this year&amp;#8217;s International Conference on Learning Representations (ICLR), the world&amp;#8217;s premier venue for representation learning and deep learning research, taking place April 23-27, 2026 [&amp;#8230;]&lt;/p&gt;
+&lt;p&gt;The post &lt;a href="https://vectorinstitute.ai/vector-researchers-advance-representation-learning-and-deep-learning-research-at-iclr-2026/"&gt;Vector researchers advance representation learning and deep learning research at ICLR 2026&lt;/a&gt; appeared first on &lt;a href="https://vectorinstitute.ai"&gt;Vector Institute for Artificial Intelligence&lt;/a&gt;.&lt;/p&gt;
+</description>
+										<content:encoded>
+&lt;p&gt;Vector researchers made significant contributions to this year&amp;#8217;s &lt;a href="https://iclr.cc/"&gt;International Conference on Learning Representations (ICLR)&lt;/a&gt;, the world&amp;#8217;s premier venue for representation learning and deep learning research, taking place April 23-27, 2026 in Rio de Janeiro, Brazil.&lt;/p&gt;
+
+
+
+&lt;p&gt;Vector&amp;#8217;s research portfolio at ICLR 2026 demonstrated the institute&amp;#8217;s leadership across core areas of representation learning and AI. Our accepted papers span fundamental advances in reinforcement learning for advanced reasoning, breakthroughs in generative AI and multimodal systems, pioneering work on autonomous AI agents, critical contributions to trustworthy and responsible AI, and innovative applications in scientific discovery and health care.&lt;/p&gt;
+
+
+
+&lt;p&gt;These contributions reflect the collaborative work of 60 Vector Faculty Members, Vector Faculty Affiliates, and Vector Distinguished Postdoctoral Fellows, including 11 collaborative papers. Vector researchers also spearheaded 6 of the 40 accepted workshops, directly shaping 15 per cent of the conference&amp;#8217;s most focused discussions. These contributions underscore the Vector community&amp;#8217;s dual commitment to advancing both the fundamental science of how neural networks learn representations and the development of AI systems that deliver real-world impact; our researchers are pushing the boundaries of what&amp;#8217;s possible in AI while ensuring these advances benefit society.&lt;/p&gt;
+
+
+
+&lt;p&gt;Below you&amp;#8217;ll find the complete list of 48 accepted papers, including collaborations, from Vector Faculty Members, Vector Faculty Affiliates, and Vector Distinguished Postdoctoral Fellows.&lt;/p&gt;
+
+
+
+&lt;div style="height:56px" aria-hidden="true" class="wp-block-spacer"&gt;&lt;/div&gt;
+
+
+
+&lt;p&gt;&lt;a href="https://openreview.net/forum?id=pXw0uRTSKT"&gt;&lt;strong&gt;Can we generate portable representations for clinical time series data using LLMs?&lt;/strong&gt;&lt;/a&gt;&lt;/p&gt;
+
+
+
+&lt;p&gt;Zongliang Ji, Yifei Sun, Andre Amaral, Anna Goldenberg (Vector Faculty Member), Rahul G. Krishnan (Vector Faculty Member)&lt;/p&gt;
+
+
+
+&lt;p&gt;&lt;strong&gt;Abstract:&amp;nbsp;&lt;/strong&gt;&lt;/p&gt;
+
+
+
+&lt;p&gt;Deploying clinical ML is slow and brittle: models that work at one hospital often degrade under distribution shifts at the next. In this work, we study a simple question &amp;#8212; can large language models (LLMs) create portable patient embeddings i.e. representations of patients enable a downstream predictor built on one hospital to be elsewhere with minimal-to-no retraining and fine-tuning. To do so, we map from irregular ICU time series onto concise natural language summaries using a frozen LLM, then embed each summary with a frozen text embedding model to obtain a fixed length vector capable of serving as input to a variety of downstream predictors. Across three cohorts (MIMIC-IV, HIRID, PPICU), on multiple clinically grounded forecasting and classification tasks, we find that our approach is simple, easy to use and surprisingly competitive with in-distribution with grid imputation, self-supervised representation learning, and time series foundation models, while exhibiting smaller relative performance drops when transferring to new hospitals. We study the variation in performance across prompt design, with structured prompts being crucial to reducing the variance of the predictive models without altering mean accuracy. We find that using these portable representations improves few-shot learning and does not increase demographic recoverability of age or sex relative to baselines, suggesting little additional privacy risk. Our work points to the potential that LLMs hold as tools to enable the scalable deployment of production grade predictive models by reducing the engineering overhead.&lt;/p&gt;
+
+
+
+&lt;p&gt;&lt;strong&gt;TLDR: &lt;/strong&gt;Explore the ability of LLMs to generate portable and transferrable representations for ICU time-series&lt;/p&gt;
+
+
+
+&lt;div class="wp-block-group is-layout-constrained wp-block-group-is-layout-constrained"&gt;
+&lt;div style="height:40px" aria-hidden="true" class="wp-block-spacer"&gt;&lt;/div&gt;
+
+
+    &lt;div class="acf-block acf-block-block_4db73432d13e4c15b6065fb9403b00dd acf-block-separator separator"&gt;
+      &lt;div class="separator__bar" style="background-color: #E00087"&gt;&lt;/div&gt;
+    &lt;/div&gt;
+
+
+
+&lt;div style="height:40px" aria-hidden="true" class="wp-block-spacer"&gt;&lt;/div&gt;
+&lt;/div&gt;
+
+
+
+&lt;p&gt;&lt;a href="https://openreview.net/forum?id=MbMzoQ91Gk"&gt;&lt;strong&gt;ChronoEdit: Towards Temporal Reasoning for In-Context Image Editing and World Simulation&lt;/strong&gt;&lt;/a&gt;&lt;/p&gt;
+
+
+
+&lt;p&gt;Jay Zhangjie Wu, Xuanchi Ren, Tianchang Shen, Tianshi Cao, Kai He, Yifan Lu, Ruiyuan Gao, Enze Xie, Shiyi Lan, Jose M. Alvarez, Jun Gao, Sanja Fidler (Vector Faculty Member), Zian Wang, Huan Ling&lt;/p&gt;
+
+
+
+&lt;p&gt;&lt;strong&gt;Abstract:&amp;nbsp;&lt;/strong&gt;&lt;/p&gt;
+
+
+
+&lt;p&gt;Recent advances in large generative models have significantly advanced image editing and in-context image generation, yet a critical gap remains in ensuring physical consistency, where edited objects must remain coherent. This capability is especially vital for world simulation related tasks. In this paper, we present ChronoEdit, a framework that reframes image editing as a video generation problem. First, ChronoEdit treats the input and edited images as the first and last frames of a video, allowing it to leverage large pretrained video generative models that capture not only object appearance but also the implicit physics of motion and interaction through learned temporal consistency. Second, ChronoEdit introduces a temporal reasoning stage that explicitly performs editing at inference time. Under this setting, target frame is jointly denoised with reasoning tokens to imagine a plausible editing trajectory that constrains the solution space to physically viable transformations. The reasoning tokens are then dropped after a few steps to avoid the high computational cost of rendering a full video. To validate ChronoEdit, we introduce PBench-Edit, a new benchmark of image–prompt pairs for contexts that require physical consistency, and demonstrate that ChronoEdit surpasses state-of-the-art baselines in both visual fidelity and physical plausibility.&lt;/p&gt;
+
+
+
+&lt;div class="wp-block-group is-layout-constrained wp-block-group-is-layout-constrained"&gt;
+&lt;div style="height:40px" aria-hidden="true" class="wp-block-spacer"&gt;&lt;/div&gt;
+
+
+    &lt;div class="acf-block acf-block-block_4db73432d13e4c15b6065fb9403b00dd acf-block-separator separator"&gt;
+      &lt;div class="separator__bar" style="background-color: #E00087"&gt;&lt;/div&gt;
+    &lt;/div&gt;
+
+
+
+&lt;div style="height:40px" aria-hidden="true" class="wp-block-spacer"&gt;&lt;/div&gt;
+&lt;/div&gt;
+
+
+
+&lt;p&gt;&lt;a href="https://openreview.net/forum?id=3x4SDbXbgl"&gt;&lt;strong&gt;Computer Agent Arena: Toward Human-Centric Evaluation and Analysis of Computer-Use Agents&lt;/strong&gt;&lt;/a&gt;&lt;/p&gt;
+
+
+
+&lt;p&gt;Bowen Wang, Xinyuan Wang, Jiaqi Deng, Tianbao Xie, Ryan Li, Yanzhe Zhang, Junli Wang, Dunjie Lu, Zicheng Gong, Gavin Li, Toh Hua, Wei-Lin Chiang, Ion Stoica, Diyi Yang, Yu Su, Yi Zhang, Zhiguo Wang, Victor Zhong (Vector Faculty Member), Tao Yu&lt;/p&gt;
+
+
+
+&lt;p&gt;&lt;strong&gt;Abstract:&amp;nbsp;&lt;/strong&gt;&lt;/p&gt;
+
+
+
+&lt;p&gt;As Computer-Use Agents (CUAs) proliferate and grow increasingly capable, evaluation has become more challenging: static, manually curated benchmarks are narrow in domain, contamination-prone, and environment-heavy, and they diverge substantially from user-driven, real-world evaluation. We present Computer Agent Arena, an open-source platform for head-to-head CUA evaluation and a dynamic methodology that converts human preferences into structured feedback in realistic environments. The system (i) simulates real-world computer use via cloud-hosted, diverse, and dynamic environment initializations and customizations; (ii) ensures authentic, fair comparison by faithfully reproducing open-source CUAs and executing anonymously in matched, controlled environments; and (iii) extends evaluation beyond pairwise preference and correctness to capability- and behavior-oriented signals. Across 2,201 high-quality votes over 12 agents—spanning multi-app interactions, ambiguous instructions, and open-ended queries—we observe striking ranking reversals relative to static benchmarks. Further analysis shows that overall correctness mainly drives human preference; beyond that, agent-human interaction and self-correction boost user preference, even when overall task completion is comparable. Our error analysis reveals agent behavior errors, such as long-horizon memory and fine-grained action failures that static benchmarks fail to evaluate. We also contrast pure GUI agents with universal digital agents capable of tool use and coding, and discuss the trade-offs of these different design philosophies. We open source the full platform, collected dataset, and code of Computer Agent Arena to support future research on the evaluation and development of CUA.&lt;/p&gt;
+
+
+
+&lt;div class="wp-block-group is-layout-constrained wp-block-group-is-layout-constrained"&gt;
+&lt;div style="height:40px" aria-hidden="true" class="wp-block-spacer"&gt;&lt;/div&gt;
+
+
+    &lt;div class="acf-block acf-block-block_4db73432d13e4c15b6065fb9403b00dd acf-block-separator separator"&gt;
+      &lt;div class="separator__bar" style="background-color: #E00087"&gt;&lt;/div&gt;
+    &lt;/div&gt;
+
+
+
+&lt;div style="height:40px" aria-hidden="true" class="wp-block-spacer"&gt;&lt;/div&gt;
+&lt;/div&gt;
+
+
+
+&lt;p&gt;&lt;a href="https://openreview.net/forum?id=rRp8yYKRGj"&gt;&lt;strong&gt;Consistent Text-to-Image Generation via Scene De-Contextualization&lt;/strong&gt;&lt;/a&gt;&lt;/p&gt;
+
+
+
+&lt;p&gt;Song Tang, Peihao Gong, Kunyu LI, Kai Guo, Boyu Wang (Vector Faculty Affiliate), Mao Ye, Jianwei Dr. Zhang, Xiatian Zhu&lt;/p&gt;
+
+
+
+&lt;p&gt;&lt;strong&gt;Abstract: &lt;/strong&gt;Consistent text-to-image (T2I) generation seeks to produce identity-preserving images of the same subject across diverse scenes, yet it often fails due to a phenomenon called identity (ID) shift. Previous methods have tackled this issue, but typically rely on the unrealistic assumption of knowing all target scenes in advance. This paper reveals that a key source of ID shift is the native correlation between subject and scene context, called scene contextualization, which arises naturally as T2I models fit the training distribution of vast natural images. We formally prove the near-universality of this scene-subject correlation and derive theoretical bounds on its strength. On this basis, we propose a novel, efficient, training-free prompt embedding editing approach, called Scene De-Contextualization (SDeC), that imposes an inversion process of T2I’s built-in scene contextualization. Specifically, it identifies and suppresses the latent scene-subject correlation within the ID prompt’s embedding by quantifying SVD directional stability to re-weight the corresponding eigenvalues adaptively. Critically, SDeC allows for per-scene use (one prompt per scene) without requiring prior access to all target scenes. This makes it a highly flexible and general solution well-suited to real-world applications where such prior knowledge is often unavailable or varies over time. Experiments demonstrate that SDeC significantly enhances identity preservation while maintaining scene diversity.&lt;/p&gt;
+
+
+
+&lt;div class="wp-block-group is-layout-constrained wp-block-group-is-layout-constrained"&gt;
+&lt;div style="height:40px" aria-hidden="true" class="wp-block-spacer"&gt;&lt;/div&gt;
+
+
+    &lt;div class="acf-block acf-block-block_4db73432d13e4c15b6065fb9403b00dd acf-block-separator separator"&gt;
+      &lt;div class="separator__bar" style="background-color: #E00087"&gt;&lt;/div&gt;
+    &lt;/div&gt;
+
+
+
+&lt;div style="height:40px" aria-hidden="true" class="wp-block-spacer"&gt;&lt;/div&gt;
+&lt;/div&gt;
+
+
+
+&lt;p&gt;&lt;a href="https://openreview.net/forum?id=tsuxIeLUsz"&gt;&lt;strong&gt;Critique-Coder: Enhancing Coder Models by Critique Reinforcement Learning&lt;/strong&gt;&lt;/a&gt;&lt;/p&gt;
+
+
+
+&lt;p&gt;Chi Ruan, Dongfu Jiang, Yubo Wang, Wenhu Chen (Vector Faculty Member)&lt;/p&gt;
+
+
+
+&lt;p&gt;&lt;strong&gt;Abstract:&amp;nbsp;&lt;/strong&gt;&lt;/p&gt;
+
+
+
+&lt;p&gt;Reinforcement Learning (RL) has emerged as a popular training paradigm, particularly when paired with reasoning models. While effective, it primarily focuses on generating responses and lacks mechanisms to explicitly foster critique or reflection. Several recent studies, like Critique-Fine-Tuning (CFT) and Critique-Guided-Distillation (CGD) have shown the benefits of explicitly teaching LLMs how to critique. Motivated by them, we propose Critique Reinforcement Learning (CRL), where the model is tasked with generating a critique for a given (question, solution) pair. The reward is determined solely by whether the final judgment label $c \in \{\texttt{True}, \texttt{False}\}$ of the generated critique aligns with the ground-truth judgment $c^*$. Building on this point, we introduce \textsc{Critique-Coder}, which is trained on a hybrid of RL and CRL by substituting 20\% of the standard RL data with CRL data. We fine-tune multiple models (\textsc{Critique-Coder}) and evaluate them on different benchmarks to show their advantages over RL-only models.&amp;nbsp; We show that \textsc{Critique-Coder} consistently outperforms RL-only baselines on all the evaluated benchmarks. Notably, our \textsc{Critique-Coder-8B} can reach over 60\% on LiveCodeBench (v5), outperforming other reasoning models like DeepCoder-14B and GPT-o1.&amp;nbsp; Beyond code generation, \textsc{Critique-Coder} also demonstrates enhanced general reasoning abilities, as evidenced by its better performance on logic reasoning tasks from the BBEH dataset. This indicates that the application of CRL on coding datasets enhances general reasoning and critique abilities, which are transferable across a broad range of tasks. Hence, we believe that CRL works as a great complement to standard RL for LLM reasoning.&lt;/p&gt;
+
+
+
+&lt;div class="wp-block-group is-layout-constrained wp-block-group-is-layout-constrained"&gt;
+&lt;div style="height:40px" aria-hidden="true" class="wp-block-spacer"&gt;&lt;/div&gt;
+
+
+    &lt;div class="acf-block acf-block-block_4db73432d13e4c15b6065fb9403b00dd acf-block-separator separator"&gt;
+      &lt;div class="separator__bar" style="background-color: #E00087"&gt;&lt;/div&gt;
+    &lt;/div&gt;
+
+
+
+&lt;div style="height:40px" aria-hidden="true" class="wp-block-spacer"&gt;&lt;/div&gt;
+&lt;/div&gt;
+
+
+
+&lt;p&gt;&lt;a href="https://openreview.net/forum?id=hD69qj15Os"&gt;&lt;strong&gt;Cross-Tokenizer Likelihood Scoring Algorithms for Language Model Distillation&lt;/strong&gt;&lt;/a&gt;&lt;/p&gt;
+
+
+
+&lt;p&gt;Truong Buu Phan, Ashish Khisti (Vector Faculty Affiliate), Karen Ullrich&lt;/p&gt;
+
+
+
+&lt;p&gt;&lt;strong&gt;Abstract:&amp;nbsp;&lt;/strong&gt;&lt;/p&gt;
+
+
+
+&lt;p&gt;Computing the next-token likelihood ratio between two language models (LMs) is a standard task in training paradigms like knowledge distillation. Since this task requires both models to share the same probability space, it becomes challenging when the teacher and student LMs use different tokenizers, for instance, when edge-device deployment necessitates a smaller vocabulary size to lower memory overhead. In this work, we address this vocabulary misalignment problem by uncovering an implicit recursive structure in the commonly deployed Byte-Pair Encoding (BPE) algorithm and utilizing it to create a probabilistic framework for cross-tokenizer likelihood scoring. Our method enables sequence likelihood evaluation for vocabularies different from the teacher model native tokenizer, addressing two specific scenarios: when the student vocabulary is a subset of the teacher vocabulary, and the general case where it is arbitrary. In the subset regime, our framework computes exact likelihoods and provides next-token probabilities for sequential sampling with only $\mathcal{O}(1)$ model evaluations per token. When used for distillation, this yields up to a 12\% reduction in memory footprint for the Qwen2.5-1.5B model while also improving baseline performance up to 4\% on the evaluated tasks. For the general case, we introduce a rigorous lossless procedure that leverages BPE recursive structure, complemented by a fast approximation that keeps large-vocabulary settings practical. Applied to distillation for mathematical reasoning, our approach improves GSM8K accuracy by more than 2% over the current state of the art.&lt;/p&gt;
+
+
+
+&lt;p&gt;&lt;strong&gt;TLDR:&lt;/strong&gt; Algorithms to compute token sequences under a target BPE vocabulary that differs from the model’s native tokenizer.&lt;/p&gt;
+
+
+
+&lt;div class="wp-block-group is-layout-constrained wp-block-group-is-layout-constrained"&gt;
+&lt;div style="height:40px" aria-hidden="true" class="wp-block-spacer"&gt;&lt;/div&gt;
+
+
+    &lt;div class="acf-block acf-block-block_4db73432d13e4c15b6065fb9403b00dd acf-block-separator separator"&gt;
+      &lt;div class="separator__bar" style="background-color: #E00087"&gt;&lt;/div&gt;
+    &lt;/div&gt;
+
+
+
+&lt;div style="height:40px" aria-hidden="true" class="wp-block-spacer"&gt;&lt;/div&gt;
+&lt;/div&gt;
+
+
+
+&lt;p&gt;&lt;a href="https://openreview.net/forum?id=pUpzQZTvGY"&gt;&lt;strong&gt;Darwin Gödel Machine: Open-Ended Evolution of Self-Improving Agents&lt;/strong&gt;&lt;/a&gt;&lt;/p&gt;
+
+
+
+&lt;p&gt;Jenny Zhang, Shengran Hu, Cong Lu, Robert Lange, Jeff Clune (Vector Faculty Member)&lt;/p&gt;
+
+
+
+&lt;p&gt;&lt;strong&gt;Abstract:&amp;nbsp;&lt;/strong&gt;&lt;/p&gt;
+
+
+
+&lt;p&gt;Most of today&amp;#8217;s AI systems are constrained by human-designed, fixed architectures and cannot autonomously and continuously improve themselves. The scientific method, on the other hand, is a cumulative and open-ended system, where each innovation builds upon previous artifacts, enabling future discoveries. There is growing hope that the current manual process of advancing AI could itself be automated. If done safely, such automation would accelerate AI development and allow us to reap its benefits much sooner. This prospect raises the question of how AI systems can endlessly improve themselves while getting better at solving relevant problems. Meta-learning can automate the discovery of novel algorithms, but is limited by first-order improvements and the human design of a suitable search space. The Gödel machine proposed a theoretical alternative: a self-improving AI that repeatedly modifies itself in a provably beneficial manner. Unfortunately, proving that most changes are net beneficial is impossible in practice. We introduce the Darwin Gödel Machine (DGM), a novel self-improving system that iteratively modifies its own code (thereby also improving its ability to modify its own codebase) and empirically validates each change using coding benchmarks. Inspired by Darwinian evolution and open-endedness research, the DGM grows an archive of generated coding agents. It samples agents from this archive, which self-modify to create new, interesting versions of themselves. This open-ended exploration forms a growing tree of diverse, high-quality agents and allows the parallel exploration of many different paths through the search space. Empirically, the DGM automatically improves its coding capabilities (e.g., better code editing tools, long-context window management, peer-review mechanisms), increasing performance on SWE-bench from 20.0% to 50.0%, and on Polyglot from 14.2% to 30.7%. Furthermore, the DGM significantly outperforms baselines without self-improvement or open-ended exploration. All experiments were done with safety precautions (e.g., sandboxing, human oversight). Overall, the DGM represents a significant step toward self-improving AI, capable of gathering its own stepping stones along a path that unfolds into endless innovation.&lt;/p&gt;
+
+
+
+&lt;div class="wp-block-group is-layout-constrained wp-block-group-is-layout-constrained"&gt;
+&lt;div style="height:40px" aria-hidden="true" class="wp-block-spacer"&gt;&lt;/div&gt;
+
+
+    &lt;div class="acf-block acf-block-block_4db73432d13e4c15b6065fb9403b00dd acf-block-separator separator"&gt;
+      &lt;div class="separator__bar" style="background-color: #E00087"&gt;&lt;/div&gt;
+    &lt;/div&gt;
+
+
+
+&lt;div style="height:40px" aria-hidden="true" class="wp-block-spacer"&gt;&lt;/div&gt;
+&lt;/div&gt;
+
+
+
+&lt;p&gt;&lt;a href="https://openreview.net/forum?id=32mrjmaeMP"&gt;&lt;strong&gt;Dataless Weight Disentanglement in Task Arithmetic via Kronecker-Factored Approximate Curvature&lt;/strong&gt;&lt;/a&gt;&lt;/p&gt;
+
+
+
+&lt;p&gt;Angelo Porrello, Pietro Buzzega, Felix Dangel (former Vector Distinguished Postdoctoral Fellow), Thomas Sommariva, Riccardo Salami, Lorenzo Bonicelli, Simone Calderara&lt;/p&gt;
+
+
+
+&lt;p&gt;&lt;strong&gt;Abstract: &lt;/strong&gt;&lt;/p&gt;
+
+
+
+&lt;p&gt;Task Arithmetic (TA) provides a modular and scalable way to adapt foundation models. Combining multiple task vectors, however, can lead to cross-task interference, causing representation drift and degraded performance. Representation drift regularization provides a natural remedy to disentangle task vectors, but existing approaches typically require external task data, which conflicts with TA’s modularity and availability constraints like privacy concerns. We propose a data-free approach by framing representation drift regularization as a curvature matrix approximation problem. This allows us leverage well-established techniques; in particular, we adopt Kronecker-Factored Approximate Curvature (KFAC) to obtain practical regularizers. Our method is data-free, has constant complexity with respect to the number of tasks, and improves performance on TA benchmarks.&lt;/p&gt;
+
+
+
+&lt;p&gt;&lt;strong&gt;TLDR: &lt;/strong&gt;We tackle cross-task interference in Task Arithmetic with a dateless approach. By viewing drift as curvature approximation and applying K-FAC, we achieve scalable task disentanglement and improved benchmark performance.&lt;/p&gt;
+
+
+
+&lt;div class="wp-block-group is-layout-constrained wp-block-group-is-layout-constrained"&gt;
+&lt;div style="height:40px" aria-hidden="true" class="wp-block-spacer"&gt;&lt;/div&gt;
+
+
+    &lt;div class="acf-block acf-block-block_4db73432d13e4c15b6065fb9403b00dd acf-block-separator separator"&gt;
+      &lt;div class="separator__bar" style="background-color: #E00087"&gt;&lt;/div&gt;
+    &lt;/div&gt;
+
+
+
+&lt;div style="height:40px" aria-hidden="true" class="wp-block-spacer"&gt;&lt;/div&gt;
+&lt;/div&gt;
+
+
+
+&lt;p&gt;&lt;a href="https://openreview.net/forum?id=NjgaeXNit3"&gt;&lt;strong&gt;Divide and Abstract: Autoformalization via Decomposition and Abstraction Learning&lt;/strong&gt;&lt;/a&gt;&lt;/p&gt;
+
+
+
+&lt;p&gt;Marcus Min, Yeqi Gao, Wilson Sy, Zhaoyu Li, Xujie Si (Vector Faculty Affiliate), Osbert Bastani&lt;/p&gt;
+
+
+
+&lt;p&gt;&lt;strong&gt;Abstract: &lt;/strong&gt;&lt;/p&gt;
+
+
+
+&lt;p&gt;Autoformalization, the task of translating informal mathematics into formal machine-verifiable languages, has long been challenging, even for individual statements. Beyond the statement level, mathematicians invest substantial effort in formalizing reusable abstractions such as common definitions and relations, based on which a large corpus of statements can be easily formalized. While previous work focuses on fine-tuning models for single statement autoformalization, we introduce $\textit{Divide and Abstract (DNA)}$, an end-to-end framework that not only improves the models&amp;#8217; test-time performance at formalizing a corpus of statements, but also learns a library of reusable formal abstractions, which scales to statements outside of the corpus. First, $\textit{DNA}$ extracts common mathematical concepts from the entire informal corpus and formalizes them as reusable abstractions. Conditioned on these learned abstractions, $\textit{DNA}$ decomposes each informal statement in the corpus into a structured collection of informal clauses, translates each clause into its formal correspondents, composes the formal clauses back together, and refines the final formalization given feedback from a symbolic validator. The entire framework requires zero training and thus scales to any formal language, particularly low-resource Domain-Specific Languages (DSL). $\textit{DNA}$ significantly improves performance by up to $\textbf{8.6}\times$, and advances the SOTA by $\textbf{57.8}$\% from $\textbf{40.8}$ to $\textbf{64.4}$.&lt;/p&gt;
+
+
+
+&lt;p&gt;&lt;strong&gt;TLDR: &lt;/strong&gt;We designed a framework that not only improves LLMs at formalizing a corpus of statements, but also learns a library of reusable abstractions, which scales to statements outside of the corpus.&lt;/p&gt;
+
+
+
+&lt;div class="wp-block-group is-layout-constrained wp-block-group-is-layout-constrained"&gt;
+&lt;div style="height:40px" aria-hidden="true" class="wp-block-spacer"&gt;&lt;/div&gt;
+
+
+    &lt;div class="acf-block acf-block-block_4db73432d13e4c15b6065fb9403b00dd acf-block-separator separator"&gt;
+      &lt;div class="separator__bar" style="background-color: #E00087"&gt;&lt;/div&gt;
+    &lt;/div&gt;
+
+
+
+&lt;div style="height:40px" aria-hidden="true" class="wp-block-spacer"&gt;&lt;/div&gt;
+&lt;/div&gt;
+
+
+
+&lt;p&gt;&lt;a href="https://openreview.net/forum?id=neaxYXGYd5"&gt;&lt;strong&gt;DPQuant: Efficient and Private Model Training via Dynamic Quantization Scheduling&lt;/strong&gt;&lt;/a&gt;&lt;/p&gt;
+
+
+
+&lt;p&gt;Yubo Gao, Renbo Tu, Gennady Pekhimenko (Vector Faculty Member), Nandita Vijaykumar (Vector Faculty Member)&lt;/p&gt;
+
+
+
+&lt;p&gt;&lt;strong&gt;Abstract:&amp;nbsp;&lt;/strong&gt;&lt;/p&gt;
+
+
+
+&lt;p&gt;Differentially-Private SGD (DP-SGD) is a powerful technique to protect user privacy when using sensitive data to train neural networks. During training, converting model weights and activations into low-precision formats, i.e., quantization, can drastically reduce training times, energy consumption, and cost, and is thus a widely used technique. In this work, we demonstrate that quantization causes significantly higher accuracy degradation in DP-SGD compared to regular SGD. We observe that this is caused by noise injection in DP-SGD, which amplifies quantization variance, leading to disproportionately large accuracy degradation. To address this challenge, we present DPQuant, a dynamic quantization framework that adaptively selects a changing subset of layers to quantize at each epoch. Our method combines two key ideas that effectively reduce quantization variance: (i) probabilistic sampling of the layers that rotates which layers are quantized every epoch, and (ii) loss-aware layer prioritization, which uses a differentially private loss sensitivity estimator to identify layers that can be quantized with minimal impact on model quality. This estimator consumes a negligible fraction of the overall privacy budget, preserving DP guarantees. Empirical evaluations on ResNet18, ResNet50, and DenseNet121 across a range of datasets demonstrate that DPQuant consistently outperforms static quantization baselines, achieving near Pareto-optimal accuracy-compute trade-offs and up to $2.21\times$ theoretical throughput improvements on low‑precision hardware, with less than 2% drop in validation accuracy.&lt;/p&gt;
+
+
+
+&lt;div class="wp-block-group is-layout-constrained wp-block-group-is-layout-constrained"&gt;
+&lt;div style="height:40px" aria-hidden="true" class="wp-block-spacer"&gt;&lt;/div&gt;
+
+
+    &lt;div class="acf-block acf-block-block_4db73432d13e4c15b6065fb9403b00dd acf-block-separator separator"&gt;
+      &lt;div class="separator__bar" style="background-color: #E00087"&gt;&lt;/div&gt;
+    &lt;/div&gt;
+
+
+
+&lt;div style="height:40px" aria-hidden="true" class="wp-block-spacer"&gt;&lt;/div&gt;
+&lt;/div&gt;
+
+
+
+&lt;p&gt;&lt;a href="https://openreview.net/forum?id=OrgL5DsU0f"&gt;&lt;strong&gt;DrivingGen: A Comprehensive Benchmark for Generative Video World Models in Autonomous Driving&lt;/strong&gt;&lt;/a&gt;&lt;/p&gt;
+
+
+
+&lt;p&gt;Yang Zhou, Hao Shao, Letian Wang, Zhuofan Zong, Hongsheng Li, Steven Waslander (Vector Faculty Affiliate)&lt;/p&gt;
+
+
+
+&lt;p&gt;&lt;strong&gt;Abstract:&lt;/strong&gt;&lt;/p&gt;
+
+
+
+&lt;p&gt;Video generation models, as one form of world models, has emerged as one of the most exciting frontiers in AI, promising agents the ability to imagine the future by modeling the temporal evolution of complex scenes.&amp;nbsp; In autonomous driving, this vision gives rise to driving world models—generative simulators that imagine ego and agent futures, enabling scalable simulation, safe testing of corner cases, and rich synthetic data generation. Yet, despite fast-growing research activity, the field lacks a rigorous benchmark to measure progress and guide priorities. Existing evaluations remain limited: generic video metrics overlook safety-critical imaging factors; trajectory plausibility is rarely quantified; temporal and agent-level consistency is neglected; and controllability with respect to ego conditioning is ignored. Moreover, current datasets fail to cover the diversity of conditions required for real-world deployment. To address these gaps, we present DrivingGen, the first comprehensive benchmark for generative driving world models. DrivingGen combines a diverse evaluation dataset—curated from both driving datasets and internet-scale video sources, spanning varied weather, time of day, geographic regions, and complex maneuvers—with a suite of new metrics that jointly assess visual realism, trajectory plausibility, temporal coherence, and controllability. Benchmarking 14 state-of-the-art models reveals clear trade-offs: general models look better but break physics, while driving-specific ones capture motion realistically but lag in visual quality. DrivingGen offers a unified evaluation framework to foster reliable, controllable, and deployable driving world models, enabling scalable simulation, planning, and data-driven decision-making.&lt;/p&gt;
+
+
+
+&lt;div class="wp-block-group is-layout-constrained wp-block-group-is-layout-constrained"&gt;
+&lt;div style="height:40px" aria-hidden="true" class="wp-block-spacer"&gt;&lt;/div&gt;
+
+
+    &lt;div class="acf-block acf-block-block_4db73432d13e4c15b6065fb9403b00dd acf-block-separator separator"&gt;
+      &lt;div class="separator__bar" style="background-color: #E00087"&gt;&lt;/div&gt;
+    &lt;/div&gt;
+
+
+
+&lt;div style="height:40px" aria-hidden="true" class="wp-block-spacer"&gt;&lt;/div&gt;
+&lt;/div&gt;
+
+
+
+&lt;p&gt;&lt;a href="https://openreview.net/forum?id=eZu358JOOR"&gt;&lt;strong&gt;EditReward: A Human-Aligned Reward Model for Instruction-Guided Image Editing&lt;/strong&gt;&lt;/a&gt;&lt;/p&gt;
+
+
+
+&lt;p&gt;Keming Wu, Sicong Jiang, Max Ku, PING NIE, Minghao Liu, Wenhu Chen (Vector Faculty Member)&lt;/p&gt;
+
+
+
+&lt;p&gt;&lt;strong&gt;Abstract:&amp;nbsp;&lt;/strong&gt;&lt;/p&gt;
+
+
+
+&lt;p&gt;Recently, we have witnessed great progress in image editing with natural language instructions. Several closed-source models like GPT-Image-1, Seedream, and Google-Nano-Banana have shown highly promising progress. However, the open-source models are still lagging. The main bottleneck is the lack of a reliable reward model to scale up high-quality synthetic training data. To address this critical bottleneck, we built EditReward, trained with our new large-scale human preference dataset, meticulously annotated by trained experts following a rigorous protocol containing over 200K preference pairs. EditReward demonstrates superior alignment with human preferences in instruction-guided image editing tasks. Experiments show that EditReward achieves state-of-the-art human correlation on established benchmarks such as GenAI-Bench, AURORA-Bench, ImagenHub, and our new EditReward-Bench, outperforming a wide range of VLM-as-judge models. Furthermore, we use EditReward to select a high-quality subset from the existing noisy ShareGPT-4o-Image dataset. We train Step1X-Edit on the selected subset, which shows significant improvement over training on the full set. This demonstrates EditReward&amp;#8217;s ability to serve as a reward model to scale up high-quality training data for image editing. EditReward with its training dataset will be released to help the community build more high-quality image editing training datasets to catch up with the frontier ones.&lt;/p&gt;
+
+
+
+&lt;p&gt;&lt;strong&gt;TL;DR: &lt;/strong&gt;We present EDITREWARD, trained on EDITREWARD-DATA (200K human preference pairs), and introduce EDITREWARD-BENCH, setting new state-of-the-art in image editing evaluation and data curation.&lt;/p&gt;
+
+
+
+&lt;div class="wp-block-group is-layout-constrained wp-block-group-is-layout-constrained"&gt;
+&lt;div style="height:40px" aria-hidden="true" class="wp-block-spacer"&gt;&lt;/div&gt;
+
+
+    &lt;div class="acf-block acf-block-block_4db73432d13e4c15b6065fb9403b00dd acf-block-separator separator"&gt;
+      &lt;div class="separator__bar" style="background-color: #E00087"&gt;&lt;/div&gt;
+    &lt;/div&gt;
+
+
+
+&lt;div style="height:40px" aria-hidden="true" class="wp-block-spacer"&gt;&lt;/div&gt;
+&lt;/div&gt;
+
+
+
+&lt;p&gt;&lt;a href="https://openreview.net/forum?id=NlkykTqAId"&gt;&lt;strong&gt;Emergent Hierarchical Reasoning in LLMs through Reinforcement Learning&lt;/strong&gt;&lt;/a&gt;&lt;/p&gt;
+
+
+
+&lt;p&gt;Haozhe Wang, Qixin Xu, Che Liu, Junhong Wu, Fangzhen Lin, Wenhu Chen (Vector Faculty Member)&lt;/p&gt;
+
+
+
+&lt;p&gt;&lt;strong&gt;Abstract:&amp;nbsp;&lt;/strong&gt;&lt;/p&gt;
+
+
+
+&lt;p&gt;Reinforcement Learning (RL) has proven highly effective at enhancing the complex reasoning abilities of Large Language Models (LLMs), yet underlying mechanisms driving this success remain largely opaque. Our analysis reveals that puzzling phenomena like &amp;#8220;aha moments&amp;#8221;, &amp;#8220;length-scaling&amp;#8221; and entropy dynamics are not disparate occurrences but hallmarks of an emergent reasoning hierarchy, akin to the separation of high-level strategic planning from low-level procedural execution in human cognition. We uncover a compelling two-phase dynamic: initially, a model is constrained by procedural correctness and must improve its low-level skills. The learning bottleneck then decisively shifts, with performance gains being driven by the exploration and mastery of high-level strategic planning. This insight exposes a core inefficiency in prevailing RL algorithms like GRPO, which apply optimization pressure agnostically and dilute the learning signal across all tokens. To address this, we propose Hierarchy-Aware Credit Assignment (HICRA), an algorithm that concentrates optimization efforts on high-impact planning tokens. Our extensive experiments validate that HICRA significantly outperforms strong baselines, and offer deep insights into how reasoning advances through the lens of strategic exploration.&lt;/p&gt;
+
+
+
+&lt;div class="wp-block-group is-layout-constrained wp-block-group-is-layout-constrained"&gt;
+&lt;div style="height:40px" aria-hidden="true" class="wp-block-spacer"&gt;&lt;/div&gt;
+
+
+    &lt;div class="acf-block acf-block-block_4db73432d13e4c15b6065fb9403b00dd acf-block-separator separator"&gt;
+      &lt;div class="separator__bar" style="background-color: #E00087"&gt;&lt;/div&gt;
+    &lt;/div&gt;
+
+
+
+&lt;div style="height:40px" aria-hidden="true" class="wp-block-spacer"&gt;&lt;/div&gt;
+&lt;/div&gt;
+
+
+
+&lt;p&gt;&lt;a href="https://openreview.net/forum?id=yzwSzhqLpH"&gt;&lt;strong&gt;Entropy-Guided Dynamic Tokens for Graph-LLM Alignment in Molecular Understanding&lt;/strong&gt;&lt;/a&gt;&lt;/p&gt;
+
+
+
+&lt;p&gt;Zihao Jing, Qiuhao Zeng, Ruiyi Fang, Yan Sun, Boyu Wang (Vector Faculty Affiliate), Pingzhao Hu&lt;/p&gt;
+
+
+
+&lt;p&gt;&lt;strong&gt;Abstract:&amp;nbsp;&lt;/strong&gt;&lt;/p&gt;
+
+
+
+&lt;p&gt;Molecular understanding is central to advancing areas such as scientific and drug discovery, yet Large Language Models (LLMs) struggle to understand molecular graphs effectively. Existing graph–LLM bridges often adapt the Q-Former-style connector with fixed-length static tokens, which is originally designed for vision tasks. These designs overlook stereochemistry and substructural context and typically require costly LLM-backbone fine-tuning, limiting efficiency and generalization. We introduce **EDT-Former**, an **E**ntropy-guided **D**ynamic **T**oken Trans**former** that generates tokens aligned with informative molecular patches, thereby preserving both local and global structural features for molecular graph understanding. Beyond prior approaches, EDT-Former enables alignment between frozen graph encoders and LLMs without tuning the LLM backbone (excluding the embedding layer), resulting in computationally efficient finetuning, and achieves state-of-the-art results on MoleculeQA, Mol-Instructions, and property prediction benchmarks (TDC, MoleculeNet), underscoring its effectiveness for scalable and generalizable multimodal molecular understanding.&lt;/p&gt;
+
+
+
+&lt;p&gt;&lt;strong&gt;TLDR: &lt;/strong&gt;EDT-Former: entropy-guided dynamic query tokens map molecular graphs to LLMs, capturing local and global structure features for comprehensive understanding and reasoning with backbone-free, connector-only training.&lt;/p&gt;
+
+
+
+&lt;div class="wp-block-group is-layout-constrained wp-block-group-is-layout-constrained"&gt;
+&lt;div style="height:40px" aria-hidden="true" class="wp-block-spacer"&gt;&lt;/div&gt;
+
+
+    &lt;div class="acf-block acf-block-block_4db73432d13e4c15b6065fb9403b00dd acf-block-separator separator"&gt;
+      &lt;div class="separator__bar" style="background-color: #E00087"&gt;&lt;/div&gt;
+    &lt;/div&gt;
+
+
+
+&lt;div style="height:40px" aria-hidden="true" class="wp-block-spacer"&gt;&lt;/div&gt;
+&lt;/div&gt;
+
+
+
+&lt;p&gt;&lt;a href="https://openreview.net/forum?id=CQnpxZNMvT"&gt;&lt;strong&gt;Gradient-Sign Masking for Task Vector Transport Across Pre-Trained Models&lt;/strong&gt;&lt;/a&gt;&lt;/p&gt;
+
+
+
+&lt;p&gt;Filippo Rinaldi, Aniello Panariello, Giacomo Salici, Fengyuan Liu, Marco Ciccone (Vector Distinguished Postdoctoral Fellow), Angelo Porrello, Simone Calderara&lt;/p&gt;
+
+
+
+&lt;p&gt;&lt;strong&gt;Abstract:&amp;nbsp;&lt;/strong&gt;&lt;/p&gt;
+
+
+
+&lt;p&gt;When a new release of a foundation model is published, practitioners typically need to repeat full fine-tuning, even if the same task has already been solved in the previous version. A promising alternative is to reuse the parameter changes (i.e., task vectors) that capture how a model adapts to a specific task. However, they often fail to transfer across different pre-trained models due to their misaligned parameter space. In this work, we show that the key to successful transfer lies in the sign structure of the gradients of the new model. Based on this insight, we propose GradFix, a novel method that approximates the ideal gradient sign structure and leverages it to transfer knowledge using only a handful of labeled samples. Notably, this requires no additional fine-tuning: the adaptation is achieved by computing a few gradients at the target model and masking the source task vector accordingly. This yields an update that is locally aligned with the target loss landscape, effectively rebasing the task vector onto the new pre-training. We provide a theoretical guarantee that our method ensures first-order descent. Empirically, we demonstrate significant performance gains on vision and language benchmarks, consistently outperforming naive task vector addition and few-shot fine-tuning.&lt;/p&gt;
+
+
+
+&lt;p&gt;&lt;strong&gt;TLDR: &lt;/strong&gt;Gradient-sign masking transfers task vectors across foundation models with few samples, outperforming naive transfer and few-shot fine-tuning.&lt;/p&gt;
+
+
+
+&lt;div class="wp-block-group is-layout-constrained wp-block-group-is-layout-constrained"&gt;
+&lt;div style="height:40px" aria-hidden="true" class="wp-block-spacer"&gt;&lt;/div&gt;
+
+
+    &lt;div class="acf-block acf-block-block_4db73432d13e4c15b6065fb9403b00dd acf-block-separator separator"&gt;
+      &lt;div class="separator__bar" style="background-color: #E00087"&gt;&lt;/div&gt;
+    &lt;/div&gt;
+
+
+
+&lt;div style="height:40px" aria-hidden="true" class="wp-block-spacer"&gt;&lt;/div&gt;
+&lt;/div&gt;
+
+
+
+&lt;p&gt;&lt;a href="https://openreview.net/forum?id=LMvlwGkXpX"&gt;&lt;strong&gt;Homeostatic Adaptation of Optimal Population Codes under Metabolic Stress&lt;/strong&gt;&lt;/a&gt;&lt;/p&gt;
+
+
+
+&lt;p&gt;Yi-Chun Hung, Gregory Schwartz (Vector Faculty Affiliate), Emily Cooper, Emma Alexander&lt;/p&gt;
+
+
+
+&lt;p&gt;&lt;strong&gt;Abstract:&amp;nbsp;&lt;/strong&gt;&lt;/p&gt;
+
+
+
+&lt;p&gt;Information processing in neural populations is inherently constrained by metabolic resource limits and noise properties, with dynamics that are not accurately described by existing mathematical models. Recent data, for example, shows that neurons in mouse visual cortex go into a &amp;#8220;low power mode&amp;#8221; in which they maintain firing rate homeostasis while expending less energy. This adaptation leads to increased neuronal noise and tuning curve flattening in response to metabolic stress. We have developed a theoretical population coding framework that captures this behavior using two novel, surprisingly simple constraints: an approximation of firing rate homeostasis and an energy limit tied to noise levels via biophysical simulation. A key feature of our contribution is an energy budget model directly connecting adenosine triphosphate (ATP) use in cells to a fully explainable mathematical framework that generalizes existing optimal population codes. Specifically, our simulation provides an energy-dependent dispersed Poisson noise model, based on the assumption that the cell will follow an optimal decay path to produce the least-noisy spike rate that is possible at a given cellular energy budget. Each state along this optimal path is associated with properties (resting potential and leak conductance) which can be measured in electrophysiology experiments and have been shown to change under prolonged caloric deprivation. We analytically derive the optimal coding strategy for neurons under varying energy budgets and coding goals, and show how our method uniquely captures how populations of tuning curves adapt while maintaining homeostasis, as has been observed empirically.&lt;/p&gt;
+
+
+
+&lt;div class="wp-block-group is-layout-constrained wp-block-group-is-layout-constrained"&gt;
+&lt;div style="height:40px" aria-hidden="true" class="wp-block-spacer"&gt;&lt;/div&gt;
+
+
+    &lt;div class="acf-block acf-block-block_4db73432d13e4c15b6065fb9403b00dd acf-block-separator separator"&gt;
+      &lt;div class="separator__bar" style="background-color: #E00087"&gt;&lt;/div&gt;
+    &lt;/div&gt;
+
+
+
+&lt;div style="height:40px" aria-hidden="true" class="wp-block-spacer"&gt;&lt;/div&gt;
+&lt;/div&gt;
+
+
+
+&lt;p&gt;&lt;a href="https://openreview.net/forum?id=bld9g6jFh9"&gt;&lt;strong&gt;ImagenWorld: Stress-Testing Image Generation Models with Explainable Human Evaluation on Open-ended Real-World Tasks&lt;/strong&gt;&lt;/a&gt;&lt;/p&gt;
+
+
+
+&lt;p&gt;Samin Mahdizadeh Sani, Max Ku, Nima Jamali, Matina Sani, Paria Khoshtab, Wei-Chieh Sun, Parnian Fazel, Zhi Rui Tam, Thomas Chong, Edisy Kin Wai Chan, Donald Tsang, Chiao-Wei Hsu, Ting Lam, Ho Ng, Chiafeng Chu, Chak-Wing Mak, Keming Wu, Wong Hiu-Tung, Yik Ho, Chi Ruan, Zhuofeng Li, I-Sheng Fang, Shih-Ying Yeh, Ho Kei Cheng, Ping Nie, Wenhu Chen (Vector Faculty Member)&lt;/p&gt;
+
+
+
+&lt;p&gt;&lt;strong&gt;Abstract:&amp;nbsp;&lt;/strong&gt;&lt;/p&gt;
+
+
+
+&lt;p&gt;Advances in diffusion, autoregressive, and hybrid models have enabled high-quality image synthesis for tasks such as text-to-image, editing, and reference-guided composition. Yet, existing benchmarks remain limited, either focus on isolated tasks, cover only narrow domains, or provide opaque scores without explaining failure modes. We introduce \textbf{ImagenWorld}, a benchmark of 3.6K condition sets spanning six core tasks (generation and editing, with single or multiple references) and six topical domains (artworks, photorealistic images, information graphics, textual graphics, computer graphics, and screenshots). The benchmark is supported by 20K fine-grained human annotations and an explainable evaluation schema that tags localized object-level and segment-level errors, complementing automated VLM-based metrics. Our large-scale evaluation of 14 models yields several insights: (1) models typically struggle more in editing tasks than in generation tasks, especially in local edits. (2) models excel in artistic and photorealistic settings but struggle with symbolic and text-heavy domains such as screenshots and information graphics. (3) closed-source systems lead overall, while targeted data curation (e.g., Qwen-Image) narrows the gap in text-heavy cases. (4) modern VLM-based metrics achieve Kendall accuracies up to 0.79, approximating human ranking, but fall short of fine-grained, explainable error attribution. ImagenWorld provides both a rigorous benchmark and a diagnostic tool to advance robust image generation.&lt;/p&gt;
+
+
+
+&lt;div class="wp-block-group is-layout-constrained wp-block-group-is-layout-constrained"&gt;
+&lt;div style="height:40px" aria-hidden="true" class="wp-block-spacer"&gt;&lt;/div&gt;
+
+
+    &lt;div class="acf-block acf-block-block_4db73432d13e4c15b6065fb9403b00dd acf-block-separator separator"&gt;
+      &lt;div class="separator__bar" style="background-color: #E00087"&gt;&lt;/div&gt;
+    &lt;/div&gt;
+
+
+
+&lt;div style="height:40px" aria-hidden="true" class="wp-block-spacer"&gt;&lt;/div&gt;
+&lt;/div&gt;
+
+
+
+&lt;p&gt;&lt;a href="https://openreview.net/forum?id=JQR8OCptcG"&gt;&lt;strong&gt;Improving Set Function Approximation with Quasi-Arithmetic Neural Networks&lt;/strong&gt;&lt;/a&gt;&lt;/p&gt;
+
+
+
+&lt;p&gt;Tomas Tokar, Scott Sanner (Vector Faculty Affiliate)&lt;/p&gt;
+
+
+
+&lt;p&gt;&lt;strong&gt;Abstract:&amp;nbsp;&lt;/strong&gt;&lt;/p&gt;
+
+
+
+&lt;p&gt;Sets represent a fundamental abstraction across many types of data. To handle the unordered nature of set-structured data, models such as DeepSets and PointNet rely on fixed, non-learnable pooling operations (e.g., sum or max) &amp;#8212; a design choice that can hinder the transferability of learned embeddings and limits model expressivity. More recently, learnable aggregation functions have been proposed as more expressive alternatives. In this work, we advance this line of research by introducing the Neuralized Kolmogorov Mean (NKM) &amp;#8212; a novel, trainable framework for learning a generalized measure of central tendency through an invertible neural function. We further propose quasi-arithmetic neural networks (QUANNs), which incorporate the NKM as a learnable aggregation function. We provide a theoretical analysis showing that, QUANNs are universal approximators for a broad class of common set-function decompositions and, thanks to their invertible neural components, learn more structured latent representations. Empirically, QUANNs outperform state-of-the-art baselines across diverse benchmarks, while learning embeddings that transfer effectively even to tasks that do not involve sets.&lt;/p&gt;
+
+
+
+&lt;p&gt;&lt;strong&gt;TL;DR: &lt;/strong&gt;We introduce quasi-arithmetic neural networks (QUANNs), which use Neuralized Kolmogorov Mean&amp;#8212;newly introduced trainable pooling mechanism&amp;#8212;to improve set functions approximation.&lt;/p&gt;
+
+
+
+&lt;div class="wp-block-group is-layout-constrained wp-block-group-is-layout-constrained"&gt;
+&lt;div style="height:40px" aria-hidden="true" class="wp-block-spacer"&gt;&lt;/div&gt;
+
+
+    &lt;div class="acf-block acf-block-block_4db73432d13e4c15b6065fb9403b00dd acf-block-separator separator"&gt;
+      &lt;div class="separator__bar" style="background-color: #E00087"&gt;&lt;/div&gt;
+    &lt;/div&gt;
+
+
+
+&lt;div style="height:40px" aria-hidden="true" class="wp-block-spacer"&gt;&lt;/div&gt;
+&lt;/div&gt;
+
+
+
+&lt;p&gt;&lt;a href="https://openreview.net/forum?id=hj9eKpqxQl"&gt;&lt;strong&gt;Learn to Reason Efficiently with Adaptive Length-based Reward Shaping&lt;/strong&gt;&lt;/a&gt;&lt;/p&gt;
+
+
+
+&lt;p&gt;Wei Liu, Ruochen Zhou, Yiyun Deng, Yuzhen Huang, Junteng Liu, Yuntian Deng (Vector Faculty Affiliate), Yizhe Zhang, Junxian He&lt;/p&gt;
+
+
+
+&lt;p&gt;&lt;strong&gt;Abstract:&amp;nbsp;&lt;/strong&gt;&lt;/p&gt;
+
+
+
+&lt;p&gt;Large Reasoning Models (LRMs) have shown remarkable capabilities in solving complex problems through reinforcement learning (RL), particularly by generating long reasoning traces. However, these extended outputs often exhibit substantial redundancy, which limits the efficiency of LRMs. In this paper, we investigate RL-based approaches to promote reasoning efficiency. Specifically, we first present a unified framework that formulates various efficient reasoning methods through the lens of length-based reward shaping. Building on this perspective, we propose a novel **L**ength-b**A**sed **S**t**E**p **R**eward shaping method (LASER), which employs a step function as the reward based on target length. LASER surpasses previous methods, achieving a superior trade-off between performance and efficiency. Next, we further extend LASER based on two key intuitions: (1) The reasoning behavior of the model evolves dynamically during training, necessitating reward specifications that are also adaptive and dynamic; (2) Rather than uniformly encouraging shorter or longer chains of thought (CoT), we posit that length-based reward shaping should be difficulty-aware i.e., it should penalize lengthy CoTs more for easy queries. This approach is expected to facilitate a combination of fast and slow thinking, leading to a better overall tradeoff. The resulting method is termed LASER-D (**D**ynamic and **D**ifficulty-aware). Experiments on five open-weight models from 1.5B to 32B demonstrate that our approach significantly enhances both reasoning performance and response length efficiency. For instance, LASER-D achieves a **5.3** improvement on AIME2024 while reducing token usage by **64**%. Further analysis reveals that our RL-based compression produces more concise reasoning patterns with less redundant &amp;#8220;self-reflections&amp;#8221;.&lt;/p&gt;
+
+
+
+&lt;div class="wp-block-group is-layout-constrained wp-block-group-is-layout-constrained"&gt;
+&lt;div style="height:40px" aria-hidden="true" class="wp-block-spacer"&gt;&lt;/div&gt;
+
+
+    &lt;div class="acf-block acf-block-block_4db73432d13e4c15b6065fb9403b00dd acf-block-separator separator"&gt;
+      &lt;div class="separator__bar" style="background-color: #E00087"&gt;&lt;/div&gt;
+    &lt;/div&gt;
+
+
+
+&lt;div style="height:40px" aria-hidden="true" class="wp-block-spacer"&gt;&lt;/div&gt;
+&lt;/div&gt;
+
+
+
+&lt;p&gt;&lt;a href="https://openreview.net/forum?id=nqZe43tRY9"&gt;&lt;strong&gt;LogicXGNN:&amp;nbsp; Grounded Logical Rules for Explaining Graph Neural Networks&lt;/strong&gt;&lt;/a&gt;&lt;/p&gt;
+
+
+
+&lt;p&gt;Chuqin Geng, Ziyu Zhao, Zhaoyue Wang, Haolin Ye, Yuhe Jiang, Xujie Si (Vector Faculty Affiliate)&lt;/p&gt;
+
+
+
+&lt;p&gt;&lt;strong&gt;Abstract:&amp;nbsp;&lt;/strong&gt;&lt;/p&gt;
+
+
+
+&lt;p&gt;Existing rule-based explanations for Graph Neural Networks (GNNs) provide global interpretability but often optimize and assess fidelity in an intermediate, uninterpretable concept space, overlooking the grounding quality of the final subgraph explanations for end users. This gap yields explanations that may appear faithful yet be unreliable in practice. To this end, we propose LogicXGNN, a post hoc framework that constructs logical rules over reliable predicates explicitly designed to capture the GNN&amp;#8217;s message-passing structure, thereby ensuring effective grounding. We further introduce data-grounded fidelity ($Fid_D$), a realistic metric that evaluates explanations in their final-graph form, along with complementary utility metrics such as coverage and validity. Across extensive experiments, LogicXGNN improves $Fid_D$ by over 20% on average relative to state-of-the-art methods while being 10-100 times faster. With strong scalability and utility performance, LogicXGNN produces explanations that are faithful to the model&amp;#8217;s logic and reliably grounded in observable data.&lt;/p&gt;
+
+
+
+&lt;div class="wp-block-group is-layout-constrained wp-block-group-is-layout-constrained"&gt;
+&lt;div style="height:40px" aria-hidden="true" class="wp-block-spacer"&gt;&lt;/div&gt;
+
+
+    &lt;div class="acf-block acf-block-block_4db73432d13e4c15b6065fb9403b00dd acf-block-separator separator"&gt;
+      &lt;div class="separator__bar" style="background-color: #E00087"&gt;&lt;/div&gt;
+    &lt;/div&gt;
+
+
+
+&lt;div style="height:40px" aria-hidden="true" class="wp-block-spacer"&gt;&lt;/div&gt;
+&lt;/div&gt;
+
+
+
+&lt;p&gt;&lt;a href="https://openreview.net/forum?id=RzYXb5YWBs"&gt;&lt;strong&gt;LoopFormer: Elastic-Depth Looped Transformers for Latent Reasoning via Shortcut Modulation&lt;/strong&gt;&lt;/a&gt;&lt;/p&gt;
+
+
+
+&lt;p&gt;Ahmadreza Jeddi, Marco Ciccone (Vector Distinguished Postdoctoral Fellow), Babak Taati (Vector Faculty Affiliate)&lt;/p&gt;
+
+
+
+&lt;p&gt;&lt;strong&gt;Abstract:&amp;nbsp;&lt;/strong&gt;&lt;/p&gt;
+
+
+
+&lt;p&gt;Looped Transformers have emerged as an efficient and powerful class of models for reasoning in the language domain. Recent studies show that these models achieve strong performance on algorithmic and reasoning tasks, suggesting that looped architectures possess an inductive bias toward latent reasoning. However, prior approaches fix the number of loop iterations during training and inference, leaving open the question of whether these models can flexibly adapt their computational depth under variable compute budgets. We introduce LoopFormer, a looped Transformer trained on variable-length trajectories to enable budget-conditioned reasoning. Our core contribution is a shortcut-consistency training scheme that aligns trajectories of different lengths, ensuring that shorter loops yield informative representations while longer loops continue to refine them. LoopFormer conditions each loop on the current time and step size, enabling representations to evolve consistently across trajectories of varying length rather than drifting or stagnating. Empirically, LoopFormer demonstrates robust performance on language modeling and reasoning benchmarks even under aggressive compute constraints, while scaling gracefully with additional budget. These results show that looped Transformers are inherently suited for adaptive language modeling, opening a path toward controllable and budget-aware large language models.&lt;/p&gt;
+
+
+
+&lt;div class="wp-block-group is-layout-constrained wp-block-group-is-layout-constrained"&gt;
+&lt;div style="height:40px" aria-hidden="true" class="wp-block-spacer"&gt;&lt;/div&gt;
+
+
+    &lt;div class="acf-block acf-block-block_4db73432d13e4c15b6065fb9403b00dd acf-block-separator separator"&gt;
+      &lt;div class="separator__bar" style="background-color: #E00087"&gt;&lt;/div&gt;
+    &lt;/div&gt;
+
+
+
+&lt;div style="height:40px" aria-hidden="true" class="wp-block-spacer"&gt;&lt;/div&gt;
+&lt;/div&gt;
+
+
+
+&lt;p&gt;&lt;a href="https://openreview.net/forum?id=tIVCfVnIHo"&gt;&lt;strong&gt;Lyra: Generative 3D Scene Reconstruction via Video Diffusion Model Self-Distillation&lt;/strong&gt;&lt;/a&gt;&lt;/p&gt;
+
+
+
+&lt;p&gt;Sherwin Bahmani, Tianchang Shen, Jiawei Ren, Jiahui Huang, Yifeng Jiang, Haithem Turki, Andrea Tagliasacchi, David Lindell (Vector Faculty Affiliate), Zan Gojcic, Sanja Fidler (Vector Faculty Member), Huan Ling, Jun Gao, Xuanchi Ren&lt;/p&gt;
+
+
+
+&lt;p&gt;&lt;strong&gt;Abstract:&amp;nbsp;&lt;/strong&gt;&lt;/p&gt;
+
+
+
+&lt;p&gt;The ability to generate virtual environments is crucial for applications ranging from gaming to physical AI domains such as robotics, autonomous driving, and industrial AI. Current learning-based 3D reconstruction methods rely on the availability of captured real-world multi-view data, which is not always readily available. Recent advancements in video diffusion models have shown remarkable imagination capabilities, yet their 2D nature limits the applications to simulation where a robot needs to navigate and interact with the environment. In this paper, we propose a self-distillation framework that aims to distill the implicit 3D knowledge in the video diffusion models into an explicit 3D Gaussian Splatting (3DGS) representation, eliminating the need for multi-view training data. Specifically, we augment the typical RGB decoder with a 3DGS decoder, which is supervised by the output of the RGB decoder. In this approach, the 3DGS decoder can be purely trained with synthetic data generated by video diffusion models. At inference time, our model can synthesize 3D scenes from either a text prompt or a single image for real-time rendering. Our framework further extends to dynamic 3D scene generation from a monocular input video. Experimental results show that our framework achieves state-of-the-art performance in static and dynamic 3D scene generation. Video results: &lt;a href="https://anonlyra.github.io/anonlyra"&gt;https://anonlyra.github.io/anonlyra&lt;/a&gt;&lt;/p&gt;
+
+
+
+&lt;p&gt;&lt;strong&gt;TL;DR: &lt;/strong&gt;Feed-forward 3D and 4D with camera-controlled video diffusion models&lt;/p&gt;
+
+
+
+&lt;div class="wp-block-group is-layout-constrained wp-block-group-is-layout-constrained"&gt;
+&lt;div style="height:40px" aria-hidden="true" class="wp-block-spacer"&gt;&lt;/div&gt;
+
+
+    &lt;div class="acf-block acf-block-block_4db73432d13e4c15b6065fb9403b00dd acf-block-separator separator"&gt;
+      &lt;div class="separator__bar" style="background-color: #E00087"&gt;&lt;/div&gt;
+    &lt;/div&gt;
+
+
+
+&lt;div style="height:40px" aria-hidden="true" class="wp-block-spacer"&gt;&lt;/div&gt;
+&lt;/div&gt;
+
+
+
+&lt;p&gt;&lt;a href="https://openreview.net/forum?id=d3R0TF7w5f"&gt;&lt;strong&gt;Mitigating Privacy Risk via Forget Set-Free Unlearning&lt;/strong&gt;&lt;/a&gt;&lt;/p&gt;
+
+
+
+&lt;p&gt;Aviraj Newatia, Michael Cooper, Viet Nguyen, Rahul G. Krishnan (Vector Faculty Member)&lt;/p&gt;
+
+
+
+&lt;p&gt;&lt;strong&gt;Abstract:&amp;nbsp;&lt;/strong&gt;&lt;/p&gt;
+
+
+
+&lt;p&gt;Training machine learning models requires the storage of large datasets, which often contain sensitive or private data. Storing data is associated with a number of potential risks which increase over time, such as database breaches and malicious adversaries. Machine unlearning is the study of methods to efficiently remove the influence of training data subsets from previously-trained models. Existing unlearning methods typically require direct access to the &amp;#8220;forget set&amp;#8221;&amp;#8212;the data to be forgotten-and organisations must retain this data for unlearning rather than deleting it immediately upon request, increasing risks associated with the forget set. We introduce partially-blind unlearning&amp;#8212;utilizing auxiliary information to unlearn without explicit access to the forget set. We introduce a practical framework Reload, a partially-blind method based on gradient optimization and structured weight sparsification to operationalize partially-blind unlearning. We show that Reload efficiently unlearns, approximating models retrained from scratch, and outperforms several forget set-dependent approaches. On language models, Reload unlearns entities using &amp;lt;0.025\% of the retain set and &amp;lt;7\% of model weights in &amp;lt;8 minutes on Llama2-7B. In the corrective case, Reload achieves unlearning even when only 10\% of corrupted data is identified.&lt;/p&gt;
+
+
+
+&lt;div class="wp-block-group is-layout-constrained wp-block-group-is-layout-constrained"&gt;
+&lt;div style="height:40px" aria-hidden="true" class="wp-block-spacer"&gt;&lt;/div&gt;
+
+
+    &lt;div class="acf-block acf-block-block_4db73432d13e4c15b6065fb9403b00dd acf-block-separator separator"&gt;
+      &lt;div class="separator__bar" style="background-color: #E00087"&gt;&lt;/div&gt;
+    &lt;/div&gt;
+
+
+
+&lt;div style="height:40px" aria-hidden="true" class="wp-block-spacer"&gt;&lt;/div&gt;
+&lt;/div&gt;
+
+
+
+&lt;p&gt;&lt;a href="https://openreview.net/forum?id=kWCNhRdcDI"&gt;&lt;strong&gt;Natural Language PDDL (NL-PDDL) for Open-world Goal-oriented Commonsense Regression Planning in Embodied AI&lt;/strong&gt;&lt;/a&gt;&lt;/p&gt;
+
+
+
+&lt;p&gt;Xiaotian Liu, Armin Toroghi, Jiazhou Liang, David Courtis, Ruiwen Li, Ali Pesaranghader, Jaehong Kim, Tanmana Sadhu, Hyejeong Jeon, Scott Sanner (Vector Faculty Affiliate)&lt;/p&gt;
+
+
+
+&lt;p&gt;&lt;strong&gt;Abstract:&amp;nbsp;&lt;/strong&gt;&lt;/p&gt;
+
+
+
+&lt;p&gt;Planning in open-world environments, where agents must act with partially observed states and incomplete knowledge, is a central challenge in embodied AI. Open-world planning involves not only sequencing actions but also determining what information the agent needs to sense to enable those actions. Existing approaches using Large Language Models (LLM) and Vision-Language Models (VLM) cannot reliably plan over long horizons and complex goals, where they often hallucinate and fail to reason causally over agent-environment interactions. Alternatively, classical PDDL planners offer correct and principled reasoning, but fail in open-world settings: they presuppose complete models and depend on exhaustive grounding over all objects, states, and actions; they cannot address misalignment between goal specifications (e.g., “heat the bread”) and action specifications (e.g., “toast the bread”); and they do not generalize across modalities (e.g., text, vision). To address these core challenges: (i) we extend symbolic PDDL into a flexible natural language representation that we term NL-PDDL, improving accessibility for non-expert users as well as generalization over modalities; (ii) we generalize regression-style planning to NL-PDDL with commonsense entailment reasoning to determine what needs to be observed for goal achievement in partially-observed environments with potential goal–action specification misalignment; and (iii) we leverage the lifted specification of NL-PDDL to facilitate open-world planning that avoids exhaustive grounding and yields a time and space complexity independent of the number of ground objects, states, and actions. Our experiments in three diverse domains — classical Blocksworld and the embodied ALFWorld environment with both textual and visual states — show that NL-PDDL substantially outperforms existing baselines, is more robust to longer horizons and more complex goals, and generalizes across modalities.&lt;/p&gt;
+
+
+
+&lt;div class="wp-block-group is-layout-constrained wp-block-group-is-layout-constrained"&gt;
+&lt;div style="height:40px" aria-hidden="true" class="wp-block-spacer"&gt;&lt;/div&gt;
+
+
+    &lt;div class="acf-block acf-block-block_4db73432d13e4c15b6065fb9403b00dd acf-block-separator separator"&gt;
+      &lt;div class="separator__bar" style="background-color: #E00087"&gt;&lt;/div&gt;
+    &lt;/div&gt;
+
+
+
+&lt;div style="height:40px" aria-hidden="true" class="wp-block-spacer"&gt;&lt;/div&gt;
+&lt;/div&gt;
+
+
+
+&lt;p&gt;&lt;a href="https://openreview.net/forum?id=TE2Vu7WJki"&gt;&lt;strong&gt;NeuralOS: Towards Simulating Operating Systems via Neural Generative Models&lt;/strong&gt;&lt;/a&gt;&lt;/p&gt;
+
+
+
+&lt;p&gt;Luke Rivard, Sun Sun, Hongyu Guo, Wenhu Chen (Vector Faculty Member), Yuntian Deng (Vector Faculty Affiliate)&lt;/p&gt;
+
+
+
+&lt;p&gt;&lt;strong&gt;Abstract:&amp;nbsp;&lt;/strong&gt;&lt;/p&gt;
+
+
+
+&lt;p&gt;We introduce NeuralOS, a neural framework that simulates graphical user interfaces (GUIs) of operating systems by directly predicting screen frames in response to user inputs such as mouse movements, clicks, and keyboard events. NeuralOS combines a recurrent neural network (RNN), which tracks the computer state, with a diffusion-based neural renderer that generates screen images. The model is trained on a dataset of Ubuntu XFCE recordings, which include both randomly generated interactions and realistic interactions produced by AI agents. Experiments show that NeuralOS successfully renders realistic GUI sequences, accurately captures mouse interactions, and reliably predicts state transitions like application launches. Beyond reproducing existing systems, NeuralOS shows that synthesized training data can teach the model to simulate applications that were never installed, as illustrated by a Doom application, and suggests a path toward learning user interfaces purely from synthetic demonstrations.&lt;/p&gt;
+
+
+
+&lt;p&gt;&lt;strong&gt;TL;DR: &lt;/strong&gt;We introduce a neural generative model that simulates operating system interfaces by directly generating screen images from user inputs.&lt;/p&gt;
+
+
+
+&lt;div class="wp-block-group is-layout-constrained wp-block-group-is-layout-constrained"&gt;
+&lt;div style="height:40px" aria-hidden="true" class="wp-block-spacer"&gt;&lt;/div&gt;
+
+
+    &lt;div class="acf-block acf-block-block_4db73432d13e4c15b6065fb9403b00dd acf-block-separator separator"&gt;
+      &lt;div class="separator__bar" style="background-color: #E00087"&gt;&lt;/div&gt;
+    &lt;/div&gt;
+
+
+
+&lt;div style="height:40px" aria-hidden="true" class="wp-block-spacer"&gt;&lt;/div&gt;
+&lt;/div&gt;
+
+
+
+&lt;p&gt;&lt;a href="https://openreview.net/forum?id=mex3rvs2KX"&gt;&lt;strong&gt;Private Rate-Constrained Optimization with Applications to Fair Learning&lt;/strong&gt;&lt;/a&gt;&lt;/p&gt;
+
+
+
+&lt;p&gt;Mohammad Yaghini, Tudor Cebere, Michael Menart, Aurélien Bellet, Nicolas Papernot (Vector Faculty Member)&lt;/p&gt;
+
+
+
+&lt;p&gt;&lt;strong&gt;Abstract:&amp;nbsp;&lt;/strong&gt;&lt;/p&gt;
+
+
+
+&lt;p&gt;Many problems in trustworthy ML can be expressed as constraints on prediction rates across subpopulations, including group fairness constraints (demographic parity, equalized odds, etc.). In this work, we study such constrained minimization problems under differential privacy (DP). Standard DP optimization techniques like DP-SGD rely on objectives that decompose over individual examples, enabling per-example gradient clipping and noise addition. Rate constraints, however, depend on aggregate statistics across groups, creating inter-sample dependencies that violate this decomposability. To address this, we develop RaCO-DP, a DP variant of Stochastic Gradient Descent-Ascent (SGDA) that solves the Lagrangian formulation of rate constraint problems. We show that the additional privacy cost of incorporating these constraints reduces to privately estimating a histogram over the mini-batch at each step. We prove convergence of our algorithm through a novel analysis of SGDA that leverages the linear structure of the dual parameter. Empirical results show that our method Pareto-dominates existing private learning approaches under group fairness constraints and also achieves strong privacy–utility–fairness performance on neural networks.&lt;/p&gt;
+
+
+
+&lt;div class="wp-block-group is-layout-constrained wp-block-group-is-layout-constrained"&gt;
+&lt;div style="height:40px" aria-hidden="true" class="wp-block-spacer"&gt;&lt;/div&gt;
+
+
+    &lt;div class="acf-block acf-block-block_4db73432d13e4c15b6065fb9403b00dd acf-block-separator separator"&gt;
+      &lt;div class="separator__bar" style="background-color: #E00087"&gt;&lt;/div&gt;
+    &lt;/div&gt;
+
+
+
+&lt;div style="height:40px" aria-hidden="true" class="wp-block-spacer"&gt;&lt;/div&gt;
+&lt;/div&gt;
+
+
+
+&lt;p&gt;&lt;a href="https://openreview.net/forum?id=WPJnLvQrP3"&gt;&lt;strong&gt;Prompt and Parameter Co-Optimization for Large Language Models&lt;/strong&gt;&lt;/a&gt;&lt;/p&gt;
+
+
+
+&lt;p&gt;Xiaohe Bo, Rui Li, Zexu Sun, Quanyu Dai, Zeyu Zhang, Zihang Tian, Xu Chen (Schmidt AI in Science Postdoctoral Fellow), Zhenhua Dong&lt;/p&gt;
+
+
+
+&lt;p&gt;&lt;strong&gt;Abstract:&amp;nbsp;&lt;/strong&gt;&lt;/p&gt;
+
+
+
+&lt;p&gt;Prompt optimization and fine-tuning are two major approaches to improve the performance of Large Language Models (LLMs). They enhance the capabilities of LLMs from complementary perspectives: the former through explicit natural language, and the latter through implicit parameter updates.&amp;nbsp; However, prior work has typically studied them in isolation, leaving their synergistic potential largely underexplored. To bridge this gap, in this paper, we introduce MetaTuner, a novel framework that jointly integrates prompt optimization and fine-tuning for LLM training. Specifically, we introduce two neural networks to generate prompts and parameters, respectively, while allowing them to share a common bottom encoding layer to enable knowledge sharing. By the guidance of the final supervised signals, our framework is optimized to discover the optimal combinations between the prompts and parameters. Given that prompt learning involves discrete optimization while fine-tuning operates in a continuous parameter space, we design a supervised regularization loss to train our framework effectively. Extensive experiments across diverse benchmarks show that our method consistently outperforms the baselines.&amp;nbsp; To benefit the research community, we have released our project at &lt;a href="https://anonymous.4open.science/r/metatuner"&gt;https://anonymous.4open.science/r/metatuner&lt;/a&gt;.&lt;/p&gt;
+
+
+
+&lt;p&gt;&lt;strong&gt;TLDR: &lt;/strong&gt;This paper proposes MetaTuner, a novel framework that jointly optimizes prompts and parameters of LLMs through a knowledge-sharing mechanism and a supervised regularization loss, achieving superior performance across multiple benchmarks.&lt;/p&gt;
+
+
+
+&lt;div class="wp-block-group is-layout-constrained wp-block-group-is-layout-constrained"&gt;
+&lt;div style="height:40px" aria-hidden="true" class="wp-block-spacer"&gt;&lt;/div&gt;
+
+
+    &lt;div class="acf-block acf-block-block_4db73432d13e4c15b6065fb9403b00dd acf-block-separator separator"&gt;
+      &lt;div class="separator__bar" style="background-color: #E00087"&gt;&lt;/div&gt;
+    &lt;/div&gt;
+
+
+
+&lt;div style="height:40px" aria-hidden="true" class="wp-block-spacer"&gt;&lt;/div&gt;
+&lt;/div&gt;
+
+
+
+&lt;p&gt;&lt;a href="https://openreview.net/forum?id=4vmm8mlHkS"&gt;&lt;strong&gt;Relative Entropy Pathwise Policy Optimization&lt;/strong&gt;&lt;/a&gt;&lt;/p&gt;
+
+
+
+&lt;p&gt;Claas Voelcker, Axel Brunnbauer, Marcel Hussing, Michal Nauman, Pieter Abbeel, Radu Grosu, Eric Eaton, Amir-massoud Farahmand, Igor Gilitschenski (Vector Faculty Member)&lt;/p&gt;
+
+
+
+&lt;p&gt;&lt;strong&gt;Abstract:&amp;nbsp;&lt;/strong&gt;&lt;/p&gt;
+
+
+
+&lt;p&gt;Score-function based methods for policy learning, such as REINFORCE and PPO, have delivered strong results in game-playing and robotics, yet their high variance often undermines training stability. Using pathwise policy gradients, i.e. computing a derivative by differentiating the objective function, alleviates the variance issues. However, they require an accurate action-conditioned value function, which is notoriously hard to learn without relying on replay buffers for reusing past off-policy data. We present an on-policy algorithm that trains Q-value models purely from on-policy trajectories, unlocking the possibility of using pathwise policy updates in the context of on-policy learning. We show how to combine stochastic policies for exploration with constrained updates for stable training, and evaluate important architectural components that stabilize value function learning. The result, Relative Entropy Pathwise Policy Optimization (REPPO), is an efficient on-policy algorithm that combines the stability of pathwise policy gradients with the simplicity and minimal memory footprint of standard on-policy learning. Compared to state-of-the-art on two standard GPU-parallelized benchmarks, REPPO provides strong empirical performance at superior sample efficiency, wall-clock time, memory footprint, and hyperparameter robustness.&lt;/p&gt;
+
+
+
+&lt;p&gt;&lt;strong&gt;TLDR: &lt;/strong&gt;REPPO uses straight-through gradient estimation via a surrogate Q function to obtain more accurate policy gradients.&lt;/p&gt;
+
+
+
+&lt;div class="wp-block-group is-layout-constrained wp-block-group-is-layout-constrained"&gt;
+&lt;div style="height:40px" aria-hidden="true" class="wp-block-spacer"&gt;&lt;/div&gt;
+
+
+    &lt;div class="acf-block acf-block-block_4db73432d13e4c15b6065fb9403b00dd acf-block-separator separator"&gt;
+      &lt;div class="separator__bar" style="background-color: #E00087"&gt;&lt;/div&gt;
+    &lt;/div&gt;
+
+
+
+&lt;div style="height:40px" aria-hidden="true" class="wp-block-spacer"&gt;&lt;/div&gt;
+&lt;/div&gt;
+
+
+
+&lt;p&gt;&lt;a href="https://openreview.net/forum?id=mzAchylAtf"&gt;&lt;strong&gt;SANA-Video: Efficient Video Generation with Block Linear Diffusion Transformer&lt;/strong&gt;&lt;/a&gt;&lt;/p&gt;
+
+
+
+&lt;p&gt;Junsong Chen, Yuyang Zhao, Jincheng YU, Ruihang Chu, Junyu Chen, Shuai Yang, Xianbang Wang, Yicheng Pan, Zhou Daquan, Huan Ling, Haozhe Liu, Hongwei Yi, Hao Zhang, Muyang Li, Yukang Chen, Han Cai, Sanja Fidler (Vector Faculty Member), Ping Luo, Song Han, Enze Xie&lt;/p&gt;
+
+
+
+&lt;p&gt;&lt;strong&gt;Abstract:&lt;/strong&gt;&lt;/p&gt;
+
+
+
+&lt;p&gt;We introduce SANA-Video, a small diffusion model that can efficiently generate videos up to 720×1280 resolution and minute-length duration. SANA-Video synthesizes high-resolution, high-quality and long videos with strong text-video alignment at a remarkably fast speed, deployable on RTX 5090 GPU. Two core designs ensure our efficient, effective and long video generation:&amp;nbsp; (1) Linear DiT: We leverage linear attention as the core operation, which is more efficient than vanilla attention given the large number of tokens processed in video generation. (2) Constant-Memory KV cache for Block Linear Attention: we design block-wise autoregressive approach for long video generation by employing a constant-memory state, derived from the cumulative properties of linear attention. This KV cache provides the Linear DiT with global context at a fixed memory cost, eliminating the need for a traditional KV cache and enabling efficient, minute-long video generation. In addition, we explore effective data filters and model training strategies, narrowing the training cost to 12 days on 64 H100 GPUs, which is only 1\% of the cost of MovieGen. Given its low cost, SANA-Video achieves competitive performance compared to modern state-of-the-art small diffusion models (e.g., Wan 2.1-1.3B and SkyReel-V2-1.3B) while being 16x faster in measured latency. Moreover, SANA-Video can be deployed on RTX 5090 GPUs with NVFP4 precision, accelerating the inference speed of generating a 5-second 720p video from 71s to 29s (2.4x} speedup). In summary, SANA-Video enables low-cost, high-quality video generation. Code and model will be publicly released.&lt;/p&gt;
+
+
+
+&lt;div class="wp-block-group is-layout-constrained wp-block-group-is-layout-constrained"&gt;
+&lt;div style="height:40px" aria-hidden="true" class="wp-block-spacer"&gt;&lt;/div&gt;
+
+
+    &lt;div class="acf-block acf-block-block_4db73432d13e4c15b6065fb9403b00dd acf-block-separator separator"&gt;
+      &lt;div class="separator__bar" style="background-color: #E00087"&gt;&lt;/div&gt;
+    &lt;/div&gt;
+
+
+
+&lt;div style="height:40px" aria-hidden="true" class="wp-block-spacer"&gt;&lt;/div&gt;
+&lt;/div&gt;
+
+
+
+&lt;p&gt;&lt;a href="https://openreview.net/forum?id=hC9Ny8iMLi"&gt;&lt;strong&gt;SAGA: Structural Aggregation Guided Alignment with Dynamic View and Neighborhood Order Selection for Multiview Graph Domain Adaptation&lt;/strong&gt;&lt;/a&gt;&lt;/p&gt;
+
+
+
+&lt;p&gt;Ruiyi Fang, Jingyu Zhao, Shuo Wang, Ruizhi Pu, Bingheng Li, Jiale Cai, Zhihao Li, Zihao Jing, Jian Zhu, Song Tang, Charles Ling (former Vector Faculty Affiliate), Boyu Wang (Vector Faculty Affiliate)&lt;/p&gt;
+
+
+
+&lt;p&gt;&lt;strong&gt;Abstract:&amp;nbsp;&lt;/strong&gt;&lt;/p&gt;
+
+
+
+&lt;p&gt;Graph domain adaptation (GDA) transfers knowledge from a labeled source graph to an unlabeled target graph to alleviate label scarcity. In multi-view graphs, the challenge of mitigating domain shift is constrained by structural information across various views. Moreover, within each view, structures at different hops capture distinct neighborhood levels, which can lead to varying structural discrepancies. However, existing methods typically assume only a single-view graph structure, which cannot effectively capture the rich structural information in multi-relational graphs and hampers adaptation performances. In this paper, we tackle the challenging Multi-view Graph Domain Adaptation (MGDA) problem by proposing Structural Aggregation Guided Alignment (SAGA) that aligns multi-view graph data via dynamic view and neighborhood order selection. Specifically, we propose the notion of Structural Aggregation Distance (SAD) as a dynamic discrepancy metric that jointly considers view and neighborhood order, allowing the dominant view–order pair to vary during training. Through empirical analysis, we justify the validity of SAD and show that domain discrepancy in MGDA is largely governed by the dominant view–order pair, which evolves throughout training. Motivated by this observation, we design SAGA, which leverages SAD to dynamically identify the principal view-order pair that guides alignment, thereby effectively characterizing and mitigating both view- and hop-level structural discrepancies between multi-view graphs. Experimental results on various multi-relational graph benchmarks verify the effectiveness of our method.&lt;/p&gt;
+
+
+
+&lt;div class="wp-block-group is-layout-constrained wp-block-group-is-layout-constrained"&gt;
+&lt;div style="height:40px" aria-hidden="true" class="wp-block-spacer"&gt;&lt;/div&gt;
+
+
+    &lt;div class="acf-block acf-block-block_4db73432d13e4c15b6065fb9403b00dd acf-block-separator separator"&gt;
+      &lt;div class="separator__bar" style="background-color: #E00087"&gt;&lt;/div&gt;
+    &lt;/div&gt;
+
+
+
+&lt;div style="height:40px" aria-hidden="true" class="wp-block-spacer"&gt;&lt;/div&gt;
+&lt;/div&gt;
+
+
+
+&lt;p&gt;&lt;a href="https://openreview.net/forum?id=Q1JpRZkR3S"&gt;&lt;strong&gt;Scalable Spatio-Temporal SE(3) Diffusion for Long-Horizon Protein Dynamics&lt;/strong&gt;&lt;/a&gt;&lt;/p&gt;
+
+
+
+&lt;p&gt;Nima Shoghi, Yuxuan Liu, Yuning Shen, Rob Brekelmans (former Vector Distinguished Postdoctoral Fellow), Pan Li, Quanquan Gu&lt;/p&gt;
+
+
+
+&lt;p&gt;&lt;strong&gt;Abstract: &lt;/strong&gt;&lt;/p&gt;
+
+
+
+&lt;p&gt;Molecular dynamics (MD) simulations remain the gold standard for studying protein dynamics, but their computational cost limits access to biologically relevant timescales. Recent generative models have shown promise in accelerating simulations, yet they struggle with long-horizon generation due to architectural constraints, error accumulation, and inadequate modeling of spatiotemporal dynamics. We present STAR-MD (Spatio-Temporal Autoregressive Rollout for Molecular Dynamics), a scalable SE(3)-equivariant diffusion model that generates physically plausible protein trajectories over microsecond timescales. Our key innovation is a causal diffusion transformer with joint spatiotemporal attention that efficiently captures complex space-time dependencies while avoiding the memory bottlenecks of existing methods. On the standard ATLAS benchmark, STAR-MD achieves state-of-the-art performance across all metrics&amp;#8211;substantially improving conformational coverage, structural validity, and dynamic fidelity compared to previous methods. STAR-MD successfully extrapolates to generate stable microsecond-scale trajectories where baseline methods fail catastrophically, maintaining high structural quality throughout the extended rollout. Our comprehensive evaluation reveals severe limitations in current models for long-horizon generation, while demonstrating that STAR-MD&amp;#8217;s joint spatiotemporal modeling enables robust dynamics simulation at biologically relevant timescales, paving the way for accelerated exploration of protein function.&lt;/p&gt;
+
+
+
+&lt;p&gt;&lt;strong&gt;TLDR: &lt;/strong&gt;A scalable spatiotemporal SE(3) diffusion model that generates long-horizon protein trajectories with state-of-the-art fidelity.&lt;/p&gt;
+
+
+
+&lt;div class="wp-block-group is-layout-constrained wp-block-group-is-layout-constrained"&gt;
+&lt;div style="height:40px" aria-hidden="true" class="wp-block-spacer"&gt;&lt;/div&gt;
+
+
+    &lt;div class="acf-block acf-block-block_4db73432d13e4c15b6065fb9403b00dd acf-block-separator separator"&gt;
+      &lt;div class="separator__bar" style="background-color: #E00087"&gt;&lt;/div&gt;
+    &lt;/div&gt;
+
+
+
+&lt;div style="height:40px" aria-hidden="true" class="wp-block-spacer"&gt;&lt;/div&gt;
+&lt;/div&gt;
+
+
+
+&lt;p&gt;&lt;a href="https://openreview.net/forum?id=QLiXtWEAkq"&gt;&lt;strong&gt;SPIKE-RL: Video-LLMs meet Bayesian Surprise&lt;/strong&gt;&lt;/a&gt;&lt;/p&gt;
+
+
+
+&lt;p&gt;Sahithya Ravi, Aditya Chinchure, Raymond Ng, Leonid Sigal (Vector Faculty Member), Vered Shwartz (Vector Faculty Member)&lt;/p&gt;
+
+
+
+&lt;p&gt;&lt;strong&gt;Abstract:&amp;nbsp;&lt;/strong&gt;&lt;/p&gt;
+
+
+
+&lt;p&gt;Real-world videos often show routine activities punctuated by memorable, surprising events. However, most Video-LLMs process videos by sampling frames uniformly, likely missing critical moments that define a video&amp;#8217;s narrative. We introduce SPIKE, an inference-time framework that quantifies Bayesian Surprise as the belief update triggered by new visual evidence in the video stream, identifying moments where new visual evidence conflicts with prior beliefs. SPIKE effectively localizes surprise in videos, correlated with humans on positive (FunQA) and negative (Oops!) surprise benchmarks. SPIKE-RL further improves on SPIKE&amp;#8217;s ability to detect surprise, leveraging GRPO to refine its belief hypotheses based on a reward signal from the video caption. SPIKE and SPIKE-RL guide query-agnostic surprise-weighted frame sampling, which allocates more frames to interesting moments in the video. With this strategy, we achieve consistent performance gains on five downstream benchmarks. By enabling Video-LLMs to track beliefs and register surprise, our work paves the way for more robust models that can revise their understanding in response to new information.&lt;/p&gt;
+
+
+
+&lt;p&gt;&lt;strong&gt;TL;DR: &lt;/strong&gt;We make Video-LLMs surprise-aware by tracking belief shifts in videos.&lt;/p&gt;
+
+
+
+&lt;div class="wp-block-group is-layout-constrained wp-block-group-is-layout-constrained"&gt;
+&lt;div style="height:40px" aria-hidden="true" class="wp-block-spacer"&gt;&lt;/div&gt;
+
+
+    &lt;div class="acf-block acf-block-block_4db73432d13e4c15b6065fb9403b00dd acf-block-separator separator"&gt;
+      &lt;div class="separator__bar" style="background-color: #E00087"&gt;&lt;/div&gt;
+    &lt;/div&gt;
+
+
+
+&lt;div style="height:40px" aria-hidden="true" class="wp-block-spacer"&gt;&lt;/div&gt;
+&lt;/div&gt;
+
+
+
+&lt;p&gt;&lt;a href="https://openreview.net/forum?id=SaiDRQU7Ez"&gt;&lt;strong&gt;StreamSplat: Towards Online Dynamic 3D Reconstruction from Uncalibrated Video Streams&lt;/strong&gt;&lt;/a&gt;&lt;/p&gt;
+
+
+
+&lt;p&gt;Zike Wu, Qi Yan, Xuanyu Yi, Lele Wang, Renjie Liao (Vector Faculty Member)&lt;/p&gt;
+
+
+
+&lt;p&gt;&lt;strong&gt;Abstract:&amp;nbsp;&lt;/strong&gt;&lt;/p&gt;
+
+
+
+&lt;p&gt;Real-time reconstruction of dynamic 3D scenes from uncalibrated video streams demands robust online methods that recover scene dynamics from sparse observations under strict latency and memory constraints. Yet most dynamic reconstruction methods rely on hours of per-scene optimization under full-sequence access, limiting practical deployment. In this work, we introduce **StreamSplat**, a fully feed-forward framework that instantly transforms uncalibrated video streams of arbitrary length into dynamic 3D Gaussian Splatting (3DGS) representations in an online manner.&amp;nbsp; It is achieved via three key technical innovations: 1) a probabilistic sampling mechanism that robustly predicts 3D Gaussians from uncalibrated inputs; 2) a bidirectional deformation field that yields reliable associations across frames and mitigates long-term error accumulation; 3) an adaptive Gaussian fusion operation that propagates persistent Gaussians while handling emerging and vanishing ones. Extensive experiments on standard dynamic and static benchmarks demonstrate that StreamSplat achieves state-of-the-art reconstruction quality and dynamic scene modeling. Uniquely, our method supports the online reconstruction of arbitrarily long video streams with a $1200\times$ speedup over optimization-based methods.&amp;nbsp; Our code and models will be made publicly available.&lt;/p&gt;
+
+
+
+&lt;p&gt;&lt;strong&gt;TLDR: &lt;/strong&gt;We proposed an efficient, scalable, and feed-forward framework for online dynamic 3D reconstruction.&lt;/p&gt;
+
+
+
+&lt;div class="wp-block-group is-layout-constrained wp-block-group-is-layout-constrained"&gt;
+&lt;div style="height:40px" aria-hidden="true" class="wp-block-spacer"&gt;&lt;/div&gt;
+
+
+    &lt;div class="acf-block acf-block-block_4db73432d13e4c15b6065fb9403b00dd acf-block-separator separator"&gt;
+      &lt;div class="separator__bar" style="background-color: #E00087"&gt;&lt;/div&gt;
+    &lt;/div&gt;
+
+
+
+&lt;div style="height:40px" aria-hidden="true" class="wp-block-spacer"&gt;&lt;/div&gt;
+&lt;/div&gt;
+
+
+
+&lt;p&gt;&lt;a href="https://openreview.net/forum?id=buDwV7LUA7"&gt;&lt;strong&gt;StructEval: Benchmarking LLMs&amp;#8217; Capabilities to Generate Structural Outputs&lt;/strong&gt;&lt;/a&gt;&lt;/p&gt;
+
+
+
+&lt;p&gt;Jialin Yang, Dongfu Jiang, Wenhu Chen (Vector Faculty Member), Ping Nie&lt;/p&gt;
+
+
+
+&lt;p&gt;&lt;strong&gt;Abstract:&lt;/strong&gt;&lt;/p&gt;
+
+
+
+&lt;p&gt;As Large Language Models (LLMs) become integral to software development workflows, their ability to generate structured outputs has become critically important. We introduce $\textbf{StructEval}$, a comprehensive benchmark for evaluating LLMs&amp;#8217; capabilities in producing both non-renderable (JSON, YAML, CSV) and renderable (HTML, React, SVG) structured formats. Unlike prior benchmarks, StructEval systematically evaluates structural fidelity across diverse formats through two paradigms: $\textbf{1)}$ generation tasks, producing structured output from natural language prompts, and $\textbf{2)}$ conversion tasks, translating between structured formats. Our benchmark encompasses 18 formats and 44 types of task, with novel metrics for format adherence and structural correctness. Results reveal significant performance gaps—even state-of-the-art models like o1-mini achieve only $75.58$ average score, with open-source alternatives lagging approximately $10$ points behind. We find generation tasks more challenging than conversion tasks, and producing correct visual content more difficult than generating text-only structures.&lt;/p&gt;
+
+
+
+&lt;div class="wp-block-group is-layout-constrained wp-block-group-is-layout-constrained"&gt;
+&lt;div style="height:40px" aria-hidden="true" class="wp-block-spacer"&gt;&lt;/div&gt;
+
+
+    &lt;div class="acf-block acf-block-block_4db73432d13e4c15b6065fb9403b00dd acf-block-separator separator"&gt;
+      &lt;div class="separator__bar" style="background-color: #E00087"&gt;&lt;/div&gt;
+    &lt;/div&gt;
+
+
+
+&lt;div style="height:40px" aria-hidden="true" class="wp-block-spacer"&gt;&lt;/div&gt;
+&lt;/div&gt;
+
+
+
+&lt;p&gt;&lt;a href="https://openreview.net/forum?id=x7zOzUwtR7"&gt;&lt;strong&gt;Structure-Aware Graph Hypernetworks for Neural Program Synthesis&lt;/strong&gt;&lt;/a&gt;&lt;/p&gt;
+
+
+
+&lt;p&gt;Wenhao Li, Yudong Xu, Elias Khalil (former Vector Faculty Affiliate, Scott Sanner (Vector Faculty Affiliate)&lt;/p&gt;
+
+
+
+&lt;p&gt;&lt;strong&gt;Abstract:&amp;nbsp;&lt;/strong&gt;&lt;/p&gt;
+
+
+
+&lt;p&gt;We study the neural program synthesis of $\textit{parameterized}$ function families through the lens of meta-learning with hypernetworks. Given a user intent $U$, a meta-learner $M_{\phi}$ produces a full weight set $\hat{\theta}=M_{\phi}(U)$ for a target neural network with fixed architecture $S$, and the instantiated network $m_{S,\hat{\theta}}(X)\to Y$ realizes the behavior intended for $U$. Classical hypernetworks typically $\textit{ignore the target network’s structure}$ and emit a flat list of weights; as a consequence, they fail to account for $\textit{neuron-permutation symmetry}$—many distinct parameterizations of $S$ implement the same function—so equivalent solutions are treated as different targets, fragmenting supervision and hurting out-of-distribution generalization. To address this, we propose $\textit{Meta-GNN}$, a hypernetwork that constructs a $\textit{neural graph}$ from the target architecture $S$ and applies $\textbf{structure-aware}$ message passing with parameter-tied encoders and decoders. This design reduces the search space during learning by collapsing equivalent classes of target networks, without loss of expressivity. Empirically, across modular arithmetic ($\textit{AddMod}$-$p$), array operations ($\textit{SumFirst}$-$n$), and inverse-rule tasks from 1D-ARC, $\textit{Meta-GNN}$ substantially improves learning and $\textbf{out-of-distribution generalization}$ compared to classic hypernetworks and direct $(U,X)\to Y$ baselines. Mechanistic analyses reveal $\textit{what is learned}$: on $\textit{AddMod}$-$p$ the synthesized Transformers recover the canonical clock representation and admit a compact closed-form map $U\mapsto\theta$. These results demonstrate that structure-aware Meta-GNNs enable reliable generalization to $\textit{unseen program parameterizations}$, providing a critical advance for the nascent field of neural program synthesis.&lt;/p&gt;
+
+
+
+&lt;p&gt;&lt;strong&gt;TL;DR: &lt;/strong&gt;We show that a structure-aware hypernetwork can directly generate full neural-network weights—treating weights as a continuous program modality—and outperform baselines with strong zero-shot generalization across unseen tasks.&lt;/p&gt;
+
+
+
+&lt;div class="wp-block-group is-layout-constrained wp-block-group-is-layout-constrained"&gt;
+&lt;div style="height:40px" aria-hidden="true" class="wp-block-spacer"&gt;&lt;/div&gt;
+
+
+    &lt;div class="acf-block acf-block-block_4db73432d13e4c15b6065fb9403b00dd acf-block-separator separator"&gt;
+      &lt;div class="separator__bar" style="background-color: #E00087"&gt;&lt;/div&gt;
+    &lt;/div&gt;
+
+
+
+&lt;div style="height:40px" aria-hidden="true" class="wp-block-spacer"&gt;&lt;/div&gt;
+&lt;/div&gt;
+
+
+
+&lt;p&gt;&lt;a href="https://openreview.net/forum?id=OH4PE0TDo0"&gt;&lt;strong&gt;Test-Time Adaptation for LLM Agents via Environment Interaction&lt;/strong&gt;&lt;/a&gt;&lt;/p&gt;
+
+
+
+&lt;p&gt;Arthur Chen, Zuxin Liu, Jianguo Zhang, Akshara Prabhakar, Zhiwei Liu, Shelby Heinecke, Silvio Savarese, Victor Zhong (Vector Faculty Member), Caiming Xiong&lt;/p&gt;
+
+
+
+&lt;p&gt;&lt;strong&gt;Abstract:&amp;nbsp;&lt;/strong&gt;&lt;/p&gt;
+
+
+
+&lt;p&gt;Large language model (LLM)-based agents struggle to generalize to novel and complex environments, such as unseen websites or new sets of functions, due to a fundamental mismatch between their pre-training and test-time conditions. This challenge stems from two distinct failure modes: a syntactic misunderstanding of environment-specific components like observation formats, and a semantic misunderstanding of state-transition dynamics, which are only revealed at test time. To address these issues, we propose two distinct and complementary strategies for adapting LLM agents by leveraging environment-specific information available during deployment. First, an online distributional adaptation method parameterizes environmental nuances by learning a lightweight adaptation vector that biases the model&amp;#8217;s output distribution, enabling rapid alignment with an environment response format. Second, a deployment-time dynamics grounding method employs a persona-driven exploration phase to systematically probe and learn the environment&amp;#8217;s causal dynamics before task execution, equipping the agent with a non-parametric world model. We evaluate these strategies across diverse agentic benchmarks, including function calling and web navigation. Our empirical results show the effectiveness of both strategies across all benchmarks with minimal computational cost. We find that dynamics grounding is particularly effective in complex environments where unpredictable dynamics pose a major obstacle, demonstrating a robust path toward more generalizable and capable LLM-based agents. For example, on the WebArena multi-site split, this method increases the agent&amp;#8217;s success rate from 2\% to 23\%.&lt;/p&gt;
+
+
+
+&lt;p&gt;&lt;strong&gt;TLDR: &lt;/strong&gt;We propose a framework named grounded test-time adaptation to adapt LLM-based agents to novel and complex environments.&lt;/p&gt;
+
+
+
+&lt;div class="wp-block-group is-layout-constrained wp-block-group-is-layout-constrained"&gt;
+&lt;div style="height:40px" aria-hidden="true" class="wp-block-spacer"&gt;&lt;/div&gt;
+
+
+    &lt;div class="acf-block acf-block-block_4db73432d13e4c15b6065fb9403b00dd acf-block-separator separator"&gt;
+      &lt;div class="separator__bar" style="background-color: #E00087"&gt;&lt;/div&gt;
+    &lt;/div&gt;
+
+
+
+&lt;div style="height:40px" aria-hidden="true" class="wp-block-spacer"&gt;&lt;/div&gt;
+&lt;/div&gt;
+
+
+
+&lt;p&gt;&lt;a href="https://openreview.net/forum?id=4XsV5Qoj0j"&gt;&lt;strong&gt;Textual Equilibrium Propagation for Deep Compound AI Systems&lt;/strong&gt;&lt;/a&gt;&lt;/p&gt;
+
+
+
+&lt;p&gt;Minghui Chen, Wenlong Deng, James Y Zou, Han Yu, Xiaoxiao Li (Vector Faculty Member)&lt;/p&gt;
+
+
+
+&lt;p&gt;&lt;strong&gt;Abstract:&amp;nbsp;&lt;/strong&gt;&lt;/p&gt;
+
+
+
+&lt;p&gt;Large language models (LLMs) are increasingly deployed as part of compound AI systems which coordinate multiple modules (e.g., retrievers, tools, verifiers) over long-horizon workflows. Although recent frameworks that propagate textual feedback globally (e.g., TextGrad make it feasible to optimize such pipelines, we identify two depth-scaling failure modes in long-horizon agentic workflows: 1) exploding textual gradient, where textual feedback grows exponentially with depth, leading to prohibitively long message and amplifies evaluation biases; and 2) vanishing textual gradient, where limited long-context ability causes models overemphasize recent or early feedback, while compression of lengthy feedback causes downstream messages to lose specificity gradually as they propagate many hops upstream. To mitigate these issues, we introduce Textual Equilibrium Propagation (TEP), a local learning principle inspired by Equilibrium Propagation in energy-based models. TEP includes two phases: 1) a free phase where a local LLM critics iteratively refine prompts until reaching equilibrium (no further improvements are suggested); and 2) a nudged phase which applies proximal prompt edits with bounded modification intensity, using task-level objectives that propagate via forward signaling rather than backward feedback chains. This design supports local prompt optimization followed by controlled adaptation toward global goals without the computational burden and signal degradation of global textual backpropagation. Across long-horizon QA benchmarks and multi-agent tool-use dataset, TEP consistently improves accuracy and efficiency over global propagation methods such as TextGrad, with gains that increase at greater depths, while preserving the practicality of black-box LLM components in deep compound AI system.&lt;/p&gt;
+
+
+
+&lt;div class="wp-block-group is-layout-constrained wp-block-group-is-layout-constrained"&gt;
+&lt;div style="height:40px" aria-hidden="true" class="wp-block-spacer"&gt;&lt;/div&gt;
+
+
+    &lt;div class="acf-block acf-block-block_4db73432d13e4c15b6065fb9403b00dd acf-block-separator separator"&gt;
+      &lt;div class="separator__bar" style="background-color: #E00087"&gt;&lt;/div&gt;
+    &lt;/div&gt;
+
+
+
+&lt;div style="height:40px" aria-hidden="true" class="wp-block-spacer"&gt;&lt;/div&gt;
+&lt;/div&gt;
+
+
+
+&lt;p&gt;&lt;a href="https://openreview.net/forum?id=nxcevynv08"&gt;&lt;strong&gt;Thicker and Quicker: The Jumbo Token for Fast Plain Vision Transformers&lt;/strong&gt;&lt;/a&gt;&lt;/p&gt;
+
+
+
+&lt;p&gt;Anthony Fuller, Yousef Yassin, Daniel Kyrollos, Evan Shelhamer (Vector Faculty Member), James Green&lt;/p&gt;
+
+
+
+&lt;p&gt;&lt;strong&gt;Abstract:&amp;nbsp;&lt;/strong&gt;&lt;/p&gt;
+
+
+
+&lt;p&gt;ViTs are general and accurate, and address many tasks, but ViTs are slow, and are not always practical when efficiency is key. Existing methods for faster ViTs design hybrid non-ViT architectures, losing generality, or shrink their tokens, sacrificing accuracy. While many non-ViT architectures are both fast and accurate, they cannot flexibly process other input shapes, pre-train by SOTA self-supervised learning, reduce computation by dropping tokens, and more like ViTs can. We make ViTs faster by reducing patch token width while increasing global token width by adding a new Jumbo token. Our wider Jumbo token is processed by its own wider FFN to increase model capacity. Yet our Jumbo FFN is efficient: it processes a single token, for speed, and its parameters are shared across all layers, for memory. Crucially, our Jumbo is attention-only and non-hierarchical, like a plain ViT, so it is simple, scalable, flexible, and compatible with ViT methods new and old. Jumbo improves over ViT baselines with Registers from Nano to Large scales while maintaining speed/throughput on ImageNet-1K (↑0.1−13%). Jumbo also improves MAE pre-training (↑4.9% linear probing on ImageNet-1K), test-time adaptation (↑5.2% on ImageNet-C), and time series modeling. Our Jumbo models even achieve better speed-accuracy trade-offs than specialized non-ViT compute-efficient models, while maintaining plain-ViT compatibility for practicality.&lt;/p&gt;
+
+
+
+&lt;p&gt;&lt;strong&gt;TLDR:&lt;/strong&gt; We add a new wider &amp;#8220;Jumbo&amp;#8221; token to ViTs to improve accuracy and efficiency by adding model capacity in just the right way while preserving generality.&lt;/p&gt;
+
+
+
+&lt;div class="wp-block-group is-layout-constrained wp-block-group-is-layout-constrained"&gt;
+&lt;div style="height:40px" aria-hidden="true" class="wp-block-spacer"&gt;&lt;/div&gt;
+
+
+    &lt;div class="acf-block acf-block-block_4db73432d13e4c15b6065fb9403b00dd acf-block-separator separator"&gt;
+      &lt;div class="separator__bar" style="background-color: #E00087"&gt;&lt;/div&gt;
+    &lt;/div&gt;
+
+
+
+&lt;div style="height:40px" aria-hidden="true" class="wp-block-spacer"&gt;&lt;/div&gt;
+&lt;/div&gt;
+
+
+
+&lt;p&gt;&lt;a href="https://openreview.net/forum?id=sQGlhjKUC0"&gt;&lt;strong&gt;To Sink or Not to Sink: Visual Information Pathways in Large Vision-Language Models&lt;/strong&gt;&lt;/a&gt;&lt;/p&gt;
+
+
+
+&lt;p&gt;Jiayun Luo, Wan-Cyuan (Chris) Fan, Lyuyang Wang, Xiangteng He, Tanzila Rahman (former Vector Distinguished Postdoctoral Fellow), Purang Abolmaesumi, Leonid Sigal (Vector Faculty Member)&lt;/p&gt;
+
+
+
+&lt;p&gt;&lt;strong&gt;Abstract:&amp;nbsp;&lt;/strong&gt;&lt;/p&gt;
+
+
+
+&lt;p&gt;Large Vision Language Models (LVLMs) have recently emerged as powerful architectures capable of understanding and reasoning over both visual and textual information. These models typically rely on two key components: a Vision Transformer (ViT) and a Large Language Model (LLM). ViT encodes visual content into a sequence of image tokens and serves as the perceptual front-end &amp;#8212; the eyes of the model. In contrast, the LLM interprets these tokens to perform high-level reasoning, generates responses, and functions as the cognitive core &amp;#8212; the brain of the model. However, it remains unclear which visual tokens contribute most significantly to understanding and reasoning, and how effectively these signals are propagated from ViT to the LLM. While most existing works have focused on identifying attention sinks, low-semantic tokens receiving disproportionately high attention, within the LLM, we shift the focus to the vision encoder by identifying a class of high-norm visual tokens from ViT, referred to as ViT attention sinks &amp;#8212; a problem that has been rarely studied but is indeed very important for LVLMs. Our findings show that these ViT sinks encapsulate high-level semantic concepts from images, allowing the LLM to perform more effective understanding and reasoning. Despite their importance, these sink tokens are often overlooked in existing LVLM architectures. To explore their contribution, we present both qualitative and quantitative analyses of the information embedded in these sink tokens. We also propose both training-free and training-based approaches to better leverage how this information is interpreted by the LLM, and to what extent. By explicitly utilizing these tokens, we demonstrate substantial improvements across a range of LVLMs and visual reasoning tasks, including but not limited to mathematical problem solving, logical inference, and geometric understanding, highlighting the untapped potential of ViT attention sinks in enhancing visual reasoning.&lt;/p&gt;
+
+
+
+&lt;div class="wp-block-group is-layout-constrained wp-block-group-is-layout-constrained"&gt;
+&lt;div style="height:40px" aria-hidden="true" class="wp-block-spacer"&gt;&lt;/div&gt;
+
+
+    &lt;div class="acf-block acf-block-block_4db73432d13e4c15b6065fb9403b00dd acf-block-separator separator"&gt;
+      &lt;div class="separator__bar" style="background-color: #E00087"&gt;&lt;/div&gt;
+    &lt;/div&gt;
+
+
+
+&lt;div style="height:40px" aria-hidden="true" class="wp-block-spacer"&gt;&lt;/div&gt;
+&lt;/div&gt;
+
+
+
+&lt;p&gt;&lt;a href="https://openreview.net/forum?id=htQDmHvva6"&gt;&lt;strong&gt;Token Hidden Reward: Steering Exploration-Exploitation in Group Relative Deep Reinforcement Learning&lt;/strong&gt;&lt;/a&gt;&lt;/p&gt;
+
+
+
+&lt;p&gt;Wenlong Deng, Yi Ren, Yushu Li, Boying Gong, Danica Sutherland, Xiaoxiao Li (Vector Faculty Member), Christos Thrampoulidis&lt;/p&gt;
+
+
+
+&lt;p&gt;&lt;strong&gt;Abstract:&amp;nbsp;&lt;/strong&gt;&lt;/p&gt;
+
+
+
+&lt;p&gt;Reinforcement learning with verifiable rewards has significantly advanced the reasoning capabilities of large language models, yet how to explicitly steer training toward exploration or exploitation remains an open problem. We introduce Token Hidden Reward (THR), a token-level metric that quantifies each token’s influence on the likelihood of correct responses under Group Relative Policy Optimization (GRPO). We find that training dynamics are dominated by a small subset of tokens with high absolute THR values. Most interestingly, tokens with positive THR strengthen confidence in correct outputs, thus favoring exploitation, while tokens with negative THR preserve probability mass for alternative outputs, enabling exploration. This insight suggests a natural intervention: a THR-guided reweighting algorithm that modulates GRPO’s learning signals to explicitly bias training toward exploitation or exploration. We validate the efficacy of this algorithm on diverse math reasoning benchmarks. By amplifying tokens with positive THR value and weakening negative ones, our algorithm improves greedy-decoding accuracy, favoring exploitation. The reverse strategy yields consistent gains in Pass@K accuracy, favoring exploration. We further demonstrate that our algorithm integrates seamlessly with other RL objectives such as GSPO and generalizes across architectures including Llama. These findings establish THR as a principled and fine-grained mechanism for dynamically controlling exploration and exploitation in RL-tuned LLMs, providing new tools for targeted fine-tuning in reasoning-intensive applications.&lt;/p&gt;
+
+
+
+&lt;div class="wp-block-group is-layout-constrained wp-block-group-is-layout-constrained"&gt;
+&lt;div style="height:40px" aria-hidden="true" class="wp-block-spacer"&gt;&lt;/div&gt;
+
+
+    &lt;div class="acf-block acf-block-block_4db73432d13e4c15b6065fb9403b00dd acf-block-separator separator"&gt;
+      &lt;div class="separator__bar" style="background-color: #E00087"&gt;&lt;/div&gt;
+    &lt;/div&gt;
+
+
+
+&lt;div style="height:40px" aria-hidden="true" class="wp-block-spacer"&gt;&lt;/div&gt;
+&lt;/div&gt;
+
+
+
+&lt;p&gt;&lt;a href="https://openreview.net/forum?id=Fcf5fLmaeG"&gt;&lt;strong&gt;TrustGen: A Platform of Dynamic Benchmarking on the Trustworthiness of Generative Foundation Models&lt;/strong&gt;&lt;/a&gt;&lt;/p&gt;
+
+
+
+&lt;p&gt;Yue Huang, Chujie Gao, Siyuan Wu, Haoran Wang, Xiangqi Wang, Jiayi Ye, Yujun Zhou, Yanbo Wang, Jiawen Shi, Qihui Zhang, Han Bao, Zhaoyi Liu, Yuan Li, Tianrui Guan, Peiran Wang, Haomin Zhuang, Dongping Chen, Kehan Guo, Andy Zou, Bryan Hooi, Caiming Xiong, Elias Stengel-Eskin, Hongyang Zhang (Vector Faculty Member), Hongzhi Yin, Huan Zhang, Huaxiu Yao, Jieyu Zhang, Jaehong Yoon, Kai Shu, Ranjay Krishna, Swabha Swayamdipta, Weijia Shi, Xiang Li, Yuexing Hao, Zhihao Jia, Zhize Li, Xiuying Chen, Zhengzhong Tu, Xiyang Hu, Tianyi Zhou, Jieyu Zhao, Lichao Sun, Furong Huang, Or Cohen-Sasson, Prasanna Sattigeri, Anka Reuel, Max Lamparth, Yue Zhao, Nouha Dziri, Yu Su, Huan Sun, Heng Ji, Chaowei Xiao, Mohit Bansal, Nitesh Chawla, Jian Pei, Jianfeng Gao, Michael Backes, Philip Yu, Neil Gong, Pin-Yu Chen, Bo Li, Dawn Song, Xiangliang Zhang&lt;/p&gt;
+
+
+
+&lt;p&gt;&lt;strong&gt;Abstract:&amp;nbsp;&lt;/strong&gt;&lt;/p&gt;
+
+
+
+&lt;p&gt;Generative foundation models (GenFMs), such as large language models and text-to-image systems, have demonstrated remarkable capabilities in various downstream applications. As they are increasingly deployed in high-stakes applications, assessing their trustworthiness has become both a critical necessity and a substantial challenge. Existing evaluation efforts are fragmented, rapidly outdated, and often lack extensibility across modalities. This raises a fundamental question: how can we systematically, reliably, and continuously assess the trustworthiness of rapidly advancing GenFMs across diverse modalities and use cases? To address these gaps, we introduce TrustGen, a dynamic and modular benchmarking system designed to systematically evaluate the trustworthiness of GenFMs across text-to-image, large language, and vision-language modalities. TrustGen standardizes trust evaluation through a unified taxonomy of over 25 fine-grained dimensions—including truthfulness, safety, fairness, robustness, privacy, and machine ethics—while supporting dynamic data generation and adaptive evaluation through three core modules: Metadata Curator, Test Case Builder, and Contextual Variator. Taking TrustGen into action to evaluate the trustworthiness of 39 models reveals four key insights. (1) State-of-the-art GenFMs achieve promising overall trust performance, yet significant limitations remain in specific dimensions such as hallucination resistance, fairness, and privacy preservation. (2) Contrary to prevailing assumptions, open-source models now rival and occasionally surpass proprietary systems in trustworthiness metrics. (3) The trust gap among top-performing models is narrowing, likely due to increased industry convergence on best practices. (4) Trustworthiness is not an isolated property; it interacts complexly with other behaviors, such as helpfulness and ethical decision-making. TrustGen is a transformative step toward standardized, scalable, and actionable trustworthiness evaluation, supporting dynamic assessments across diverse modalities and trust dimensions that evolve alongside the generative AI landscape.&lt;/p&gt;
+
+
+
+&lt;div class="wp-block-group is-layout-constrained wp-block-group-is-layout-constrained"&gt;
+&lt;div style="height:40px" aria-hidden="true" class="wp-block-spacer"&gt;&lt;/div&gt;
+
+
+    &lt;div class="acf-block acf-block-block_4db73432d13e4c15b6065fb9403b00dd acf-block-separator separator"&gt;
+      &lt;div class="separator__bar" style="background-color: #E00087"&gt;&lt;/div&gt;
+    &lt;/div&gt;
+
+
+
+&lt;div style="height:40px" aria-hidden="true" class="wp-block-spacer"&gt;&lt;/div&gt;
+&lt;/div&gt;
+
+
+
+&lt;p&gt;&lt;a href="https://openreview.net/forum?id=pQQuC1nIQq"&gt;&lt;strong&gt;Understanding and improving Shampoo and SOAP via Kullback-Leibler Minimization&lt;/strong&gt;&lt;/a&gt;&lt;/p&gt;
+
+
+
+&lt;p&gt;Wu Lin (former Vector Distinguished Postdoctoral Fellow), Scott C Lowe (Vector Distinguished Postdoctoral Fellow), Felix Dangel (former Vector Distinguished Postdoctoral Fellow), Runa Eschenhagen, Zikun Xu, Roger Grosse (Vector Faculty Member)&lt;/p&gt;
+
+
+
+&lt;p&gt;&lt;strong&gt;Abstract:&amp;nbsp;&lt;/strong&gt;&lt;/p&gt;
+
+
+
+&lt;p&gt;Shampoo and its efficient, Adam-stabilized variant SOAP, employ structured second-moment estimation and have received growing attention for their effectiveness.&amp;nbsp; In practice, Shampoo requires step-size grafting with Adam to achieve competitive performance. SOAP mitigates this by applying Adam in Shampoo&amp;#8217;s eigenbasis and further reducing per-iteration runtime.&amp;nbsp; However, reliance on Adam introduces additional memory overhead in both methods. Prior theoretical interpretations have primarily examined their estimation schemes using the Frobenius norm. Motivated by the natural correspondence between the second moment and a covariance matrix, we reinterpret the estimation procedures in Shampoo and SOAP as instances of covariance estimation through the lens of Kullback–Leibler (KL) divergence minimization. This perspective reveals a previously overlooked theoretical limitation and motivates principled improvements to their design.&amp;nbsp; Building on the KL perspective, we propose practical estimation schemes&amp;#8212;KL-Shampoo and KL-SOAP&amp;#8212;that &amp;nbsp; match or exceed the performance of Shampoo and SOAP for pre-training a range of neural network models while maintaining SOAP-level per-iteration runtime. Notably, KL-Shampoo does not rely on Adam to achieve superior performance, thereby avoiding the associated memory overhead. Surprisingly, KL-Shampoo consistently outperforms the other methods in our experiments.&lt;/p&gt;
+
+
+
+&lt;p&gt;&lt;strong&gt;TLDR:&lt;/strong&gt; A new Kullback–Leibler perspective to interpret and improve Shampoo and SOAP&lt;/p&gt;
+
+
+
+&lt;div class="wp-block-group is-layout-constrained wp-block-group-is-layout-constrained"&gt;
+&lt;div style="height:40px" aria-hidden="true" class="wp-block-spacer"&gt;&lt;/div&gt;
+
+
+    &lt;div class="acf-block acf-block-block_4db73432d13e4c15b6065fb9403b00dd acf-block-separator separator"&gt;
+      &lt;div class="separator__bar" style="background-color: #E00087"&gt;&lt;/div&gt;
+    &lt;/div&gt;
+
+
+
+&lt;div style="height:40px" aria-hidden="true" class="wp-block-spacer"&gt;&lt;/div&gt;
+&lt;/div&gt;
+
+
+
+&lt;p&gt;&lt;a href="https://openreview.net/forum?id=ArU2CeB7Tm"&gt;&lt;strong&gt;UniEdit-Flow: Unleashing Inversion and Editing in the Era of Flow Models&lt;/strong&gt;&lt;/a&gt;&lt;/p&gt;
+
+
+
+&lt;p&gt;Guanlong Jiao, Biqing Huang, Kuan-Chieh Wang, Renjie Liao (Vector Faculty Member)&lt;/p&gt;
+
+
+
+&lt;p&gt;&lt;strong&gt;Abstract:&amp;nbsp;&lt;/strong&gt;&lt;/p&gt;
+
+
+
+&lt;p&gt;Flow matching models have emerged as a strong alternative to diffusion models, but existing inversion and editing methods designed for diffusion are often ineffective or inapplicable to them. The straight-line, non-crossing trajectories of flow models pose challenges for diffusion-based approaches but also open avenues for novel solutions. In this paper, we introduce a predictor-corrector-based framework for inversion and editing in flow models. First, we propose Uni-Inv, an effective inversion method designed for accurate reconstruction. Building on this, we extend the concept of delayed injection to flow models and introduce Uni-Edit, a region-aware, robust image editing approach. Our methodology is tuning-free, model-agnostic, efficient, and effective, enabling diverse edits while ensuring strong preservation of edit-irrelevant regions. Extensive experiments across various generative models demonstrate the superiority and generalizability of Uni-Inv and Uni-Edit, even under low-cost settings.&lt;/p&gt;
+
+
+
+&lt;div class="wp-block-group is-layout-constrained wp-block-group-is-layout-constrained"&gt;
+&lt;div style="height:40px" aria-hidden="true" class="wp-block-spacer"&gt;&lt;/div&gt;
+
+
+    &lt;div class="acf-block acf-block-block_4db73432d13e4c15b6065fb9403b00dd acf-block-separator separator"&gt;
+      &lt;div class="separator__bar" style="background-color: #E00087"&gt;&lt;/div&gt;
+    &lt;/div&gt;
+
+
+
+&lt;div style="height:40px" aria-hidden="true" class="wp-block-spacer"&gt;&lt;/div&gt;
+&lt;/div&gt;
+
+
+
+&lt;p&gt;&lt;a href="https://openreview.net/forum?id=EDCJTaR9bk"&gt;&lt;strong&gt;UniVideo: Unified Understanding, Generation, and Editing for Videos&lt;/strong&gt;&lt;/a&gt;&lt;/p&gt;
+
+
+
+&lt;p&gt;Cong Wei, Quande Liu, Zixuan Ye, Qiulin Wang, Xintao Wang, Pengfei Wan, Kun Gai, Wenhu Chen (Vector Faculty Member)&lt;/p&gt;
+
+
+
+&lt;p&gt;&lt;strong&gt;Abstract:&amp;nbsp;&lt;/strong&gt;&lt;/p&gt;
+
+
+
+&lt;p&gt;Unified multimodal understanding–generation models have shown promising results in image generation and editing, but remain largely constrained to the image domain. In this work, we present VOGUE, a versatile framework that extends unified modeling to the video domain. VOGUE adopts a dual-stream design, combining a Multimodal Large Language Model (MLLM) for instruction understanding with a Multimodal DiT (MMDiT) for video generation. This design enables accurate interpretation of complex multimodal instructions while preserving visual consistency. Built on this architecture, VOGUE unifies diverse video generation and editing tasks under a single multimodal instruction paradigm and is jointly trained across them. Extensive experiments demonstrate that VOGUE matches or surpasses state-of-the-art task-specific baselines in visual understanding, text/image-to-video generation, in-context video editing and generation. Beyond these core capabilities, the unified design allows VOGUE to generalize to unseen free-form editing tasks, such as green-screening characters or novel task composition (e.g., editing + style transfer) in a single instruction. Notably, VOGUE is the first system to support visual-prompt-based video generation in a unified model, where the MLLM interprets visual prompts and guides the MMDiT in synthesis. To foster future research, our model and code will be released.&lt;/p&gt;
+
+
+
+&lt;p&gt;&lt;strong&gt;TL;DR:&lt;/strong&gt; a unified multimodal models that can handle diverse multimodal tasks&lt;/p&gt;
+
+
+
+&lt;div class="wp-block-group is-layout-constrained wp-block-group-is-layout-constrained"&gt;
+&lt;div style="height:40px" aria-hidden="true" class="wp-block-spacer"&gt;&lt;/div&gt;
+
+
+    &lt;div class="acf-block acf-block-block_4db73432d13e4c15b6065fb9403b00dd acf-block-separator separator"&gt;
+      &lt;div class="separator__bar" style="background-color: #E00087"&gt;&lt;/div&gt;
+    &lt;/div&gt;
+
+
+
+&lt;div style="height:40px" aria-hidden="true" class="wp-block-spacer"&gt;&lt;/div&gt;
+&lt;/div&gt;
+
+
+
+&lt;p&gt;&lt;a href="https://openreview.net/forum?id=4zoMnmZzh4"&gt;&lt;strong&gt;VisCoder2: Building Multi-Language Visualization Coding Agents&lt;/strong&gt;&lt;/a&gt;&lt;/p&gt;
+
+
+
+&lt;p&gt;Yuansheng Ni, Songcheng Cai, Xiangchao Chen, Jiarong Liang, Zhiheng Lyu, Jiaqi Deng, Kai Zou, Ping Nie, Fei Yuan, Xiang Yue, Wenhu Chen (Vector Faculty Member)&lt;/p&gt;
+
+
+
+&lt;p&gt;&lt;strong&gt;Abstract:&amp;nbsp;&lt;/strong&gt;&lt;/p&gt;
+
+
+
+&lt;p&gt;Large language models (LLMs) have recently enabled coding agents capable of generating, executing, and revising visualization code. However, existing models often fail in practical workflows due to limited language coverage, unreliable execution, and lack of iterative correction mechanisms. Progress has been constrained by narrow datasets and benchmarks that emphasize single-round generation and single-language tasks. To address these challenges, we introduce three complementary resources for advancing visualization coding agents. **VisCode-Multi-679K** is a large-scale, supervised dataset containing 679K validated and executable visualization samples with multi-turn correction dialogues across 12 programming languages. **VisPlotBench** is a benchmark for systematic evaluation, featuring executable tasks, rendered outputs, and protocols for both initial generation and multi-round self-debug. Finally, we present **VisCoder2**, a family of multi-language visualization models trained on VisCode-Multi-679K. Experiments show that VisCoder2 significantly outperforms strong open-source baselines and approaches the performance of proprietary models like GPT-4.1, with further gains from iterative self-debug, reaching **82.4%** overall execution pass rate at the 32B scale, particularly in symbolic or compiler-dependent languages.&lt;/p&gt;
+
+
+
+&lt;div class="wp-block-group is-layout-constrained wp-block-group-is-layout-constrained"&gt;
+&lt;div style="height:40px" aria-hidden="true" class="wp-block-spacer"&gt;&lt;/div&gt;
+
+
+    &lt;div class="acf-block acf-block-block_4db73432d13e4c15b6065fb9403b00dd acf-block-separator separator"&gt;
+      &lt;div class="separator__bar" style="background-color: #E00087"&gt;&lt;/div&gt;
+    &lt;/div&gt;
+
+
+
+&lt;div style="height:40px" aria-hidden="true" class="wp-block-spacer"&gt;&lt;/div&gt;
+&lt;/div&gt;
+
+
+
+&lt;p&gt;&lt;a href="https://openreview.net/forum?id=ssWi0rC3mx"&gt;&lt;strong&gt;When Priors Backfire: On the Vulnerability of Unlearnable Examples to Pretraining&lt;/strong&gt;&lt;/a&gt;&lt;/p&gt;
+
+
+
+&lt;p&gt;Zhihao Li, Gezheng Xu, Jiale Cai, Ruiyi Fang, Di Wu, Qicheng Lao, Charles Ling (former Vector Faculty Affiliate) Boyu Wang (Vector Faculty Affiliate)&lt;/p&gt;
+
+
+
+&lt;p&gt;&lt;strong&gt;Abstract:&amp;nbsp;&lt;/strong&gt;&lt;/p&gt;
+
+
+
+&lt;p&gt;Unlearnable Examples (UEs) are introduced as a data protection strategy that generates imperceptible perturbations to mislead models into learning spurious correlations rather than real semantics. In this paper, we reveal a fundamental vulnerability of UEs that emerges when learning starts from a pretrained model. Specifically, our empirical analysis shows that even when data are protected by carefully crafted perturbations, pretraining priors still allow the model to bypass the shortcuts introduced by UEs and capture semantic information from the data, thereby nullifying unlearnability. To counter this effect, we propose $\textbf{BAIT}$ ($\textbf{B}$inding $\textbf{A}$rtificial perturbations to $\textbf{I}$ncorrect $\textbf{T}$argets), a novel bi‑level optimization formulation in which the inner level mirrors standard UE objectives, while the outer level enforces a dynamic association of perturbations with incorrect labels, deliberately misleading pretraining priors and preventing them from aligning with true semantics. This mislabel-perturbation binding mechanism blocks the pretrained model from readily establishing the true label-data relationship, so the learning process cannot quickly rely on image semantics and instead remains dependent on the perturbations.&amp;nbsp; Extensive experiments on standard benchmarks and multiple pretrained backbones demonstrate that our approach produces UEs that remain effective in the presence of pretraining priors.&lt;/p&gt;
+
+
+
+&lt;div class="wp-block-group is-layout-constrained wp-block-group-is-layout-constrained"&gt;
+&lt;div style="height:40px" aria-hidden="true" class="wp-block-spacer"&gt;&lt;/div&gt;
+
+
+    &lt;div class="acf-block acf-block-block_4db73432d13e4c15b6065fb9403b00dd acf-block-separator separator"&gt;
+      &lt;div class="separator__bar" style="background-color: #E00087"&gt;&lt;/div&gt;
+    &lt;/div&gt;
+
+
+
+&lt;div style="height:40px" aria-hidden="true" class="wp-block-spacer"&gt;&lt;/div&gt;
+&lt;/div&gt;
+
+
+
+&lt;p&gt;&lt;a href="https://openreview.net/forum?id=a8QTAl5Hnb"&gt;&lt;strong&gt;When Style Breaks Safety: Defending LLMs Against Superficial Style Alignment&lt;/strong&gt;&lt;/a&gt;&lt;/p&gt;
+
+
+
+&lt;p&gt;Yuxin Xiao, Sana Tonekaboni (Vector Distinguished Postdoctoral Fellow), Walter Gerych, Vinith Suriyakumar, Marzyeh Ghassemi&lt;/p&gt;
+
+
+
+&lt;p&gt;&lt;strong&gt;Abstract:&amp;nbsp;&lt;/strong&gt;&lt;/p&gt;
+
+
+
+&lt;p&gt;Large language models (LLMs) can be prompted with specific styles (e.g., formatting responses as lists), including in malicious queries. Prior jailbreak research mainly augments these queries with additional string transformations to maximize attack success rate (ASR). However, the impact of style patterns in the original queries that are semantically irrelevant to the malicious intent remains unclear. In this work, we seek to understand whether style patterns compromise LLM safety, how superficial style alignment increases model vulnerability, and how best to mitigate these risks during alignment. We first define ASR inflation as the increase in ASR due to style patterns in existing jailbreak benchmark queries. By evaluating $32$ LLMs across seven benchmarks, we find that nearly all models exhibit ASR inflation. Notably, the inflation correlates with an LLM&amp;#8217;s relative attention to style patterns, which also overlap more with its instruction-tuning data when inflation occurs. We then investigate superficial style alignment, and find that fine-tuning with specific styles makes LLMs more vulnerable to jailbreaks of those same styles. Finally, we propose SafeStyle, a defense strategy that incorporates a small amount of safety training data augmented to match the distribution of style patterns in the fine-tuning data. Across three LLMs, six fine-tuning style settings, and two real-world instruction-tuning datasets, SafeStyle consistently outperforms baselines in maintaining LLM safety.&lt;/p&gt;
+
+
+
+&lt;div class="wp-block-group is-layout-constrained wp-block-group-is-layout-constrained"&gt;
+&lt;div style="height:40px" aria-hidden="true" class="wp-block-spacer"&gt;&lt;/div&gt;
+
+
+    &lt;div class="acf-block acf-block-block_4db73432d13e4c15b6065fb9403b00dd acf-block-separator separator"&gt;
+      &lt;div class="separator__bar" style="background-color: #E00087"&gt;&lt;/div&gt;
+    &lt;/div&gt;
+
+
+
+&lt;div style="height:40px" aria-hidden="true" class="wp-block-spacer"&gt;&lt;/div&gt;
+&lt;/div&gt;
+
+
+
+&lt;p&gt;&lt;a href="https://openreview.net/forum?id=hZy6YG2Ij8"&gt;&lt;strong&gt;YuE: Scaling Open Foundation Models for Long-Form Music Generation&lt;/strong&gt;&lt;/a&gt;&lt;/p&gt;
+
+
+
+&lt;p&gt;Ruibin Yuan, Hanfeng Lin, Shuyue Guo, Ge Zhang, Jiahao Pan, Yongyi Zang, Haohe Liu, Yiming Liang, Wenye Ma, Xingjian Du, Xeron Du, Zhen Ye, Tianyu Zheng, Zhengxuan Jiang, Yinghao MA, Minghao Liu, Zeyue Tian, Ziya Zhou, Liumeng Xue, Xingwei Qu, Yizhi Li, Shangda Wu, Tianhao Shen, Ziyang Ma, Jun Zhan, Chunhui Wang, Yatian Wang, Xiaowei Chi, Xinyue Zhang, Zhenzhu Yang, XiangzhouWang, Shansong Liu, Lingrui Mei, Peng Li, Junjie Wang, Jianwei Yu, Guojian Pang, Xu Li, Zihao Wang, Xiaohuan Zhou, Lijun Yu, Emmanouil Benetos, Yong Chen, Chenghua Lin, Xie Chen, Gus Xia, Zhaoxiang Zhang, Chao Zhang, Wenhu Chen (Vector Faculty Member), Xinyu Zhou, Xipeng Qiu, Roger Dannenberg, Jiaheng Liu, Jian Yang, Wenhao Huang, Wei Xue, Xu Tan, Yike Guo&lt;/p&gt;
+
+
+
+&lt;p&gt;&lt;strong&gt;Abstract: &lt;/strong&gt;We tackle the task of long-form music generation, particularly the challenging \textbf{lyrics-to-song} problem, by introducing \textbf{YuE (乐)}, a family of open-source music generation foundation models. Specifically, YuE scales to trillions of tokens and generates up to five minutes of music while maintaining lyrical alignment, coherent musical structure, and engaging vocal melodies with appropriate accompaniment. It achieves this through \textbf{track-decoupled next-token prediction} to overcome dense mixture signals, and \textbf{structural progressive conditioning} for long-context lyrical alignment. In addition, we redesign the \textbf{in-context learning} technique for music generation, enabling bidirectional content creation, style cloning, and improving musicality. Through extensive evaluation, we demonstrate that YuE matches or even surpasses some of the proprietary systems in musicality and vocal agility (as of 2025-01). We strongly encourage readers to &lt;a href="https://yue-anonymous.github.io"&gt;listen to our demo&lt;/a&gt;.&lt;/p&gt;
+
+
+
+&lt;p&gt;&lt;strong&gt;TL;DR: &lt;/strong&gt;We scale up an open LM-based song generation model to match the performance of proprietary systems.&lt;/p&gt;
+
+
+
+&lt;div style="height:100px" aria-hidden="true" class="wp-block-spacer"&gt;&lt;/div&gt;
+
+
+
+&lt;div class="wp-block-group alignwide has-vector-grey-light-background-color has-background is-content-justification-center is-layout-constrained wp-block-group-is-layout-constrained" style="border-radius:30px;padding-top:4rem;padding-bottom:4rem"&gt;
+&lt;div class="wp-block-columns alignwide is-layout-flex wp-container-core-columns-is-layout-9d6595d7 wp-block-columns-is-layout-flex"&gt;
+&lt;div class="wp-block-column is-layout-flow wp-block-column-is-layout-flow" style="flex-basis:66.6666%"&gt;
+&lt;h2 class="wp-block-heading" style="margin-top:0px;margin-bottom:0px"&gt;Stay connected to Vector&lt;/h2&gt;
+
+
+
+&lt;p class="has-body-large-font-size" style="font-style:normal;font-weight:600"&gt;Get the latest updates on breakthrough research, career opportunities, and developments in Canada&amp;#8217;s AI community.&lt;/p&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+
+
+
+&lt;div class="wp-block-columns alignwide is-layout-flex wp-container-core-columns-is-layout-9d6595d7 wp-block-columns-is-layout-flex"&gt;
+&lt;div class="wp-block-column is-layout-flow wp-block-column-is-layout-flow"&gt;
+&lt;script src="https://js-na3.hsforms.net/forms/embed/developer/342287031.js" defer&gt;&lt;/script&gt;
+&lt;div class="hs-form-html" data-region="na3" data-form-id="ed4dcd73-ef5c-485a-8697-49f9f43d512c" data-portal-id="342287031"&gt;&lt;/div&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+
+
+
+&lt;div style="height:100px" aria-hidden="true" class="wp-block-spacer"&gt;&lt;/div&gt;
+&lt;p&gt;The post &lt;a href="https://vectorinstitute.ai/vector-researchers-advance-representation-learning-and-deep-learning-research-at-iclr-2026/"&gt;Vector researchers advance representation learning and deep learning research at ICLR 2026&lt;/a&gt; appeared first on &lt;a href="https://vectorinstitute.ai"&gt;Vector Institute for Artificial Intelligence&lt;/a&gt;.&lt;/p&gt;
+</content:encoded>
+					
+		
+		
+			</item>
+		<item>
+		<title>Remarkable 2026 Poster Session: 60 research projects shaping AI’s future</title>
+		<link>https://vectorinstitute.ai/remarkable-2026-vector-institute-ai-research-poster-session/</link>
+		
+		<dc:creator>Jennifer Jenkins</dc:creator>
+		<pubDate>Wed, 25 Feb 2026 21:09:29 +0000</pubDate>
+				<category>Research</category>
+		<guid isPermaLink="false">https://vectorinstitute.ai/?p=25706</guid>
+
+					<description>&lt;p&gt;Vector Institute&amp;#8217;s third annual Remarkable 2026 conference brought together over 1,500 researchers and industry leaders in person and online on February 19-20 to explore how AI research translates into real-world [&amp;#8230;]&lt;/p&gt;
+&lt;p&gt;The post &lt;a href="https://vectorinstitute.ai/remarkable-2026-vector-institute-ai-research-poster-session/"&gt;Remarkable 2026 Poster Session: 60 research projects shaping AI&amp;#8217;s future&lt;/a&gt; appeared first on &lt;a href="https://vectorinstitute.ai"&gt;Vector Institute for Artificial Intelligence&lt;/a&gt;.&lt;/p&gt;
+</description>
+										<content:encoded>
+&lt;p&gt;Vector Institute&amp;#8217;s third annual Remarkable 2026 conference brought together over 1,500 researchers and industry leaders in person and online on February 19-20 to explore how AI research translates into real-world possibility. At the heart of this gathering – the nexus where academic excellence meets industry innovation – was a poster session that showcased the breadth and depth of Canada&amp;#8217;s collaborative AI ecosystem.&lt;/p&gt;
+
+
+
+&lt;p&gt;On February 20, the conference&amp;#8217;s second day, &lt;a href="https://vectorinstitute.ai/wp-content/uploads/2026/02/Remarkable-Poster-Booklet-2026-60.pdf" target="_blank" rel="noreferrer noopener"&gt;60 research posters&lt;/a&gt; lined the main auditorium, each representing months of rigorous investigation into AI&amp;#8217;s most pressing challenges and promising frontiers. These presentations, drawn from across Vector&amp;#8217;s research community, offered attendees a comprehensive view of how Canadian researchers are advancing the field while maintaining an unwavering commitment to responsible AI development.&lt;/p&gt;
+
+
+
+&lt;div style="height:1em" aria-hidden="true" class="wp-block-spacer"&gt;&lt;/div&gt;
+
+
+
+&lt;figure class="wp-block-image size-large"&gt;&lt;img fetchpriority="high" decoding="async" width="1024" height="683" src="https://vectorinstitute.ai/wp-content/uploads/2026/02/EBR67960-1024x683.jpg" alt="" class="wp-image-25710" srcset="https://vectorinstitute.ai/wp-content/uploads/2026/02/EBR67960-1024x683.jpg 1024w, https://vectorinstitute.ai/wp-content/uploads/2026/02/EBR67960-300x200.jpg 300w, https://vectorinstitute.ai/wp-content/uploads/2026/02/EBR67960-768x512.jpg 768w, https://vectorinstitute.ai/wp-content/uploads/2026/02/EBR67960-1536x1024.jpg 1536w, https://vectorinstitute.ai/wp-content/uploads/2026/02/EBR67960.jpg 2048w" sizes="(max-width: 1024px) 100vw, 1024px" /&gt;&lt;/figure&gt;
+
+
+
+&lt;div style="height:4em" aria-hidden="true" class="wp-block-spacer"&gt;&lt;/div&gt;
+
+
+
+&lt;h2 class="wp-block-heading" style="margin-top:0px;margin-bottom:0px"&gt;Research at the intersection of innovation and impact&lt;/h2&gt;
+
+
+
+&lt;p&gt;The poster session revealed three dominant themes shaping contemporary AI research. &lt;strong&gt;AI in medicine and health care&lt;/strong&gt; emerged as a particularly strong focus, with nearly 20% of presentations exploring breakthroughs in voice-controlled surgical navigation, cancer detection using foundation models, clinical decision support systems, and medical imaging innovations. These projects demonstrate how Canadian researchers are positioning the country as a global hub for health care AI innovation.&lt;/p&gt;
+
+
+
+&lt;p&gt;&lt;strong&gt;AI safety and responsible AI &lt;/strong&gt;represented another critical research direction, addressing the urgent need for trustworthy AI deployment. Researchers presented work on bias detection across demographics and dialects, privacy preservation techniques, fairness optimization, and novel approaches to understanding and mitigating AI vulnerabilities. This portfolio reflects Canada&amp;#8217;s leadership in ethical AI development and regulatory alignment.&lt;/p&gt;
+
+
+
+&lt;p&gt;The third major theme, &lt;strong&gt;foundation model innovations&lt;/strong&gt;, showcased advances in efficiency improvements, multimodal capabilities, and novel architectures for next-generation language and vision systems. From dramatic reductions in training costs to fundamental breakthroughs in understanding how AI processes information, these projects represent the technical foundation enabling tomorrow&amp;#8217;s AI applications.&lt;/p&gt;
+
+
+
+&lt;div style="height:1em" aria-hidden="true" class="wp-block-spacer"&gt;&lt;/div&gt;
+
+
+
+&lt;figure class="wp-block-image size-large"&gt;&lt;img decoding="async" width="1024" height="683" src="https://vectorinstitute.ai/wp-content/uploads/2026/02/ER629825-1024x683.jpg" alt="" class="wp-image-25709" srcset="https://vectorinstitute.ai/wp-content/uploads/2026/02/ER629825-1024x683.jpg 1024w, https://vectorinstitute.ai/wp-content/uploads/2026/02/ER629825-300x200.jpg 300w, https://vectorinstitute.ai/wp-content/uploads/2026/02/ER629825-768x512.jpg 768w, https://vectorinstitute.ai/wp-content/uploads/2026/02/ER629825-1536x1024.jpg 1536w, https://vectorinstitute.ai/wp-content/uploads/2026/02/ER629825.jpg 2048w" sizes="(max-width: 1024px) 100vw, 1024px" /&gt;&lt;/figure&gt;
+
+
+
+&lt;div style="height:4em" aria-hidden="true" class="wp-block-spacer"&gt;&lt;/div&gt;
+
+
+
+&lt;h2 class="wp-block-heading" style="margin-top:0px;margin-bottom:0px"&gt;Canadian leadership in focus&lt;/h2&gt;
+
+
+
+&lt;p&gt;The diverse portfolio demonstrates Canadian AI leadership extending from Toronto-based optimization startups commercializing breakthrough technologies to Vector&amp;#8217;s comprehensive medical AI pipeline positioning Canada as a global hub for healthcare innovation. This research landscape reflects the unique advantages that emerge when researchers and practitioners collaborate within Canada&amp;#8217;s supportive AI ecosystem — from government commitment to AI leadership to the deep industry partnerships that enable rapid translation of academic discoveries into deployed solutions.&lt;/p&gt;
+
+
+
+&lt;p&gt;As you explore the full collection of abstracts and research summaries in the attached poster booklet, you&amp;#8217;ll encounter the remarkable scope of investigation happening across Vector&amp;#8217;s network. Each presentation represents not just scientific advancement, but a step toward realizing AI&amp;#8217;s potential to address real-world challenges while maintaining the ethical standards and collaborative spirit that distinguish Canada&amp;#8217;s approach to artificial intelligence.&lt;/p&gt;
+
+
+
+&lt;div style="height:1em" aria-hidden="true" class="wp-block-spacer"&gt;&lt;/div&gt;
+
+
+
+&lt;figure class="wp-block-image size-large"&gt;&lt;img decoding="async" width="1024" height="683" src="https://vectorinstitute.ai/wp-content/uploads/2026/02/EBR67875-1024x683.jpg" alt="" class="wp-image-25711" srcset="https://vectorinstitute.ai/wp-content/uploads/2026/02/EBR67875-1024x683.jpg 1024w, https://vectorinstitute.ai/wp-content/uploads/2026/02/EBR67875-300x200.jpg 300w, https://vectorinstitute.ai/wp-content/uploads/2026/02/EBR67875-768x512.jpg 768w, https://vectorinstitute.ai/wp-content/uploads/2026/02/EBR67875-1536x1024.jpg 1536w, https://vectorinstitute.ai/wp-content/uploads/2026/02/EBR67875.jpg 2048w" sizes="(max-width: 1024px) 100vw, 1024px" /&gt;&lt;/figure&gt;
+
+
+
+&lt;div style="height:4em" aria-hidden="true" class="wp-block-spacer"&gt;&lt;/div&gt;
+
+
+      &lt;div class="acf-block acf-block-block_2c15c4ae473c3b0989f19f14204d94b0 acf-block-call-to-action alignwide"&gt;
+      &lt;div class="cta cta--bottom-right desktop-d-flex desktop-d-flex--y-center desktop-p-l-4"&gt;
+                  &lt;img decoding="async" class="cta__background-image" src="https://vectorinstitute.ai/wp-content/uploads/2026/03/new-cta-bg-01-1600x0-c-default.jpg" alt="" /&gt;
+        
+        
+                  &lt;div class="cta__pixels cta__pixels--bottom-right mobile-d-none"&gt;
+            &lt;svg width="416" height="256" viewBox="0 0 416 256" fill="none" xmlns="http://www.w3.org/2000/svg"&gt;
+              &lt;path d="M32 160L32 192L1.90735e-06 192L2.66249e-07 160L32 160Z" fill="white"/&gt;
+              &lt;path d="M64 128L64 160L32 160L32 128L64 128Z" fill="white"/&gt;
+              &lt;path d="M128 128L128 160L96 160L96 128L128 128Z" fill="white"/&gt;
+              &lt;path d="M160 128L160 160L128 160L128 128L160 128Z" fill="white"/&gt;
+              &lt;path d="M192 160L192 192L160 192L160 160L192 160Z" fill="white"/&gt;
+              &lt;path d="M256 192L256 224L224 224L224 192L256 192Z" fill="white"/&gt;
+              &lt;path d="M288 160L288 192L256 192L256 160L288 160Z" fill="white"/&gt;
+              &lt;path d="M320 224L320 256L288 256L288 224L320 224Z" fill="white"/&gt;
+              &lt;path d="M352 192L352 224L320 224L320 192L352 192Z" fill="white"/&gt;
+              &lt;path d="M384 224L384 256L352 256L352 224L384 224Z" fill="white"/&gt;
+              &lt;path d="M416 192L416 224L384 224L384 192L416 192Z" fill="white"/&gt;
+              &lt;path d="M288 128L288 160L256 160L256 128L288 128Z" fill="white"/&gt;
+              &lt;path d="M320 128L320 160L288 160L288 128L320 128Z" fill="white"/&gt;
+              &lt;path d="M320 96L320 128L288 128L288 96L320 96Z" fill="white"/&gt;
+              &lt;path d="M352 64L352 96L320 96L320 64L352 64Z" fill="white"/&gt;
+              &lt;path d="M256 128L256 160L224 160L224 128L256 128Z" fill="white"/&gt;
+              &lt;path d="M256 96L256 128L224 128L224 96L256 96Z" fill="white"/&gt;
+              &lt;path d="M288 64L288 96L256 96L256 64L288 64Z" fill="white"/&gt;
+              &lt;path d="M160 192L160 224L128 224L128 192L160 192Z" fill="white"/&gt;
+              &lt;path d="M160 224L160 256L128 256L128 224L160 224Z" fill="white"/&gt;
+              &lt;path d="M192 224L192 256L160 256L160 224L192 224Z" fill="white"/&gt;
+              &lt;path d="M128 224L128 256L96 256L96 224L128 224Z" fill="white"/&gt;
+              &lt;path d="M128 96L128 128L96 128L96 96L128 96Z" fill="white"/&gt;
+              &lt;path d="M192 64L192 96L160 96L160 64L192 64Z" fill="white"/&gt;
+              &lt;path d="M224 32L224 64L192 64L192 32L224 32Z" fill="white"/&gt;
+              &lt;path d="M256 0L256 32L224 32L224 1.1936e-06L256 0Z" fill="white"/&gt;
+              &lt;path d="M96 96L96 128L64 128L64 96L96 96Z" fill="white"/&gt;
+              &lt;path d="M96 160L96 192L64 192L64 160L96 160Z" fill="white"/&gt;
+            &lt;/svg&gt;
+          &lt;/div&gt;
+        
+        &lt;div class="cta__content-container"&gt;
+          &lt;div class="cta__content"&gt;
+                                          &lt;article class="cta__text-container"&gt;
+                  &lt;h2&gt;Explore the full collection of posters&lt;/h2&gt;
+&lt;p&gt;Discover the cutting-edge research shaping AI&amp;#8217;s future, organized by research theme and presented as they appeared at Remarkable 2026 on February 20, 2026.&lt;/p&gt;
+
+                &lt;/article&gt;
+                          
+                                          &lt;div class="cta__button-container"&gt;
+                  &lt;a class="button-link button-link--white" href="https://vectorinstitute.ai/wp-content/uploads/2026/02/Remarkable-Poster-Booklet-2026-60.pdf"&gt;Explore Remarkable 2026 posters&lt;/a&gt;
+                &lt;/div&gt;
+                          
+                                                &lt;/div&gt;
+        &lt;/div&gt;
+      &lt;/div&gt;
+    &lt;/div&gt;
+  
+
+
+&lt;div style="height:4em" aria-hidden="true" class="wp-block-spacer"&gt;&lt;/div&gt;
+&lt;p&gt;The post &lt;a href="https://vectorinstitute.ai/remarkable-2026-vector-institute-ai-research-poster-session/"&gt;Remarkable 2026 Poster Session: 60 research projects shaping AI&amp;#8217;s future&lt;/a&gt; appeared first on &lt;a href="https://vectorinstitute.ai"&gt;Vector Institute for Artificial Intelligence&lt;/a&gt;.&lt;/p&gt;
+</content:encoded>
+					
+		
+		
+			</item>
+		<item>
+		<title>CRISPNAM-FG: An interpretable Fine-Gray deep survival model for competing risks in health care</title>
+		<link>https://vectorinstitute.ai/crispnam-fg-interpretable-competing-risks-survival-analysis-healthcare/</link>
+		
+		<dc:creator>Jennifer Jenkins</dc:creator>
+		<pubDate>Tue, 24 Feb 2026 20:55:42 +0000</pubDate>
+				<category>Research</category>
+		<guid isPermaLink="false">https://vectorinstitute.ai/?p=25703</guid>
+
+					<description>&lt;p&gt;Vector researchers developed CRISPNAM-FG, a trustworthy AI model that predicts the risk of developing diabetes-related foot complications for patients discharged from hospitals while providing complete transparency in how each decision [&amp;#8230;]&lt;/p&gt;
+&lt;p&gt;The post &lt;a href="https://vectorinstitute.ai/crispnam-fg-interpretable-competing-risks-survival-analysis-healthcare/"&gt;CRISPNAM-FG: An interpretable Fine-Gray deep survival model for competing risks in health care&lt;/a&gt; appeared first on &lt;a href="https://vectorinstitute.ai"&gt;Vector Institute for Artificial Intelligence&lt;/a&gt;.&lt;/p&gt;
+</description>
+										<content:encoded>
+&lt;p&gt;Vector researchers developed CRISPNAM-FG, a trustworthy AI model that predicts the risk of developing diabetes-related foot complications for patients discharged from hospitals while providing complete transparency in how each decision is made – addressing the critical need for interpretable AI in health care where understanding model reasoning is paramount for clinical adoption. This breakthrough demonstrates that AI systems can achieve high accuracy while maintaining full interpretability, solving a fundamental challenge that has limited the deployment of AI in high-stakes medical settings. Access the full paper &lt;a href="https://arxiv.org/abs/2511.12409" target="_blank" rel="noreferrer noopener"&gt;here&lt;/a&gt;.&lt;/p&gt;
+
+
+
+&lt;div style="height:4em" aria-hidden="true" class="wp-block-spacer"&gt;&lt;/div&gt;
+
+
+
+&lt;div class="wp-block-cover alignwide has-custom-content-position is-position-center-left" style="padding-top:3em;padding-right:2em;padding-bottom:3em;padding-left:2em;min-height:340px;aspect-ratio:unset;"&gt;&lt;span aria-hidden="true" class="wp-block-cover__background has-black-background-color has-background-dim-100 has-background-dim"&gt;&lt;/span&gt;&lt;div class="wp-block-cover__inner-container is-layout-flow wp-block-cover-is-layout-flow"&gt;
+&lt;div class="wp-block-group is-layout-flow wp-block-group-is-layout-flow"&gt;
+&lt;div class="wp-block-columns is-layout-flex wp-container-core-columns-is-layout-13268b9e wp-block-columns-is-layout-flex" style="margin-top:0px;margin-bottom:0px;padding-top:0px;padding-right:0px;padding-bottom:0px;padding-left:0px"&gt;
+&lt;div class="wp-block-column is-layout-flow wp-block-column-is-layout-flow" style="flex-basis:66.6666%"&gt;
+&lt;h2 class="wp-block-heading has-white-color has-text-color" style="margin-top:0px;margin-bottom:0px"&gt;TLDR: Uncover groundbreaking AI research in 3 minutes&lt;/h2&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+
+
+
+&lt;div class="wp-block-columns is-layout-flex wp-container-core-columns-is-layout-13268b9e wp-block-columns-is-layout-flex" style="margin-top:0px;margin-bottom:0px;padding-top:0px;padding-right:0px;padding-bottom:0px;padding-left:0px"&gt;
+&lt;div class="wp-block-column is-layout-flow wp-block-column-is-layout-flow" style="flex-basis:83.3333%"&gt;
+&lt;p class="has-white-color has-text-color"&gt;This concise summary bridges the gap between complex scientific advancements and everyday understanding. Ideal for enthusiasts and non-researchers, start listening now.&lt;/p&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+
+
+
+&lt;div class="wp-block-columns is-layout-flex wp-container-core-columns-is-layout-13268b9e wp-block-columns-is-layout-flex" style="margin-top:0px;margin-bottom:0px;padding-top:0px;padding-right:0px;padding-bottom:0px;padding-left:0px"&gt;
+&lt;div class="wp-block-column is-layout-flow wp-block-column-is-layout-flow" style="flex-basis:100%"&gt;
+&lt;div style="height:1em" aria-hidden="true" class="wp-block-spacer"&gt;&lt;/div&gt;
+
+
+
+&lt;figure style="margin-top:0px;margin-bottom:0px" class="wp-block-audio"&gt;&lt;audio controls src="https://vectorinstitute.ai/wp-content/uploads/2026/02/ANDERS-CRISPNAM-FG.mp3"&gt;&lt;/audio&gt;&lt;/figure&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;/div&gt;&lt;/div&gt;
+
+
+
+&lt;div style="height:4em" aria-hidden="true" class="wp-block-spacer"&gt;&lt;/div&gt;
+
+
+
+&lt;p&gt;&lt;strong&gt;Survival analysis&lt;/strong&gt; is a statistical approach for analyzing time-to-event data and it involves essentially, studying how long it takes until something happens (like disease onset, recovery, or death) and what factors influence that timing.Traditional survival analysis focuses on predicting risk for a single event, but many real-world health care scenarios involve multiple &amp;#8220;competing&amp;#8221; events where experiencing one prevents others from occurring. For people with diabetes, this might include the risk of foot complications competing with risk of mortality from other causes.&lt;/p&gt;
+
+
+
+&lt;p&gt;Recent deep learning advances like DeepHit and DeepSurv have improved predictive performance for competing risks scenarios, but these gains come at the cost of interpretability, creating black-box models that are difficult for clinicians to trust and validate in practice.&lt;/p&gt;
+
+
+
+&lt;p&gt;Our team’s research goal is to enable accurate and transparent prediction of time-to-event outcomes where multiple risks coexist, while maintaining a level of interpretability that supports clinical trust, validation, and policy decision-making. This work demonstrates that high predictive performance and intrinsic interpretability can coexist in competing risks survival analysis for real-world health care application.&lt;/p&gt;
+
+
+
+&lt;p&gt;This work represents a collaborative effort between Vector Institute, GEMINI, Unity Health, and Diabetes Action Canada, bringing together methodological expertise, large-scale hospital data, and domain knowledge in diabetes care. Together, the research team developed CRISPNAM-FG (Competing Risks Survival Prediction using Neural Additive Models: Fine Gray), an intrinsically interpretable survival model that handles competing risks using the Fine-Gray formulation while maintaining both the predictive power of deep learning and the interpretability of classical statistical models.&lt;/p&gt;
+
+
+
+&lt;div style="height:4em" aria-hidden="true" class="wp-block-spacer"&gt;&lt;/div&gt;
+
+
+
+&lt;h2 class="wp-block-heading" style="margin-top:0px;margin-bottom:0px"&gt;The interpretability challenge in survival analysis&lt;/h2&gt;
+
+
+
+&lt;p&gt;Model interpretability is crucial for establishing AI safety and clinician trust in medical applications. Recent deep learning models have achieved very good predictive performance, but their limited transparency as black-box models hinders their integration into clinical practice.&lt;/p&gt;
+
+
+
+&lt;p&gt;Existing deep survival approaches for competing risks, including DeepHit and Neural Fine-Gray, lack inherent interpretability, particularly at the feature level. This opacity makes it challenging to understand individual feature contributions to risk predictions across different competing events.&lt;/p&gt;
+
+
+
+&lt;p&gt;Post-hoc explanation methods like LIME and SHAP have limitations. They generally suffer from low fidelity, leading to unfaithful or misleading explanations and can be easily fooled. Unlike black-box deep survival models, the CRISPNAM-FG approach is intrinsically interpretable and does not rely on post-hoc explanation methods, which are often unstable and difficult to validate in health care settings.&lt;/p&gt;
+
+
+
+&lt;div style="height:4em" aria-hidden="true" class="wp-block-spacer"&gt;&lt;/div&gt;
+
+
+
+&lt;h2 class="wp-block-heading" style="margin-top:0px;margin-bottom:0px"&gt;CRISPNAM-FG architecture: Building interpretability from the ground up&lt;/h2&gt;
+
+
+
+&lt;p&gt;The key contribution is the integration of the Fine-Gray competing risks framework with Neural Additive Models in a single, end-to-end trainable architecture. Each clinical variable is modeled independently using a small neural network, allowing the system to capture non-linear effects while preserving feature-level transparency.&lt;/p&gt;
+
+
+
+&lt;div style="height:2em" aria-hidden="true" class="wp-block-spacer"&gt;&lt;/div&gt;
+
+
+
+&lt;h3 class="wp-block-heading" style="margin-top:0px;margin-bottom:0px"&gt;Neural Additive Model foundation&lt;/h3&gt;
+
+
+
+&lt;p&gt;Following the Neural Additive Model framework, each input feature is processed by its own dedicated neural network, called a FeatureNet. These feature-specific sub-networks learn the non-linear contribution of each individual feature to the overall risk score while preserving interpretability by isolating feature effects.&lt;/p&gt;
+
+
+
+&lt;p&gt;Each FeatureNet takes a scalar input and produces a hidden representation through fully-connected feedforward neural networks with hyperbolic tangent activation functions.&lt;/p&gt;
+
+
+
+&lt;div style="height:2em" aria-hidden="true" class="wp-block-spacer"&gt;&lt;/div&gt;
+
+
+
+&lt;h3 class="wp-block-heading" style="margin-top:0px;margin-bottom:0px"&gt;Risk-specific projections&lt;/h3&gt;
+
+
+
+&lt;p&gt;The model allows each patient characteristic to influence different outcomes in different ways. For example, high blood sugar might strongly increase the risk of foot complications while having a different effect on mortality risk. This flexibility is crucial because the biological mechanisms driving each outcome can be distinct.&lt;/p&gt;
+
+
+
+&lt;p&gt;For each variable and each competing outcome, the model learns separate transformations that capture how that variable contributes to risk. To ensure fair comparisons across different outcomes, these transformations are standardized to the same scale. This prevents one outcome from appearing artificially more important simply due to differences in measurement units or mathematical scaling.&lt;/p&gt;
+
+
+
+&lt;div style="height:2em" aria-hidden="true" class="wp-block-spacer"&gt;&lt;/div&gt;
+
+
+
+&lt;h3 class="wp-block-heading" style="margin-top:0px;margin-bottom:0px"&gt;Fine-Gray formulation&lt;/h3&gt;
+
+
+
+&lt;p&gt;The Fine-Gray approach models the probability of experiencing a specific event over time, accounting for the presence of competing events. Unlike traditional methods that remove patients from consideration once they experience any event, Fine-Gray keeps tracking patients even after they&amp;#8217;ve had a competing event. This provides a more realistic picture of risk in clinical settings where multiple outcomes can occur.&lt;/p&gt;
+
+
+
+&lt;p&gt;The model calculates risk by combining a baseline hazard that changes over time with patient-specific factors. It then converts this into cumulative incidence: the probability that a patient will experience the event of interest by a given time point.&lt;/p&gt;
+
+
+
+&lt;div style="height:2em" aria-hidden="true" class="wp-block-spacer"&gt;&lt;/div&gt;
+
+
+
+&lt;h3 class="wp-block-heading" style="margin-top:0px;margin-bottom:0px"&gt;Interpretability through shape functions&lt;/h3&gt;
+
+
+
+&lt;p&gt;The model&amp;#8217;s key strength is its built-in interpretability. Rather than producing predictions without explanation, it generates &amp;#8220;shape functions&amp;#8221; that visualize how each patient characteristic influences risk.&lt;/p&gt;
+
+
+
+&lt;p&gt;For each clinical variable (like age, blood glucose, or blood pressure), the model creates a curve showing how different values of that variable affect risk, separately for each possible outcome. For example, you might see how increasing HbA1c levels progressively increase the risk of foot complications versus mortality.&lt;/p&gt;
+
+
+
+&lt;p&gt;The system provides two key interpretability features:&lt;/p&gt;
+
+
+
+&lt;ol class="wp-block-list"&gt;
+&lt;li&gt;Shape function plots that show how each variable influences risk across its entire range of values.&amp;nbsp;&lt;/li&gt;
+
+
+
+&lt;li&gt;Feature importance rankings that identify which factors most strongly drive each competing outcome&lt;/li&gt;
+&lt;/ol&gt;
+
+
+
+&lt;p&gt;This transparency allows clinicians to understand not just who is at high risk, but why the model reaches that conclusion, making the predictions actionable and verifiable against clinical knowledge.&lt;/p&gt;
+
+
+
+&lt;div style="height:4em" aria-hidden="true" class="wp-block-spacer"&gt;&lt;/div&gt;
+
+
+
+&lt;h2 class="wp-block-heading" style="margin-top:0px;margin-bottom:0px"&gt;Real-world validation: Diabetic foot complications in Ontario&lt;/h2&gt;
+
+
+
+&lt;div style="height:2em" aria-hidden="true" class="wp-block-spacer"&gt;&lt;/div&gt;
+
+
+
+&lt;h3 class="wp-block-heading" style="margin-top:0px;margin-bottom:0px"&gt;The clinical problem and GEMINI dataset&lt;/h3&gt;
+
+
+
+&lt;p&gt;The researchers applied CRISPNAM-FG to predict future diabetic foot complications after hospital discharge, using data from over 100,000 patients across 29 hospitals in Ontario. Foot complications are treated as the primary outcome, with in-hospital death modeled as a competing risk.&lt;/p&gt;
+
+
+
+&lt;p&gt;The dataset, obtained from GEMINI, included all adult patients with diabetes discharged home between April 2016 and March 2023. A foot complication was defined as the first hospitalization for foot ulcer, infection, gangrene, or amputation. After applying exclusion criteria, the final cohort comprised 107,386 patients.Patient characteristics included a median age of 72.0 years, with 46.2% female patients. The cohort had significant comorbidity burden, with 39.8% having a Charlson Comorbidity Index&lt;sup&gt;&lt;a href="https://vectorinstitute.ai/crispnam-fg-interpretable-competing-risks-survival-analysis-healthcare/#notes"&gt;1&lt;/a&gt;&lt;/sup&gt; of 1, and 28.4% having an index of 2 or higher.&lt;/p&gt;
+
+
+
+&lt;div style="height:2em" aria-hidden="true" class="wp-block-spacer"&gt;&lt;/div&gt;
+
+
+
+&lt;h3 class="wp-block-heading" style="margin-top:0px;margin-bottom:0px"&gt;Model performance&lt;/h3&gt;
+
+
+
+&lt;p&gt;CRISPNAM-FG demonstrated strong discriminative performance on the GEMINI dataset, achieving competitive results compared to existing deep competing risks models. We evaluated the model using two standard measures. TD-AUC (time-dependent area under the curve) measures how well the model distinguishes between patients who will and won&amp;#8217;t experience an event by a given time point, with values closer to 1.0 indicating better discrimination. TD-CI (time-dependent concordance index) similarly assesses whether the model correctly ranks patients by their risk, with higher values indicating more accurate risk ordering.&lt;/p&gt;
+
+
+
+&lt;p&gt;For foot complications (Risk 1), the model achieved TD-AUC values of 0.766 ± 0.042 at the 25th percentile, 0.763 ± 0.047 at the median, and 0.763 ± 0.052 at the 75th percentile. For the competing mortality risk (Risk 2), TD-AUC values were 0.739 ± 0.057, 0.726 ± 0.058, and 0.707 ± 0.060 across the same percentiles.&lt;/p&gt;
+
+
+
+&lt;p&gt;The model demonstrated strong discriminative performance compared to existing deep competing risks models, while producing clinically coherent risk patterns that align with medical knowledge.&lt;/p&gt;
+
+
+
+&lt;div style="height:2em" aria-hidden="true" class="wp-block-spacer"&gt;&lt;/div&gt;
+
+
+
+&lt;h3 class="wp-block-heading" style="margin-top:0px;margin-bottom:0px"&gt;Clinical insights from interpretable shape functions&lt;/h3&gt;
+
+
+
+&lt;p&gt;Shape functions are the core interpretability mechanism in CRISPNAM-FG. These are learned curves that show how each individual feature influences the model&amp;#8217;s prediction across its range of values. Unlike traditional linear models where each feature has a single coefficient, shape functions can capture non-linear relationships. For example, they might show that risk increases slowly at low HbA1c levels but accelerates rapidly at higher values. Each feature gets its own shape function, and the final prediction is simply the sum of all these individual feature contributions. This additive structure is what makes CRISPNAM-FG interpretable: clinicians can examine each shape function independently to understand exactly how the model uses each variable to calculate risk.&lt;/p&gt;
+
+
+
+&lt;div style="height:2em" aria-hidden="true" class="wp-block-spacer"&gt;&lt;/div&gt;
+
+
+
+&lt;figure class="wp-block-image size-large"&gt;&lt;img loading="lazy" decoding="async" width="808" height="1024" src="https://vectorinstitute.ai/wp-content/uploads/2026/02/averaged_shape_functions_across_folds-808x1024.png" alt="" class="wp-image-25705" srcset="https://vectorinstitute.ai/wp-content/uploads/2026/02/averaged_shape_functions_across_folds-808x1024.png 808w, https://vectorinstitute.ai/wp-content/uploads/2026/02/averaged_shape_functions_across_folds-237x300.png 237w, https://vectorinstitute.ai/wp-content/uploads/2026/02/averaged_shape_functions_across_folds-768x973.png 768w, https://vectorinstitute.ai/wp-content/uploads/2026/02/averaged_shape_functions_across_folds-1212x1536.png 1212w, https://vectorinstitute.ai/wp-content/uploads/2026/02/averaged_shape_functions_across_folds-1616x2048.png 1616w, https://vectorinstitute.ai/wp-content/uploads/2026/02/averaged_shape_functions_across_folds-scaled.png 2021w" sizes="auto, (max-width: 808px) 100vw, 808px" /&gt;&lt;/figure&gt;
+
+
+
+&lt;div style="height:2em" aria-hidden="true" class="wp-block-spacer"&gt;&lt;/div&gt;
+
+
+
+&lt;p&gt;The shape functions computed from the trained CRISPNAM-FG model on the GEMINI dataset revealed clinically meaningful and sometimes counterintuitive patterns that demonstrate the model&amp;#8217;s ability to capture complex clinical relationships:&lt;/p&gt;
+
+
+
+&lt;ul class="wp-block-list"&gt;
+&lt;li&gt;&lt;strong&gt;Glycemic control (HbA1c)&lt;/strong&gt;: The shape functions show a fascinating pattern where higher HbA1c values increase foot complication risk as expected, but actually decrease mortality risk. This counterintuitive finding demonstrates the model&amp;#8217;s ability to reveal complex clinical relationships, specifically that of patients with poor glycemic control may be more likely to develop foot complications before experiencing fatal events.&lt;br&gt;&lt;/li&gt;
+
+
+
+&lt;li&gt;&lt;strong&gt;Cardiovascular comorbidities&lt;/strong&gt;: The presence of coronary artery disease shows increased contribution to foot complication risk, consistent with established medical knowledge about the relationship between cardiovascular disease and diabetic complications. Congestive heart failure (CHF) demonstrates an increasing contribution to both foot complications and mortality, showing how cardiovascular comorbidities affect multiple outcomes.&lt;br&gt;&lt;/li&gt;
+
+
+
+&lt;li&gt;&lt;strong&gt;Peripheral vascular disease&lt;/strong&gt;: The shape functions show a strong, almost linear increase in foot complication risk with peripheral artery disease, while showing minimal impact on mortality risk. This aligns perfectly with clinical understanding that peripheral vascular disease directly affects limb perfusion and wound healing.&lt;br&gt;&lt;/li&gt;
+
+
+
+&lt;li&gt;&lt;strong&gt;Age patterns&lt;/strong&gt;: Age exhibited distinct patterns for the two outcomes. The risk contribution for foot complications increases until approximately 60 years before declining, whereas mortality risk increases monotonically with age. This divergence after age 60 likely reflects competing risks, where older patients succumb to systemic complications before developing foot-specific problems.&lt;br&gt;&lt;/li&gt;
+
+
+
+&lt;li&gt;&lt;strong&gt;Nutritional status (Albumin)&lt;/strong&gt;: Lower albumin levels contribute to both risks, but the relationship is more pronounced for mortality risk, reflecting the known association between hypoalbuminemia and poor outcomes. The shape functions show albumin&amp;#8217;s protective effect diminishing as levels drop below normal ranges.&lt;br&gt;&lt;/li&gt;
+
+
+
+&lt;li&gt;&lt;strong&gt;Disease-specific effects&lt;/strong&gt;: The model correctly identified that chronic obstructive pulmonary disease (COPD) does not contribute substantially to foot complication risk but significantly increases mortality risk. Similarly, malignancy showed stronger association with mortality than with foot complications. These distinctions are essential for appropriate post-discharge planning.&lt;br&gt;&lt;/li&gt;
+
+
+
+&lt;li&gt;&lt;strong&gt;Missing data patterns&lt;/strong&gt;: Missing values for creatinine and albumin indicated selective test ordering, where clinicians did not order these tests in the absence of clinical suspicion for renal dysfunction or hypoalbuminemia-related complications.&lt;/li&gt;
+&lt;/ul&gt;
+
+
+
+&lt;div style="height:4em" aria-hidden="true" class="wp-block-spacer"&gt;&lt;/div&gt;
+
+
+
+&lt;h2 class="wp-block-heading" style="margin-top:0px;margin-bottom:0px"&gt;Supporting preventive care and resource allocation&lt;/h2&gt;
+
+
+
+&lt;p&gt;CRISPNAM-FG is designed specifically to support preventive care and resource allocation. By identifying patients at high risk of foot complications, health systems can prioritize early screening, outpatient follow-up, and multidisciplinary interventions that are known to reduce amputations and downstream costs.&lt;/p&gt;
+
+
+
+&lt;p&gt;Because the model is interpretable, its outputs can be reviewed, audited, and communicated to clinicians, patients, and policymakers. The transparency enables health care providers to understand not just which patients are at risk, but why they are at risk and which specific factors drive their elevated risk profile.&lt;/p&gt;
+
+
+
+&lt;p&gt;This interpretability is crucial for clinical adoption because clinicians can validate the model&amp;#8217;s reasoning against their clinical experience and use the detailed risk attribution to guide targeted interventions. For instance, a patient flagged primarily for poor glycemic control would benefit from different interventions than one flagged for vascular disease.&lt;/p&gt;
+
+
+
+&lt;div style="height:4em" aria-hidden="true" class="wp-block-spacer"&gt;&lt;/div&gt;
+
+
+
+&lt;h2 class="wp-block-heading" style="margin-top:0px;margin-bottom:0px"&gt;Model advantages and limitations&lt;/h2&gt;
+
+
+
+&lt;p&gt;CRISPNAM-FG provides several key advantages over existing approaches:&lt;/p&gt;
+
+
+
+&lt;ol class="wp-block-list"&gt;
+&lt;li&gt;&lt;strong&gt;Intrinsic interpretability&lt;/strong&gt;: Unlike black-box models, CRISPNAM-FG provides transparent reasoning through shape functions and feature importance plots that show exactly how each feature contributes to each competing risk.&lt;br&gt;&lt;/li&gt;
+
+
+
+&lt;li&gt;&lt;strong&gt;Risk-specific insights&lt;/strong&gt;: The model enables the same variable to have different effects on different outcomes, revealing complex clinical relationships that would be obscured in single-outcome models.&lt;br&gt;&lt;/li&gt;
+
+
+
+&lt;li&gt;&lt;strong&gt;Clinical coherence&lt;/strong&gt;: The shape functions produce clinically meaningful patterns that align with established medical knowledge while revealing new insights about risk interactions.&lt;br&gt;&lt;/li&gt;
+
+
+
+&lt;li&gt;&lt;strong&gt;Individual-level transparency&lt;/strong&gt;: The model enables understanding of feature contributions for individual patients, not just global feature importance.&lt;br&gt;&lt;/li&gt;
+&lt;/ol&gt;
+
+
+
+&lt;p&gt;We do acknowledge that our model does not capture feature-level interactions beyond additive effects, which may limit its ability to model complex relationships. Additionally, while discrimination performance is competitive, the model&amp;#8217;s calibration performance lags behind some alternatives like DeepHit.&lt;/p&gt;
+
+
+
+&lt;div style="height:4em" aria-hidden="true" class="wp-block-spacer"&gt;&lt;/div&gt;
+
+
+
+&lt;h2 class="wp-block-heading" style="margin-top:0px;margin-bottom:0px"&gt;Real-world implementation pathway&lt;/h2&gt;
+
+
+
+&lt;p&gt;While CRISPNAM-FG has been evaluated using retrospective data and has not yet been deployed in routine clinical practice, this work builds on the team&amp;#8217;s proven track record in clinical implementation. As part of the same broader initiative, the research team has previously deployed an earlier Fine-Gray subdistribution model at St Michael&amp;#8217;s Hospital.&lt;/p&gt;
+
+
+
+&lt;p&gt;This implementation experience demonstrates the practical feasibility of interpretable survival models in real-world clinical settings and provides a pathway for scaling CRISPNAM-FG to broader health care applications.&lt;/p&gt;
+
+
+
+&lt;div style="height:4em" aria-hidden="true" class="wp-block-spacer"&gt;&lt;/div&gt;
+
+
+
+&lt;h2 class="wp-block-heading" style="margin-top:0px;margin-bottom:0px"&gt;Conclusions and future directions&lt;/h2&gt;
+
+
+
+&lt;p&gt;The researchers demonstrate that it is possible to achieve competitive predictive performance in competing risks survival analysis without sacrificing interpretability. CRISPNAM-FG offers a transparent, clinically aligned approach to risk prediction that is well suited for real-world health care deployment and population-level decision-making.&lt;/p&gt;
+
+
+
+&lt;p&gt;The model produces competitive discrimination scores while providing transparency through shape functions that reveal detailed feature contributions to each risk. The application to diabetic foot complications shows the model&amp;#8217;s practical utility in real-world health care scenarios, revealing clinically meaningful insights about risk factors and their differential impacts on competing outcomes.&lt;/p&gt;
+
+
+
+&lt;p&gt;Future research directions include investigating temporal feature networks that can capture time-varying feature contributions for each risk and developing improved loss functions to enhance the model&amp;#8217;s calibration performance.&lt;/p&gt;
+
+
+
+&lt;p&gt;The core value proposition for health care applications is the inherent interpretability that enables clinicians to understand, validate, and trust model predictions which is a crucial requirement for safe and effective AI integration in clinical practice. Through this collaborative effort between Vector Institute, GEMINI, and Diabetes Action Canada, the research team has demonstrated that the future of health care AI lies not in choosing between accuracy and interpretability, but in architecting both into unified, clinically valuable systems.&lt;/p&gt;
+
+
+
+&lt;div style="height:4em" aria-hidden="true" class="wp-block-spacer"&gt;&lt;/div&gt;
+
+
+      &lt;div class="acf-block acf-block-block_379d2e1264a44571a6fa783de3ac1482 acf-block-call-to-action alignwide"&gt;
+      &lt;div class="cta cta--bottom-right desktop-d-flex desktop-d-flex--y-center desktop-p-l-4"&gt;
+                  &lt;img decoding="async" class="cta__background-image" src="https://vectorinstitute.ai/wp-content/uploads/2026/03/new-cta-bg-01-1600x0-c-default.jpg" alt="" /&gt;
+        
+        
+                  &lt;div class="cta__pixels cta__pixels--bottom-right mobile-d-none"&gt;
+            &lt;svg width="416" height="256" viewBox="0 0 416 256" fill="none" xmlns="http://www.w3.org/2000/svg"&gt;
+              &lt;path d="M32 160L32 192L1.90735e-06 192L2.66249e-07 160L32 160Z" fill="white"/&gt;
+              &lt;path d="M64 128L64 160L32 160L32 128L64 128Z" fill="white"/&gt;
+              &lt;path d="M128 128L128 160L96 160L96 128L128 128Z" fill="white"/&gt;
+              &lt;path d="M160 128L160 160L128 160L128 128L160 128Z" fill="white"/&gt;
+              &lt;path d="M192 160L192 192L160 192L160 160L192 160Z" fill="white"/&gt;
+              &lt;path d="M256 192L256 224L224 224L224 192L256 192Z" fill="white"/&gt;
+              &lt;path d="M288 160L288 192L256 192L256 160L288 160Z" fill="white"/&gt;
+              &lt;path d="M320 224L320 256L288 256L288 224L320 224Z" fill="white"/&gt;
+              &lt;path d="M352 192L352 224L320 224L320 192L352 192Z" fill="white"/&gt;
+              &lt;path d="M384 224L384 256L352 256L352 224L384 224Z" fill="white"/&gt;
+              &lt;path d="M416 192L416 224L384 224L384 192L416 192Z" fill="white"/&gt;
+              &lt;path d="M288 128L288 160L256 160L256 128L288 128Z" fill="white"/&gt;
+              &lt;path d="M320 128L320 160L288 160L288 128L320 128Z" fill="white"/&gt;
+              &lt;path d="M320 96L320 128L288 128L288 96L320 96Z" fill="white"/&gt;
+              &lt;path d="M352 64L352 96L320 96L320 64L352 64Z" fill="white"/&gt;
+              &lt;path d="M256 128L256 160L224 160L224 128L256 128Z" fill="white"/&gt;
+              &lt;path d="M256 96L256 128L224 128L224 96L256 96Z" fill="white"/&gt;
+              &lt;path d="M288 64L288 96L256 96L256 64L288 64Z" fill="white"/&gt;
+              &lt;path d="M160 192L160 224L128 224L128 192L160 192Z" fill="white"/&gt;
+              &lt;path d="M160 224L160 256L128 256L128 224L160 224Z" fill="white"/&gt;
+              &lt;path d="M192 224L192 256L160 256L160 224L192 224Z" fill="white"/&gt;
+              &lt;path d="M128 224L128 256L96 256L96 224L128 224Z" fill="white"/&gt;
+              &lt;path d="M128 96L128 128L96 128L96 96L128 96Z" fill="white"/&gt;
+              &lt;path d="M192 64L192 96L160 96L160 64L192 64Z" fill="white"/&gt;
+              &lt;path d="M224 32L224 64L192 64L192 32L224 32Z" fill="white"/&gt;
+              &lt;path d="M256 0L256 32L224 32L224 1.1936e-06L256 0Z" fill="white"/&gt;
+              &lt;path d="M96 96L96 128L64 128L64 96L96 96Z" fill="white"/&gt;
+              &lt;path d="M96 160L96 192L64 192L64 160L96 160Z" fill="white"/&gt;
+            &lt;/svg&gt;
+          &lt;/div&gt;
+        
+        &lt;div class="cta__content-container"&gt;
+          &lt;div class="cta__content"&gt;
+                                          &lt;article class="cta__text-container"&gt;
+                  &lt;h2&gt;Created by AI, edited by humans, about AI&lt;/h2&gt;
+&lt;p&gt;This blog post is part of our &amp;#8216;ANDERS &amp;#8211; AI Noteworthy Developments Explained &amp;amp; Research Simplified&amp;#8217; series. Here we utilize AI Agents to create initial drafts from research papers, which are then carefully edited and refined by our humans. The goal is to bring you clear, concise explanations of cutting-edge research conducted by Vector researchers. Through ANDERS, we strive to bridge the gap between complex scientific advancements and everyday understanding, highlighting why these developments are important and how they impact our world.&lt;/p&gt;
+
+                &lt;/article&gt;
+                          
+                                          &lt;div class="cta__button-container"&gt;
+                  &lt;a class="button-link button-link--white" href="https://arxiv.org/abs/2511.12409" target="_blank"&gt;Read the full paper&lt;/a&gt;
+                &lt;/div&gt;
+                          
+                                                &lt;/div&gt;
+        &lt;/div&gt;
+      &lt;/div&gt;
+    &lt;/div&gt;
+  
+
+
+&lt;div style="height:4em" aria-hidden="true" class="wp-block-spacer"&gt;&lt;/div&gt;
+
+
+    &lt;div class="acf-block acf-block-block_d69878363726cf9b1b3c93e74426b27d acf-block-separator separator"&gt;
+      &lt;div class="separator__bar" style="background-color: #E00087"&gt;&lt;/div&gt;
+    &lt;/div&gt;
+
+
+
+&lt;div style="height:2em" aria-hidden="true" class="wp-block-spacer"&gt;&lt;/div&gt;
+
+
+
+&lt;h2 class="wp-block-heading has-h-3-font-size" id="notes" style="margin-top:0px;margin-bottom:0px"&gt;Additional notes&lt;/h2&gt;
+
+
+
+&lt;p&gt;&lt;sup&gt;1&lt;/sup&gt; Charlson Comorbidity Index is a scoring system that quantifies a patient&amp;#8217;s overall disease burden by assigning points for the presence of specific chronic conditions (like diabetes, heart disease, or cancer), with higher scores indicating more severe comorbidity and greater health risk.&lt;/p&gt;
+
+
+
+&lt;div style="height:4em" aria-hidden="true" class="wp-block-spacer"&gt;&lt;/div&gt;
+&lt;p&gt;The post &lt;a href="https://vectorinstitute.ai/crispnam-fg-interpretable-competing-risks-survival-analysis-healthcare/"&gt;CRISPNAM-FG: An interpretable Fine-Gray deep survival model for competing risks in health care&lt;/a&gt; appeared first on &lt;a href="https://vectorinstitute.ai"&gt;Vector Institute for Artificial Intelligence&lt;/a&gt;.&lt;/p&gt;
+</content:encoded>
+					
+		
+		<enclosure url="https://vectorinstitute.ai/wp-content/uploads/2026/02/ANDERS-CRISPNAM-FG.mp3" length="3169845" type="audio/mpeg" />
+
+			</item>
+		</channel>
+</rss>

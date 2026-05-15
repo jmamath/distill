@@ -1,0 +1,34 @@
+<rss xmlns:atom="http://www.w3.org/2005/Atom" version="2.0">
+    <channel>
+        <title>OpenAI News</title>
+        <description>The OpenAI blog</description>
+        <link>https://openai.com/news</link>
+        <generator>OpenAI</generator>
+        <lastBuildDate>Mon, 27 Apr 2026 17:05:08 GMT</lastBuildDate>
+        <atom:link href="https://openai.com/news/rss" rel="self" type="application/rss+xml" />
+        <item>
+            <title>The next phase of the Microsoft OpenAI partnership</title>
+            <description>OpenAI and Microsoft announce an amended agreement that simplifies the partnership, adds long-term clarity, and supports continued AI innovation at scale.</description>
+            <link>https://openai.com/index/next-phase-of-microsoft-partnership</link>
+            <guid isPermaLink="true">https://openai.com/index/next-phase-of-microsoft-partnership</guid>
+            <category>Company</category>
+            <pubDate>Mon, 27 Apr 2026 06:00:00 GMT</pubDate>
+        </item>
+        <item>
+            <title>Our principles</title>
+            <description>Our mission is to ensure that AGI benefits all of humanity. Sam Altman shares five principles that guide our work.</description>
+            <link>https://openai.com/index/our-principles</link>
+            <guid isPermaLink="true">https://openai.com/index/our-principles</guid>
+            <category>Company</category>
+            <pubDate>Sun, 26 Apr 2026 16:00:00 GMT</pubDate>
+        </item>
+        <item>
+            <title>Introducing GPT-5.5</title>
+            <description>Introducing GPT-5.5, our smartest model yet—faster, more capable, and built for complex tasks like coding, research, and data analysis across tools.</description>
+            <link>https://openai.com/index/introducing-gpt-5-5</link>
+            <guid isPermaLink="true">https://openai.com/index/introducing-gpt-5-5</guid>
+            <category>Product</category>
+            <pubDate>Thu, 23 Apr 2026 11:00:00 GMT</pubDate>
+        </item>
+        </channel>
+</rss>
