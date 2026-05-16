@@ -84,7 +84,7 @@ data/
 
 docs/
   research_briefing_architecture.md  ← Core architecture (authoritative)
-  15_knowledge_management_briefing_engine.md  ← Implementation plan
+  planning/                     ← Task plans (backlog / doing / done)
   specs/                      ← Task specs (.test.md files)
   diagrams/                   ← Architecture flow diagrams
 ```
