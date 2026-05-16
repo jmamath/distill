@@ -18,11 +18,16 @@ Blog fixtures (LabBlogAdapter) — one per confirmed feed in topic.md:
   fixtures/gradient_blog.xml     — https://thegradient.pub/rss/                               (3 items, dc:creator + content:encoded)
   fixtures/vector_institute.xml  — https://vectorinstitute.ai/feed/                           (3 items, dc:creator + content:encoded)
 
+Full-text fixtures (fetch_full_text):
+  fixtures/arxiv_paper.pdf        — https://arxiv.org/pdf/2404.01230   (real PDF, offline tests)
+  fixtures/lab_blog_article.html  — https://huggingface.co/blog/smollm (real HTML, offline tests)
+
 Run from the project root with the virtualenv active:
     source .venv/bin/activate
     PYTHONPATH=src pytest tests/test_source_adapters.py
 """
 
+import urllib.request
 from pathlib import Path
 
 import pytest
@@ -170,7 +175,7 @@ def test_normalized_item_shape_matches():
     assert set(NormalizedItem.model_fields) == {
         "source_id", "source_type", "title", "url",
         "published_at", "authors", "publisher",
-        "summary", "metadata",
+        "summary", "metadata", "full_text_fetched",
     }
 
 
@@ -334,6 +339,9 @@ def test_extensibility_third_adapter():
         def parse(self, raw: bytes) -> list[NormalizedItem]:
             return []
 
+        def fetch_full_text(self, url: str) -> bytes:
+            return b""
+
     _sources_module._REGISTRY["test_source"] = TestAdapter
 
     try:
@@ -377,3 +385,145 @@ def test_lab_blog_parse_rejects_malformed_xml():
     """
     with pytest.raises(ValueError, match="not valid XML"):
         LabBlogAdapter().parse(b"<broken>")
+
+
+# ---------------------------------------------------------------------------
+# 12. fetch_full_text — ArxivAdapter returns PDF bytes
+# ---------------------------------------------------------------------------
+
+
+def test_arxiv_fetch_full_text_returns_pdf(monkeypatch):
+    """ArxivAdapter.fetch_full_text returns raw PDF bytes from the fixture.
+
+    > **Why:** If the PDF fetch is broken, pass-2 scoring has no document to
+    read — every arXiv paper is silently dropped from the signal file output.
+    """
+    pdf_bytes = (_FIXTURES / "arxiv_paper.pdf").read_bytes()
+
+    def _fake_urlopen(req, timeout=60):
+        import io
+        class _Resp:
+            def read(self):
+                return pdf_bytes
+            def __enter__(self):
+                return self
+            def __exit__(self, *_):
+                pass
+        return _Resp()
+
+    monkeypatch.setattr(urllib.request, "urlopen", _fake_urlopen)
+
+    result = ArxivAdapter().fetch_full_text("https://arxiv.org/abs/2404.01230")
+
+    assert result[:4] == b"%PDF", "fetch_full_text must return raw PDF bytes"
+    assert len(result) > 1000, "PDF should be non-trivially sized"
+
+
+# ---------------------------------------------------------------------------
+# 13. fetch_full_text — ArxivAdapter extracts ID from URL correctly
+# ---------------------------------------------------------------------------
+
+
+def test_arxiv_fetch_full_text_constructs_pdf_url(monkeypatch):
+    """ArxivAdapter.fetch_full_text converts abs URL to the correct pdf URL.
+
+    > **Why:** If the URL construction is wrong, every fetch hits a 404 and
+    every paper is dropped from pass-2 without a clear error.
+    """
+    captured = {}
+
+    def _fake_urlopen(req, timeout=60):
+        captured["url"] = req.full_url
+        import io
+        class _Resp:
+            def read(self):
+                return b"%PDF-fake"
+            def __enter__(self):
+                return self
+            def __exit__(self, *_):
+                pass
+        return _Resp()
+
+    monkeypatch.setattr(urllib.request, "urlopen", _fake_urlopen)
+
+    ArxivAdapter().fetch_full_text("https://arxiv.org/abs/2404.01230")
+
+    assert captured["url"] == "https://arxiv.org/pdf/2404.01230"
+
+
+# ---------------------------------------------------------------------------
+# 14. fetch_full_text — ArxivAdapter raises RuntimeError on bad URL
+# ---------------------------------------------------------------------------
+
+
+def test_arxiv_fetch_full_text_raises_on_bad_url():
+    """ArxivAdapter.fetch_full_text raises RuntimeError for unrecognised URLs.
+
+    > **Why:** A silent failure here would produce a NormalizedItem with no
+    full text, which would flow into pass-2 and produce a vacuous signal file.
+    """
+    with pytest.raises(RuntimeError, match="Cannot extract arXiv ID"):
+        ArxivAdapter().fetch_full_text("https://example.com/not-an-arxiv-url")
+
+
+# ---------------------------------------------------------------------------
+# 15. fetch_full_text — LabBlogAdapter returns HTML-stripped plain text
+# ---------------------------------------------------------------------------
+
+
+def test_lab_blog_fetch_full_text_returns_plain_text(monkeypatch):
+    """LabBlogAdapter.fetch_full_text returns HTML-stripped UTF-8 bytes.
+
+    > **Why:** If HTML tags leak into the plain-text payload, the LLM receives
+    noisy markup instead of readable prose — scoring quality degrades silently.
+    """
+    html_bytes = (_FIXTURES / "lab_blog_article.html").read_bytes()
+
+    def _fake_urlopen(req, timeout=30):
+        class _Resp:
+            def read(self):
+                return html_bytes
+            def __enter__(self):
+                return self
+            def __exit__(self, *_):
+                pass
+        return _Resp()
+
+    monkeypatch.setattr(urllib.request, "urlopen", _fake_urlopen)
+
+    result = LabBlogAdapter().fetch_full_text("https://huggingface.co/blog/smollm")
+
+    assert isinstance(result, bytes)
+    text = result.decode("utf-8")
+    assert "<" not in text, "HTML tags must be stripped from plain-text output"
+    assert len(text) > 100, "Stripped text should contain meaningful content"
+
+
+# ---------------------------------------------------------------------------
+# 16. fetch_full_text — mime types are declared correctly
+# ---------------------------------------------------------------------------
+
+
+def test_full_text_mime_types():
+    """Each adapter declares the correct full_text_mime_type class attribute.
+
+    > **Why:** The wrong MIME type causes the google.genai API call in pass-2
+    to reject the upload — the item is silently dropped from signal output.
+    """
+    assert ArxivAdapter.full_text_mime_type == "application/pdf"
+    assert LabBlogAdapter.full_text_mime_type == "text/plain"
+
+
+# ---------------------------------------------------------------------------
+# 17. full_text_fetched defaults False on NormalizedItem
+# ---------------------------------------------------------------------------
+
+
+def test_normalized_item_full_text_fetched_defaults_false():
+    """NormalizedItem.full_text_fetched defaults to False on construction.
+
+    > **Why:** If the default were True, pass-2 would skip re-fetching items
+    that haven't actually been fetched, and write signal files with no content.
+    """
+    item = ArxivAdapter().parse((_FIXTURES / "arxiv_cs_ai.xml").read_bytes())[0]
+    assert item.full_text_fetched is False

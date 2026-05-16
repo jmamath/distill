@@ -33,6 +33,7 @@ class NormalizedItem(BaseModel):
     publisher: str | None = None  # publishing org (labs, blog channels)
     summary: str
     metadata: dict = {}        # verbatim source-specific fields
+    full_text_fetched: bool = False
 
 
 class SourceAdapter(ABC):
@@ -44,6 +45,7 @@ class SourceAdapter(ABC):
     """
 
     raw_extension: str = ".bin"
+    full_text_mime_type: str = "application/octet-stream"
 
     @abstractmethod
     def source_id(self) -> str:
@@ -84,5 +86,20 @@ class SourceAdapter(ABC):
 
         Raises:
             ValueError: if the payload is malformed or cannot be parsed.
+        """
+        ...
+
+    @abstractmethod
+    def fetch_full_text(self, url: str) -> bytes:
+        """Fetch the full text of a single item by its URL.
+
+        Args:
+            url: The canonical item URL (abstract page, blog post, etc.).
+
+        Returns:
+            Raw bytes whose MIME type matches `full_text_mime_type`.
+
+        Raises:
+            RuntimeError: if the fetch fails.
         """
         ...

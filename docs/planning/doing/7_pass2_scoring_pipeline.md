@@ -13,6 +13,8 @@ Three tightly sequential sub-tasks that together deliver one complete deliverabl
 
 ## Sub-task A — Full-Text Adapter Extension
 
+**Status: passed** — 27 tests passing as of 2026-05-16.
+
 **Depends on:** Plan 4 source adapter contract. Self-contained extension with no dependency on scoring or credibility.
 
 ### Changes

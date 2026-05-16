@@ -40,9 +40,40 @@ class ArxivAdapter(SourceAdapter):
     """Adapter for arXiv papers via the category RSS feed."""
 
     raw_extension = ".xml"
+    full_text_mime_type = "application/pdf"
 
     def source_id(self) -> str:
         return "arxiv"
+
+    def fetch_full_text(self, url: str) -> bytes:
+        """Fetch the PDF for an arXiv paper by its abstract page URL.
+
+        Converts the abstract URL (https://arxiv.org/abs/<id>) to the
+        corresponding PDF URL (https://arxiv.org/pdf/<id>) and downloads it.
+
+        Args:
+            url: arXiv abstract page URL, e.g. "https://arxiv.org/abs/2404.01234"
+
+        Returns:
+            Raw PDF bytes (begins with b"%PDF").
+
+        Raises:
+            RuntimeError: if the arXiv ID cannot be extracted or the fetch fails.
+        """
+        match = re.search(r"arxiv\.org/(?:abs|pdf)/([^\s/?#]+)", url)
+        if not match:
+            raise RuntimeError(f"Cannot extract arXiv ID from URL: {url!r}")
+        arxiv_id = match.group(1)
+        pdf_url = f"https://arxiv.org/pdf/{arxiv_id}"
+        logger.info("Fetching arXiv PDF: %s", pdf_url)
+        try:
+            req = urllib.request.Request(
+                pdf_url, headers={"User-Agent": "SonarynResearch/1.0"}
+            )
+            with urllib.request.urlopen(req, timeout=60) as resp:
+                return resp.read()
+        except Exception as exc:
+            raise RuntimeError(f"arXiv PDF fetch failed for {pdf_url!r}: {exc}") from exc
 
     def fetch(self, query_params: dict) -> bytes:
         """Fetch RSS XML from an arXiv category feed.

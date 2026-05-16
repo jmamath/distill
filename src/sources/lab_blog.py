@@ -28,9 +28,36 @@ class LabBlogAdapter(SourceAdapter):
     """Adapter for lab and engineering blog sources via RSS 2.0."""
 
     raw_extension = ".xml"
+    full_text_mime_type = "text/plain"
 
     def source_id(self) -> str:
         return "lab_blog"
+
+    def fetch_full_text(self, url: str) -> bytes:
+        """Fetch the full text of a blog article by its URL.
+
+        Fetches the article HTML, strips all tags via `_strip_html`, and
+        returns the result as UTF-8 encoded plain text.
+
+        Args:
+            url: The canonical blog post URL.
+
+        Returns:
+            UTF-8 encoded plain text bytes with no HTML tags.
+
+        Raises:
+            RuntimeError: if the HTTP request fails.
+        """
+        logger.info("Fetching lab blog article: %s", url)
+        try:
+            req = urllib.request.Request(
+                url, headers={"User-Agent": "SonarynResearch/1.0"}
+            )
+            with urllib.request.urlopen(req, timeout=30) as resp:
+                html = resp.read().decode("utf-8", errors="replace")
+        except Exception as exc:
+            raise RuntimeError(f"Lab blog full-text fetch failed for {url!r}: {exc}") from exc
+        return _strip_html(html).encode("utf-8")
 
     def fetch(self, query_params: dict) -> bytes:
         """Fetch RSS XML from a blog feed URL.
