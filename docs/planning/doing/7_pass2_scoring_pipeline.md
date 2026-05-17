@@ -135,8 +135,14 @@ Wire together full-text fetch, LLM scoring, deterministic credibility and freshn
 
 | File | Action | Description |
 |---|---|---|
-| `src/topics/scoring.py` | **UPDATE** | Add `pass2_score(items: list[tuple[NormalizedItem, AbstractScore]], topic_config: TopicConfig, topic_dir: Path, adapter: SourceAdapter) → list[Path]`; fetches full text, scores via LLM, computes credibility and freshness deterministically, writes signal files |
+| `src/topics/scoring.py` | **UPDATE** | Add `load_theme_definitions(themes_dir: Path) → dict[str, str]` helper; add `pass2_score(items: list[tuple[NormalizedItem, AbstractScore]], topic_config: TopicConfig, topic_dir: Path, adapter: SourceAdapter) → list[Path]`; fetches full text, scores via LLM, computes credibility and freshness deterministically, writes signal files |
 | `tests/test_topic_scoring_pass2.py` | **NEW** | Fixture pass-1 items → written signal files; verify schema; verify `full_text_fetched: true`; verify idempotency on re-run; verify `fetch_full_text` failure drops the item; verify credibility and freshness values in written frontmatter |
+
+### Theme definitions loader
+
+`load_theme_definitions(themes_dir: Path) → dict[str, str]`
+
+Reads every `*.md` file in `themes_dir`, parses its frontmatter via `ThemeFrontmatter`, and returns `{theme_id: description}`. This dict is passed as-is to `build_pass2_prompt` — descriptions only, no bodies. Called once per `pass2_score` invocation before the per-item loop.
 
 ### Pass-2 mechanics
 
