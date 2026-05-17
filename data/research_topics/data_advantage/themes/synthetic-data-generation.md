@@ -1,8 +1,10 @@
 ---
 id: synthetic-data-generation
 name: Synthetic Data Generation
-description: Model-generated training data for distillation, instruction tuning, textbook-style
-  pretraining, and reasoning-trace transfer.
+description: >
+  Using model-generated data to train better models, including distillation,
+  self-instruct pipelines, textbook-style synthesis, and reasoning-trace
+  generation. Includes both the methods and the resulting corpora.
 origin: bootstrap
 novelty_status: globally_novel
 key_entity_ids:

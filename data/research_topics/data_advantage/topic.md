@@ -89,86 +89,71 @@ blog_feeds:
 taxonomy:
   - id: synthetic-data-generation
     name: Synthetic Data Generation
-    description: >
-      Using model-generated data to train better models, including distillation,
-      self-instruct pipelines, textbook-style synthesis, and reasoning-trace
-      generation. Includes both the methods and the resulting corpora.
+    theme_ref: themes/synthetic-data-generation.md
   - id: quality-filtering-curation
     name: Quality Filtering and Curation
-    description: >
-      Advances in deduplication, quality scoring, contamination control, and
-      data selection that improve training outcomes without requiring more raw
-      data. Includes perplexity filtering, dedup algorithms, and curation
-      pipelines like FineWeb and Dolma.
+    theme_ref: themes/quality-filtering-curation.md
   - id: scale-unlocking-corpora
     name: Scale-Unlocking Corpora
-    description: >
-      Datasets that opened new capability regimes by providing sufficient scale
-      for a training paradigm — Common Crawl for language models, LAION for
-      open diffusion, The Pile and RedPajama for open LLM pretraining.
+    theme_ref: themes/scale-unlocking-corpora.md
   - id: domain-specific-unlocks
     name: Domain-Specific Unlocks
-    description: >
-      Datasets that enable strong performance in a narrow technical domain:
-      The Stack for code, MATH/GSM8K for reasoning, Open X-Embodiment for
-      robotics, PDB for protein structure, domain-specific scientific corpora.
+    theme_ref: themes/domain-specific-unlocks.md
   - id: human-preference-alignment
     name: Human-Preference and Alignment Data
-    description: >
-      Preference datasets collected for RLHF, DPO, and constitutional-AI style
-      training. Includes collection methodology, quality improvements, and the
-      trade-offs between human annotation and AI-generated preference signals.
+    theme_ref: themes/human-preference-alignment.md
   - id: diversity-coverage-expansion
     name: Diversity and Coverage Expansion
-    description: >
-      Multilingual, multimodal, and long-tail corpora that expand model coverage
-      beyond English-centric or modality-limited training regimes. Includes
-      multilingual corpora, interleaved image-text datasets, and audio/video data.
+    theme_ref: themes/diversity-coverage-expansion.md
   - id: annotation-dense-datasets
     name: Annotation-Dense Datasets
-    description: >
-      Datasets with rich structured supervision — dense labels, spatial grounding,
-      task-specific annotations, or multi-step rationales. Value comes from
-      annotation depth, not raw scale.
+    theme_ref: themes/annotation-dense-datasets.md
   - id: provenance-and-licensing
     name: Provenance, Licensing, and Legal-Moat Shifts
-    description: >
-      Changes to data availability, copyright interpretation, robots.txt
-      enforcement, or licensing that affect which corpora can be used or
-      re-released. Includes legal cases, policy shifts, and moat-building moves
-      by labs or data holders.
-scoring_dimensions:
+    theme_ref: themes/provenance-and-licensing.md
+pass1_dimensions:
   - id: topical_relevance
     name: Topical Relevance
     description: >
       Is this signal directly about data as a source of competitive advantage
       in AI? Does it describe a new dataset, collection method, curation
-      advance, or data-licensing shift?
+      advance, or data-licensing shift? Score 10 for pure data contributions:
+      FineWeb (Penedo et al., HuggingFace, 2024) is a 15T-token curated web
+      dataset with a rigorous filtering pipeline — no architecture angle, the
+      entire contribution is about what makes pretraining data competitive.
+      Score low for signals that concern AI broadly but have no data insight:
+      Attention Is All You Need (Vaswani et al., 2017) defines the transformer
+      architecture and has no dataset, no curation method, and no data angle.
+pass2_dimensions:
+  - id: applicability_score
+    name: Applicability (Scale vs Clever)
+    description: >
+      Score on the scale-vs-clever axis: how practical and scalable is this work
+      for industry adoption? Score 10 for methods that are easy to implement and
+      improve monotonically with more compute or data — the kind a competent ML
+      engineer can ship in a sprint (e.g. DPO, LoRA, data deduplication pipelines).
+      Score 0 for work that is mathematically elegant but practically inaccessible:
+      requires specialized expertise, does not scale beyond the lab setting, and is
+      unlikely to see industry adoption regardless of citation count. Neural Ordinary
+      Differential Equations is the canonical 0: best paper at NeurIPS, highly
+      cited, no industry impact. The question is not "is this intellectually
+      interesting?" but "will this still matter as compute and data scale up, and can
+      a team of engineers actually build and ship it?"
   - id: strategic_significance
     name: Strategic Significance
     description: >
-      Does this signal change what teams should build, invest in, or avoid?
-      A technically interesting paper with no allocation implication scores
-      lower here than one that shifts where value accrues.
-  - id: technical_novelty
-    name: Technical Novelty
-    description: >
-      Is this genuinely new — a new method, corpus, or result that did not
-      exist before — or is it incremental over prior work? Incremental signals
-      may still be worth monitoring but should be scored lower than genuine
-      advances.
-  - id: audience_actionability
-    name: Audience Actionability
-    description: >
-      Can a technical decision-maker take a concrete action based on this
-      signal? Recommended actions are: ignore, monitor, prototype, or invest.
-      Signals that cannot be mapped to one of these actions score lower.
-  - id: landscape_fit
-    name: Landscape Fit
-    description: >
-      How does this signal relate to what we already know? Does it confirm an
-      existing theme (replication), extend one in a new direction (adjacent),
-      or represent something we have no good frame for yet (wholly new)?
+      Can this signal create a competitive advantage or penalize a company's
+      market position — whether it is a method paper, dataset release, or
+      regulatory event? Score 10 when the signal shifts competitive dynamics
+      across the industry: Chinchilla (Hoffmann et al., DeepMind, 2022) proved
+      models were undertrained relative to dataset size and every major lab
+      immediately recalibrated their compute-to-data ratio, changing who could
+      train frontier models at a given budget. Score low when practitioners read
+      it, find it interesting, and no company gains or loses ground as a result:
+      SemDeDup (Abbas et al., Meta FAIR, 2023) proposes semantic deduplication
+      as a refinement over exact deduplication — useful, but teams already
+      deduplicating are not meaningfully penalized for not adopting it, and
+      teams that do adopt it gain no decisive edge.
 action_vocabulary:
   - ignore
   - monitor

@@ -85,7 +85,7 @@ class TaxonomyEntry(BaseModel):
 
     id: str
     name: str
-    description: str
+    theme_ref: str | None = None  # e.g. "themes/synthetic-data-generation.md"
 
 
 # ---------------------------------------------------------------------------
@@ -153,8 +153,9 @@ class TopicConfig(BaseModel):
     # Knowledge organisation
     taxonomy: list[TaxonomyEntry] = Field(default_factory=list)
 
-    # Scoring
-    scoring_dimensions: list[ScoringDimension] = Field(default_factory=list)
+    # Scoring rubrics — one set per pass
+    pass1_dimensions: list[ScoringDimension] = Field(default_factory=list)
+    pass2_dimensions: list[ScoringDimension] = Field(default_factory=list)
 
     # Actions
     action_vocabulary: list[ActionLabel] = Field(default_factory=list)

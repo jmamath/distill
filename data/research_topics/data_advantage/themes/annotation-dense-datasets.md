@@ -1,8 +1,10 @@
 ---
 id: annotation-dense-datasets
 name: Annotation-Dense Datasets
-description: Datasets with rich structured supervision (boxes, masks, captions, scene
-  graphs, reasoning traces) that encode priors self-supervision cannot reach efficiently.
+description: >
+  Datasets with rich structured supervision — dense labels, spatial grounding,
+  task-specific annotations, or multi-step rationales. Value comes from
+  annotation depth, not raw scale.
 origin: bootstrap
 novelty_status: globally_novel
 key_entity_ids:

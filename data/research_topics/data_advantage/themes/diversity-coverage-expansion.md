@@ -1,8 +1,10 @@
 ---
 id: diversity-coverage-expansion
 name: Diversity and Coverage Expansion
-description: Multilingual, multimodal, and long-tail corpora that expand the envelope
-  of what models can serve.
+description: >
+  Multilingual, multimodal, and long-tail corpora that expand model coverage
+  beyond English-centric or modality-limited training regimes. Includes
+  multilingual corpora, interleaved image-text datasets, and audio/video data.
 origin: bootstrap
 novelty_status: globally_novel
 key_entity_ids:

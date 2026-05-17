@@ -1,8 +1,10 @@
 ---
 id: scale-unlocking-corpora
 name: Scale-Unlocking Corpora
-description: Datasets whose size and coverage enabled new capability regimes once
-  paired with the right model.
+description: >
+  Datasets that opened new capability regimes by providing sufficient scale
+  for a training paradigm — Common Crawl for language models, LAION for
+  open diffusion, The Pile and RedPajama for open LLM pretraining.
 origin: bootstrap
 novelty_status: globally_novel
 key_entity_ids:

@@ -1,8 +1,10 @@
 ---
 id: domain-specific-unlocks
 name: Domain-Specific Unlocks
-description: Datasets that unlocked strong performance in code, math, robotics, and
-  biology by providing structured supervision unavailable from the web.
+description: >
+  Datasets that enable strong performance in a narrow technical domain:
+  The Stack for code, MATH/GSM8K for reasoning, Open X-Embodiment for
+  robotics, PDB for protein structure, domain-specific scientific corpora.
 origin: bootstrap
 novelty_status: globally_novel
 key_entity_ids:

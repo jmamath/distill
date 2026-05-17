@@ -1,8 +1,11 @@
 ---
 id: quality-filtering-curation
 name: Quality Filtering and Curation
-description: Advances in deduplication, classifier-based filtering, contamination
-  control, and data mixing that extract more capability per token.
+description: >
+  Advances in deduplication, quality scoring, contamination control, and
+  data selection that improve training outcomes without requiring more raw
+  data. Includes perplexity filtering, dedup algorithms, and curation
+  pipelines like FineWeb and Dolma.
 origin: bootstrap
 novelty_status: globally_novel
 key_entity_ids:

@@ -41,6 +41,14 @@ Build the mechanism that turns newly scored signals into updated topic beliefs a
 
 The updater should treat `depends_on` as the canonical first-pass edge field.
 
+### Landscape fit and technical novelty axes
+
+The `replication / adjacent / wholly_new` classification produced by `wiki_updater.py` is the operational form of two scoring concepts:
+
+**Landscape fit** answers "how does this signal relate to what we already know?" Replication confirms an existing theme body with no new information; adjacent extends it in a direction already framed by the topic; wholly new represents something the topic has no prior frame for. This classification is written back to the signal frontmatter as `classification` and drives both theme growth rules (replication → no body growth; adjacent → append block with stable anchor; wholly_new → standalone section) and the output filter in Plan 10 (replication signals are not surfaced as tweet candidates).
+
+**Technical novelty** answers "is this genuinely new — a new method, corpus, or result — or is it incremental over prior work?" This judgment requires the full theme body as context and cannot be made reliably from the abstract alone or without knowing what the topic already knows. The wiki updater is therefore the right place to assess it: the `replication / adjacent / wholly_new` classification already encodes this — replication is incremental, adjacent is a meaningful extension, wholly_new is a genuine advance. Incremental signals may still be worth monitoring but should rank lower in the output filter than genuine advances.
+
 ### Verification
 
 - A second run updates existing belief and wiki state instead of recreating it from scratch

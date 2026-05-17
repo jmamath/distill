@@ -54,13 +54,14 @@ def _score_one(
     client: genai.Client,
     item: NormalizedItem,
     topic_config: TopicConfig,
+    theme_definitions: dict[str, str],
 ) -> AbstractScore | None:
     """Score a single item against the topic thesis using its abstract only.
 
     Tries each model in _MODELS with one retry before moving to the fallback.
     Returns None if all models fail — the caller drops the item.
     """
-    prompt = build_pass1_prompt(item, topic_config)
+    prompt = build_pass1_prompt(item, topic_config, theme_definitions)
 
     for model in _MODELS:
         for attempt in range(2):
@@ -90,6 +91,7 @@ def _score_one(
 def pass1_filter(
     items: list[NormalizedItem],
     topic_config: TopicConfig,
+    theme_definitions: dict[str, str],
 ) -> list[tuple[NormalizedItem, AbstractScore]]:
     """Score items against the topic thesis using abstract/summary only.
 
@@ -100,6 +102,9 @@ def pass1_filter(
     Args:
         items: Normalized items from one or more source adapters.
         topic_config: The active topic configuration (thesis, taxonomy, scope).
+        theme_definitions: Mapping of theme_id → description loaded from
+            themes/*.md frontmatter. Passed to the prompt builder so both
+            passes share a single source of truth for theme descriptions.
 
     Returns:
         Pairs of (item, score) for items that cleared the threshold, in input
@@ -112,7 +117,7 @@ def pass1_filter(
     results: list[tuple[NormalizedItem, AbstractScore]] = []
 
     for item in items:
-        score = _score_one(client, item, topic_config)
+        score = _score_one(client, item, topic_config, theme_definitions)
         if score is None:
             logger.warning("pass1: dropping %r — scoring failed on all models", item.url)
             continue

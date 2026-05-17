@@ -41,18 +41,15 @@ _TOPIC = TopicConfig(
         "Pure inference or serving optimization",
     ],
     taxonomy=[
-        TaxonomyEntry(
-            id="synthetic-data-generation",
-            name="Synthetic Data Generation",
-            description="Using model-generated data to train better models.",
-        ),
-        TaxonomyEntry(
-            id="filtering-and-curation",
-            name="Filtering and Curation",
-            description="Quality filtering, deduplication, and dataset curation.",
-        ),
+        TaxonomyEntry(id="synthetic-data-generation", name="Synthetic Data Generation"),
+        TaxonomyEntry(id="filtering-and-curation", name="Filtering and Curation"),
     ],
 )
+
+_THEME_DEFS = {
+    "synthetic-data-generation": "Using model-generated data to train better models.",
+    "filtering-and-curation": "Quality filtering, deduplication, and dataset curation.",
+}
 
 
 def _make_item(title: str, summary: str, source_id: str = "arxiv") -> NormalizedItem:
@@ -112,7 +109,7 @@ def test_on_topic_item_clears_threshold():
     patcher, mock_client = _patch_client([_mock_response(8, "Directly about data filtering.")])
 
     with patcher:
-        results = pass1_filter([_ON_TOPIC], _TOPIC)
+        results = pass1_filter([_ON_TOPIC], _TOPIC, _THEME_DEFS)
 
     assert len(results) == 1
     item, score = results[0]
@@ -135,7 +132,7 @@ def test_off_topic_item_is_dropped():
     patcher, mock_client = _patch_client([_mock_response(3, "Inference optimization, not data.")])
 
     with patcher:
-        results = pass1_filter([_OFF_TOPIC], _TOPIC)
+        results = pass1_filter([_OFF_TOPIC], _TOPIC, _THEME_DEFS)
 
     assert results == []
 
@@ -154,7 +151,7 @@ def test_item_at_threshold_clears():
     patcher, mock_client = _patch_client([_mock_response(6, "Borderline but relevant.")])
 
     with patcher:
-        results = pass1_filter([_ON_TOPIC], _TOPIC)
+        results = pass1_filter([_ON_TOPIC], _TOPIC, _THEME_DEFS)
 
     assert len(results) == 1
     _, score = results[0]
@@ -174,7 +171,7 @@ def test_item_one_below_threshold_dropped():
     patcher, mock_client = _patch_client([_mock_response(5, "Marginally related.")])
 
     with patcher:
-        results = pass1_filter([_ON_TOPIC], _TOPIC)
+        results = pass1_filter([_ON_TOPIC], _TOPIC, _THEME_DEFS)
 
     assert results == []
 
@@ -198,7 +195,7 @@ def test_mixed_batch_returns_only_relevant():
 
     items = [_ON_TOPIC, _OFF_TOPIC]
     with patcher:
-        results = pass1_filter(items, _TOPIC)
+        results = pass1_filter(items, _TOPIC, _THEME_DEFS)
 
     assert len(results) == 1
     item, score = results[0]
@@ -218,7 +215,7 @@ def test_empty_input_returns_empty():
     short-circuit immediately — no API quota consumed.
     """
     with patch("topics.scoring.genai.Client") as mock_client_cls:
-        results = pass1_filter([], _TOPIC)
+        results = pass1_filter([], _TOPIC, _THEME_DEFS)
 
     assert results == []
     mock_client_cls.assert_not_called()
@@ -238,7 +235,7 @@ def test_abstract_score_fields_populated():
     patcher, mock_client = _patch_client([_mock_response(9, "Core data curation insight.")])
 
     with patcher:
-        results = pass1_filter([_ON_TOPIC], _TOPIC)
+        results = pass1_filter([_ON_TOPIC], _TOPIC, _THEME_DEFS)
 
     assert len(results) == 1
     _, score = results[0]
@@ -263,7 +260,7 @@ def test_scoring_failure_drops_item():
     patcher, mock_client = _patch_client([RuntimeError("API unavailable")] * 4)
 
     with patcher:
-        results = pass1_filter([_ON_TOPIC], _TOPIC)
+        results = pass1_filter([_ON_TOPIC], _TOPIC, _THEME_DEFS)
 
     assert results == []
 
@@ -282,7 +279,7 @@ def test_prompt_contains_thesis_and_abstract():
     patcher, mock_client = _patch_client([_mock_response(7, "Relevant.")])
 
     with patcher:
-        pass1_filter([_ON_TOPIC], _TOPIC)
+        pass1_filter([_ON_TOPIC], _TOPIC, _THEME_DEFS)
 
     assert mock_client.models.generate_content.called
     prompt_sent = mock_client.models.generate_content.call_args[1]["contents"]
@@ -314,7 +311,7 @@ def test_multiple_on_topic_items_all_returned():
     ])
 
     with patcher:
-        results = pass1_filter([_ON_TOPIC, second], _TOPIC)
+        results = pass1_filter([_ON_TOPIC, second], _TOPIC, _THEME_DEFS)
 
     assert len(results) == 2
     assert results[0][0] is _ON_TOPIC

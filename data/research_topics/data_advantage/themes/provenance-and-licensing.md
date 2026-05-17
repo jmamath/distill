@@ -1,8 +1,11 @@
 ---
 id: provenance-and-licensing
 name: Provenance, Licensing, and the Legal Moat
-description: Copyright rulings, licensing deals, opt-outs, and dataset audits that
-  reshape which data is practically and legally usable.
+description: >
+  Changes to data availability, copyright interpretation, robots.txt
+  enforcement, or licensing that affect which corpora can be used or
+  re-released. Includes legal cases, policy shifts, and moat-building moves
+  by labs or data holders.
 origin: bootstrap
 novelty_status: globally_novel
 key_entity_ids:

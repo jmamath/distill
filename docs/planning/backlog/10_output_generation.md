@@ -44,6 +44,10 @@ Build the `output/` package and implement the first renderer: daily tweet candid
 - Text must be derivable from the signal and the relevant theme — no hallucinated context
 - Each candidate must address: what changed, how it fits the landscape, why it matters for the audience
 
+### Audience actionability axis
+
+The `action` field in each tweet candidate is the operational form of the **audience actionability** scoring concept: it answers "can a technical decision-maker take a concrete action based on this signal?" The four actions from `topic.md`'s `action_vocabulary` (ignore, monitor, prototype, invest) map directly to the phrasing of the tweet's call-to-action. `ignore` signals are filtered out before candidate generation. The choice of action is derived at render time from `paper_audience` × `topic.md.audience` match — not stored in the signal file — so it can be re-derived if the audience profile changes.
+
 ## Verification
 
 - A batch of scored signals produces a valid `tweets/{yyyy-mm-dd}.json`

@@ -43,7 +43,8 @@ def test_load_data_advantage_config():
     assert config.audience_ref == "technical_decision_makers"
     assert config.thesis  # non-empty string
     assert len(config.taxonomy) > 0
-    assert len(config.scoring_dimensions) > 0
+    assert len(config.pass1_dimensions) > 0
+    assert len(config.pass2_dimensions) > 0
     assert len(config.signal_classes) > 0
     assert len(config.action_vocabulary) > 0
 
@@ -163,7 +164,8 @@ def test_different_topic_validates(tmp_path):
     assert config.topic_id == "agent_reliability"
     # Optional fields should default gracefully.
     assert config.taxonomy == []
-    assert config.scoring_dimensions == []
+    assert config.pass1_dimensions == []
+    assert config.pass2_dimensions == []
     assert config.signal_classes == []
     assert config.action_vocabulary == []
 

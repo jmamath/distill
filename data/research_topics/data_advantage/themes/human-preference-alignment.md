@@ -1,8 +1,10 @@
 ---
 id: human-preference-alignment
 name: Human-Preference and Alignment Data
-description: Preference datasets for RLHF, DPO, and constitutional-style training
-  that elicit capability and shape behavior.
+description: >
+  Preference datasets collected for RLHF, DPO, and constitutional-AI style
+  training. Includes collection methodology, quality improvements, and the
+  trade-offs between human annotation and AI-generated preference signals.
 origin: bootstrap
 novelty_status: globally_novel
 key_entity_ids:
