@@ -52,7 +52,7 @@ def build_pass1_prompt(
         f"Source type: {item.source_type}\n"
         f"Abstract: {item.summary}\n\n"
         f"Scoring rubric:\n{rubric}\n\n"
-        'Respond strictly as JSON: {"relevance": <integer 0-10>, "reason": "<one sentence>"}'
+        'Respond strictly as JSON: {"topical_relevance": <integer 0-10>, "reason": "<one sentence>"}'
     )
 
 
