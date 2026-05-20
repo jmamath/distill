@@ -47,7 +47,9 @@ class Pass2Score(BaseModel):
     """Full pass-2 scoring result produced from the item's full text."""
 
     applicability_score: int = Field(..., ge=0, le=10)
+    applicability_rationale: str
     strategic_significance: int = Field(..., ge=0, le=10)
+    strategic_significance_rationale: str
     paper_audience: str
     candidate_themes: list[CandidateTheme] = Field(default_factory=list)
     new_open_questions: list[OpenQuestion] = Field(default_factory=list)

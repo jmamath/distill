@@ -60,6 +60,9 @@ Defines the `Pass2Score` model and the pass-2 prompt contract. Fixes the schema 
 
 ```yaml
 applicability_score: int           # 0–10
+applicability_rationale: str       # one sentence: why this applicability score
+strategic_significance: int        # 0–10
+strategic_significance_rationale: str  # one sentence: why this strategic significance score
 paper_audience: str                # free text
 candidate_themes:                  # up to 3, sorted desc by confidence
   - theme_id: str
@@ -97,6 +100,9 @@ affiliations: ["MIT", "Google DeepMind"]
 ingested_at: "2026-04-29T14:23:11Z"
 full_text_fetched: true
 applicability_score: 8
+applicability_rationale: "Directly advances the synthetic data theme with a novel self-play loop."
+strategic_significance: 7
+strategic_significance_rationale: "Could shift best practice for instruction-tuning data at scale."
 paper_audience: "industry practitioners building post-training pipelines"
 source_credibility: 9
 temporal_freshness: 9

@@ -62,7 +62,9 @@ class TestPass2Score:
     def _valid_payload(self):
         return {
             "applicability_score": 8,
+            "applicability_rationale": "Directly advances the synthetic data theme with a novel self-play loop.",
             "strategic_significance": 7,
+            "strategic_significance_rationale": "Could shift best practice for instruction-tuning data at scale.",
             "paper_audience": "industry practitioners building post-training pipelines",
             "candidate_themes": [
                 {
@@ -111,7 +113,9 @@ class TestPass2Score:
     def test_empty_lists_are_valid(self):
         score = Pass2Score(
             applicability_score=3,
+            applicability_rationale="Tangentially relevant to the topic thesis.",
             strategic_significance=2,
+            strategic_significance_rationale="Incremental result with limited strategic impact.",
             paper_audience="general",
             candidate_themes=[],
             new_open_questions=[],
@@ -218,3 +222,8 @@ class TestBuildPass2Prompt:
         prompt = build_pass2_prompt(_ITEM, _TOPIC, _THEME_DEFINITIONS)
         assert "at most 3" in prompt
         assert "descending confidence" in prompt
+
+    def test_prompt_requests_score_rationales(self):
+        prompt = build_pass2_prompt(_ITEM, _TOPIC, _THEME_DEFINITIONS)
+        assert "applicability_rationale" in prompt
+        assert "strategic_significance_rationale" in prompt

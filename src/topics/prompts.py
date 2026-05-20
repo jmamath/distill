@@ -99,7 +99,9 @@ def build_pass2_prompt(
         "Respond strictly as JSON with this exact schema:\n"
         "{\n"
         '  "applicability_score": <integer 0-10>,\n'
+        '  "applicability_rationale": "<one sentence: why this applicability score>",\n'
         '  "strategic_significance": <integer 0-10>,\n'
+        '  "strategic_significance_rationale": "<one sentence: why this strategic significance score>",\n'
         '  "paper_audience": "<free text: who would benefit most from reading this>",\n'
         '  "candidate_themes": [\n'
         '    {"theme_id": "<id from the list above>", "confidence": <0-10>, '
