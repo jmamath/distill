@@ -1,10 +1,10 @@
 """Structured scoring models for the topic-aware signal pipeline.
 
-Pass-1 produces AbstractScore from the item abstract only.
+Pass-1 produces Pass1Score from the item abstract only.
 Pass-2 produces Pass2Score after full-text enrichment.
 
 Public API:
-    AbstractScore  — pass-1 relevance verdict for one NormalizedItem
+    Pass1Score  — pass-1 relevance verdict for one NormalizedItem
     CandidateTheme — one scored theme candidate from pass-2
     Pass2Score     — full pass-2 scoring result
     make_signal_id — deterministic signal file identifier
@@ -15,7 +15,7 @@ import hashlib
 from pydantic import BaseModel, Field
 
 
-class AbstractScore(BaseModel):
+class Pass1Score(BaseModel):
     """Pass-1 relevance verdict produced from a signal's abstract/summary.
 
     Items with relevance < SCORING_THRESHOLD are dropped before pass-2.

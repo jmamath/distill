@@ -42,7 +42,7 @@ Three tightly sequential sub-tasks that together deliver one complete deliverabl
 
 ## Sub-task B — Pass-2 Prompt And Signal Schema
 
-**Depends on:** Sub-task A; Plan 5 (`AbstractScore`, `NormalizedItem`); Plan 2 (`TopicConfig`, theme definitions); Plan 6 (credibility and freshness field definitions).
+**Depends on:** Sub-task A; Plan 5 (`Pass1Score`, `NormalizedItem`); Plan 2 (`TopicConfig`, theme definitions); Plan 6 (credibility and freshness field definitions).
 
 Defines the `Pass2Score` model and the pass-2 prompt contract. Fixes the schema that sub-task C, Plan 2 (storage), Plan 3 (knowledge update), and Plan 4 (output) all depend on.
 
@@ -141,7 +141,7 @@ Wire together full-text fetch, LLM scoring, deterministic credibility and freshn
 
 | File | Action | Description |
 |---|---|---|
-| `src/topics/scoring.py` | **UPDATE** | Add `load_theme_definitions(themes_dir: Path) → dict[str, str]` helper; add `pass2_score(items: list[tuple[NormalizedItem, AbstractScore]], topic_config: TopicConfig, topic_dir: Path, adapter: SourceAdapter) → list[Path]`; fetches full text, scores via LLM, computes credibility and freshness deterministically, writes signal files |
+| `src/topics/scoring.py` | **UPDATE** | Add `load_theme_definitions(themes_dir: Path) → dict[str, str]` helper; add `pass2_score(items: list[tuple[NormalizedItem, Pass1Score]], topic_config: TopicConfig, topic_dir: Path, adapter: SourceAdapter) → list[Path]`; fetches full text, scores via LLM, computes credibility and freshness deterministically, writes signal files |
 | `tests/test_topic_scoring_pass2.py` | **NEW** | Fixture pass-1 items → written signal files; verify schema; verify `full_text_fetched: true`; verify idempotency on re-run; verify `fetch_full_text` failure drops the item; verify credibility and freshness values in written frontmatter |
 
 ### Theme definitions loader

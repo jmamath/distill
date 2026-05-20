@@ -15,8 +15,8 @@ import pytest
 
 from sources.base import NormalizedItem
 from topics.config import TaxonomyEntry, TopicConfig
-from topics.models import AbstractScore
-from topics.scoring import pass1_filter
+from topics.models import Pass1Score
+from topics.scoring import pass1_score
 
 # ---------------------------------------------------------------------------
 # Shared fixtures
@@ -101,7 +101,7 @@ def _patch_client(side_effects: list):
 
 
 def test_on_topic_item_clears_threshold():
-    """An item with relevance >= SCORING_THRESHOLD is returned by pass1_filter.
+    """An item with relevance >= SCORING_THRESHOLD is returned by pass1_score.
 
     > **Why:** If on-topic items are incorrectly dropped at pass-1, the wiki
     never learns about relevant signals regardless of how good pass-2 is.
@@ -109,7 +109,7 @@ def test_on_topic_item_clears_threshold():
     patcher, mock_client = _patch_client([_mock_response(8, "Directly about data filtering.")])
 
     with patcher:
-        results = pass1_filter([_ON_TOPIC], _TOPIC, _THEME_DEFS)
+        results = pass1_score([_ON_TOPIC], _TOPIC, _THEME_DEFS)
 
     assert len(results) == 1
     item, score = results[0]
@@ -132,7 +132,7 @@ def test_off_topic_item_is_dropped():
     patcher, mock_client = _patch_client([_mock_response(3, "Inference optimization, not data.")])
 
     with patcher:
-        results = pass1_filter([_OFF_TOPIC], _TOPIC, _THEME_DEFS)
+        results = pass1_score([_OFF_TOPIC], _TOPIC, _THEME_DEFS)
 
     assert results == []
 
@@ -151,7 +151,7 @@ def test_item_at_threshold_clears():
     patcher, mock_client = _patch_client([_mock_response(6, "Borderline but relevant.")])
 
     with patcher:
-        results = pass1_filter([_ON_TOPIC], _TOPIC, _THEME_DEFS)
+        results = pass1_score([_ON_TOPIC], _TOPIC, _THEME_DEFS)
 
     assert len(results) == 1
     _, score = results[0]
@@ -171,7 +171,7 @@ def test_item_one_below_threshold_dropped():
     patcher, mock_client = _patch_client([_mock_response(5, "Marginally related.")])
 
     with patcher:
-        results = pass1_filter([_ON_TOPIC], _TOPIC, _THEME_DEFS)
+        results = pass1_score([_ON_TOPIC], _TOPIC, _THEME_DEFS)
 
     assert results == []
 
@@ -182,7 +182,7 @@ def test_item_one_below_threshold_dropped():
 
 
 def test_mixed_batch_returns_only_relevant():
-    """pass1_filter applied to a mixed batch returns only on-topic items.
+    """pass1_score applied to a mixed batch returns only on-topic items.
 
     > **Why:** The daily ingestion run produces a heterogeneous batch. If the
     filter cannot correctly partition it, either noise leaks into the wiki or
@@ -195,7 +195,7 @@ def test_mixed_batch_returns_only_relevant():
 
     items = [_ON_TOPIC, _OFF_TOPIC]
     with patcher:
-        results = pass1_filter(items, _TOPIC, _THEME_DEFS)
+        results = pass1_score(items, _TOPIC, _THEME_DEFS)
 
     assert len(results) == 1
     item, score = results[0]
@@ -209,25 +209,25 @@ def test_mixed_batch_returns_only_relevant():
 
 
 def test_empty_input_returns_empty():
-    """pass1_filter with an empty list returns [] without calling the Gemini API.
+    """pass1_score with an empty list returns [] without calling the Gemini API.
 
     > **Why:** An empty batch from the adapter (e.g. quiet feed day) should
     short-circuit immediately — no API quota consumed.
     """
     with patch("topics.scoring.genai.Client") as mock_client_cls:
-        results = pass1_filter([], _TOPIC, _THEME_DEFS)
+        results = pass1_score([], _TOPIC, _THEME_DEFS)
 
     assert results == []
     mock_client_cls.assert_not_called()
 
 
 # ---------------------------------------------------------------------------
-# 7. AbstractScore fields are fully populated on returned items
+# 7. Pass1Score fields are fully populated on returned items
 # ---------------------------------------------------------------------------
 
 
 def test_abstract_score_fields_populated():
-    """AbstractScore on returned items has correct relevance (int) and reason (str).
+    """Pass1Score on returned items has correct relevance (int) and reason (str).
 
     > **Why:** Downstream consumers (logging, pass-2 context) read these fields
     directly. A missing or wrong-typed field causes a silent AttributeError.
@@ -235,11 +235,11 @@ def test_abstract_score_fields_populated():
     patcher, mock_client = _patch_client([_mock_response(9, "Core data curation insight.")])
 
     with patcher:
-        results = pass1_filter([_ON_TOPIC], _TOPIC, _THEME_DEFS)
+        results = pass1_score([_ON_TOPIC], _TOPIC, _THEME_DEFS)
 
     assert len(results) == 1
     _, score = results[0]
-    assert isinstance(score, AbstractScore)
+    assert isinstance(score, Pass1Score)
     assert isinstance(score.relevance, int)
     assert isinstance(score.reason, str)
     assert score.relevance == 9
@@ -260,7 +260,7 @@ def test_scoring_failure_drops_item():
     patcher, mock_client = _patch_client([RuntimeError("API unavailable")] * 4)
 
     with patcher:
-        results = pass1_filter([_ON_TOPIC], _TOPIC, _THEME_DEFS)
+        results = pass1_score([_ON_TOPIC], _TOPIC, _THEME_DEFS)
 
     assert results == []
 
@@ -279,7 +279,7 @@ def test_prompt_contains_thesis_and_abstract():
     patcher, mock_client = _patch_client([_mock_response(7, "Relevant.")])
 
     with patcher:
-        pass1_filter([_ON_TOPIC], _TOPIC, _THEME_DEFS)
+        pass1_score([_ON_TOPIC], _TOPIC, _THEME_DEFS)
 
     assert mock_client.models.generate_content.called
     prompt_sent = mock_client.models.generate_content.call_args[1]["contents"]
@@ -311,7 +311,7 @@ def test_multiple_on_topic_items_all_returned():
     ])
 
     with patcher:
-        results = pass1_filter([_ON_TOPIC, second], _TOPIC, _THEME_DEFS)
+        results = pass1_score([_ON_TOPIC, second], _TOPIC, _THEME_DEFS)
 
     assert len(results) == 2
     assert results[0][0] is _ON_TOPIC

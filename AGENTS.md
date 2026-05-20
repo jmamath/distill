@@ -54,7 +54,7 @@ src/                          ← Python package root (set PYTHONPATH=src)
     lab_blog.py               ← Research lab blog adapter
   topics/                     ← Topic knowledge & scoring pipeline
     config.py                 ← TopicConfig, AudienceProfile schema & loaders
-    models.py                 ← AbstractScore, FullScore (Pydantic)
+    models.py                 ← Pass1Score, Pass2Score (Pydantic)
     scoring.py                ← Signal scoring pipeline
     credibility.py            ← Source credibility scoring
     frontmatter.py            ← YAML frontmatter parsing utilities

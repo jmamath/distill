@@ -15,9 +15,9 @@ Reuse the goal-engine filtering pattern as a fast, abstract-only relevance gate.
 | File | Action | Description |
 |---|---|---|
 | `src/config.py` | **NEW** | `GEMINI_API_KEY`, `SCORING_MODEL` (default `gemini-3.1-flash-lite-preview`), `SCORING_FALLBACK_MODEL` (default `gemini-2.5-flash-lite`), `SCORING_THRESHOLD` (default `6`); all overridable via env vars |
-| `src/topics/models.py` | **NEW** | `AbstractScore` Pydantic model: `relevance: int` (0–10), `reason: str` |
+| `src/topics/models.py` | **NEW** | `Pass1Score` Pydantic model: `relevance: int` (0–10), `reason: str` |
 | `src/topics/prompts.py` | **NEW** | `build_pass1_prompt(item: NormalizedItem, topic_config: TopicConfig) → str`; includes topic thesis, `scope_in`/`scope_out` lists, and taxonomy subtopics from `topic.md` frontmatter; item `summary` only |
-| `src/topics/scoring.py` | **NEW** | `pass1_filter(items, topic_config) → list[tuple[NormalizedItem, AbstractScore]]`; one LLM call per item via `SCORING_MODEL` (with `SCORING_FALLBACK_MODEL` on failure); drops items where `relevance < SCORING_THRESHOLD`; returns `(item, score)` pairs so pass-2 has the pass-1 context available |
+| `src/topics/scoring.py` | **NEW** | `pass1_score(items, topic_config) → list[tuple[NormalizedItem, Pass1Score]]`; one LLM call per item via `SCORING_MODEL` (with `SCORING_FALLBACK_MODEL` on failure); drops items where `relevance < SCORING_THRESHOLD`; returns `(item, score)` pairs so pass-2 has the pass-1 context available |
 | `tests/test_topic_scoring_pass1.py` | **NEW** | 10 tests; Gemini client mocked (no API key required); covers threshold boundary, mixed batch, empty input, scoring failure, prompt content, and multi-item ordering |
 
 ## Pass-1 mechanics
@@ -27,11 +27,11 @@ Reuse the goal-engine filtering pattern as a fast, abstract-only relevance gate.
 - Prompt context: topic thesis + `scope_in`/`scope_out` + taxonomy subtopics; item `summary` only — no full text
 - LLM response schema: `{"relevance": int, "reason": str}`; structured output enforced via Gemini `response_mime_type`
 - Items that fail on all models are dropped silently (logged at ERROR); items below threshold are dropped (logged at INFO)
-- No disk writes; return type is `list[tuple[NormalizedItem, AbstractScore]]` — pass-2 receives both the item and the pass-1 verdict
+- No disk writes; return type is `list[tuple[NormalizedItem, Pass1Score]]` — pass-2 receives both the item and the pass-1 verdict
 
 ## Verification
 
 - Items with off-topic abstracts (e.g. no data-domain focus for `data_advantage`) are dropped and produce no downstream output
-- Items with on-topic abstracts are returned with a populated `AbstractScore`
+- Items with on-topic abstracts are returned with a populated `Pass1Score`
 - The filter can run on a list of mixed items and return only the relevant subset
 - An empty input returns `[]` without calling the Gemini API
