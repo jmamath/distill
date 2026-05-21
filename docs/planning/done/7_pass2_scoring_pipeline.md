@@ -42,6 +42,8 @@ Three tightly sequential sub-tasks that together deliver one complete deliverabl
 
 ## Sub-task B — Pass-2 Prompt And Signal Schema
 
+**Status: passed** — 95 tests passing as of 2026-05-21.
+
 **Depends on:** Sub-task A; Plan 5 (`Pass1Score`, `NormalizedItem`); Plan 2 (`TopicConfig`, theme definitions); Plan 6 (credibility and freshness field definitions).
 
 Defines the `Pass2Score` model and the pass-2 prompt contract. Fixes the schema that sub-task C, Plan 2 (storage), Plan 3 (knowledge update), and Plan 4 (output) all depend on.
@@ -132,6 +134,8 @@ new_evidences:
 ---
 
 ## Sub-task C — Pass-2 Orchestration And Signal Writing
+
+**Status: passed** — 115 tests passing as of 2026-05-21.
 
 **Depends on:** Sub-tasks A and B; Plan 3 seeded `themes/`; Plan 6 `credibility.py` and `source_credibility.json`.
 
