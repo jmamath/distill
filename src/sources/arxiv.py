@@ -1,19 +1,28 @@
-"""Source adapter for arXiv papers via the category RSS feed.
+"""Source adapter for arXiv papers.
 
-Fetches from https://rss.arxiv.org/rss/<category> (e.g. cs.AI) and normalises
-entries into NormalizedItem records. The feed is RSS 2.0 with arXiv and Dublin
-Core extensions — distinct from the Atom search API.
+Two fetch modes:
 
-Feed structure:
-  <item>
-    <title>Paper Title</title>
-    <link>https://arxiv.org/abs/...</link>
-    <description>arXiv:XXXXv1 Announce Type: new \\nAbstract: ...</description>
-    <dc:creator>Author One, Author Two</dc:creator>
-    <arxiv:announce_type>new|cross|replace</arxiv:announce_type>
-    <category>cs.AI</category>
-    <pubDate>Mon, 27 Apr 2026 00:00:00 -0400</pubDate>
-  </item>
+1. RSS feed (batch ingestion) — fetch() + parse()
+   Fetches from https://rss.arxiv.org/rss/<category> (e.g. cs.AI) and
+   normalises entries into NormalizedItem records. The feed is RSS 2.0 with
+   arXiv and Dublin Core extensions. Used by the scheduled pipeline to ingest
+   new papers by category.
+
+   Feed structure:
+     <item>
+       <title>Paper Title</title>
+       <link>https://arxiv.org/abs/...</link>
+       <description>arXiv:XXXXv1 Announce Type: new \\nAbstract: ...</description>
+       <dc:creator>Author One, Author Two</dc:creator>
+       <arxiv:announce_type>new|cross|replace</arxiv:announce_type>
+       <category>cs.AI</category>
+       <pubDate>Mon, 27 Apr 2026 00:00:00 -0400</pubDate>
+     </item>
+
+2. Atom API (single-paper lookup) — fetch_item(url)
+   Fetches from https://export.arxiv.org/api/query?id_list=<id> and parses
+   the Atom response. Used for ad-hoc runs and smoke testing where a single
+   known paper URL is the starting point rather than a category feed.
 """
 
 import logging
@@ -29,6 +38,7 @@ logger = logging.getLogger(__name__)
 
 _DC_NS = "http://purl.org/dc/elements/1.1/"
 _ARXIV_NS = "http://arxiv.org/schemas/atom"
+_ATOM_NS = "http://www.w3.org/2005/Atom"
 
 # Strips "arXiv:2604.21935v1 Announce Type: new \n" from description.
 _PREAMBLE_RE = re.compile(r"^arXiv:\S+\s+Announce Type:\s+\w+\s*\n", re.IGNORECASE)
@@ -74,6 +84,39 @@ class ArxivAdapter(SourceAdapter):
                 return resp.read()
         except Exception as exc:
             raise RuntimeError(f"arXiv PDF fetch failed for {pdf_url!r}: {exc}") from exc
+
+    def fetch_item(self, url: str) -> NormalizedItem:
+        """Fetch metadata for a single arXiv paper via the Atom API.
+
+        Uses export.arxiv.org/api/query rather than the RSS feed, so any paper
+        can be looked up by ID without waiting for the category feed to include
+        it. Useful for smoke testing and ad-hoc pipeline runs.
+
+        Args:
+            url: arXiv abstract page URL, e.g. "https://arxiv.org/abs/2306.11644"
+
+        Returns:
+            NormalizedItem with real metadata from the Atom API.
+
+        Raises:
+            RuntimeError: if the ID cannot be extracted, the request fails, or
+                the API returns no entry for the given ID.
+        """
+        match = re.search(r"arxiv\.org/abs/([^\s/?#]+)", url)
+        if not match:
+            raise RuntimeError(f"Cannot extract arXiv ID from URL: {url!r}")
+        arxiv_id = match.group(1)
+
+        api_url = f"https://export.arxiv.org/api/query?id_list={arxiv_id}"
+        logger.info("Fetching arXiv Atom entry: %s", api_url)
+        try:
+            req = urllib.request.Request(api_url, headers={"User-Agent": "SonarynResearch/1.0"})
+            with urllib.request.urlopen(req, timeout=30) as resp:
+                raw = resp.read()
+        except Exception as exc:
+            raise RuntimeError(f"arXiv Atom fetch failed for {arxiv_id!r}: {exc}") from exc
+
+        return _parse_atom_entry(raw, arxiv_id)
 
     def fetch(self, query_params: dict) -> bytes:
         """Fetch RSS XML from an arXiv category feed.
@@ -164,6 +207,52 @@ class ArxivAdapter(SourceAdapter):
 # ---------------------------------------------------------------------------
 # Helpers
 # ---------------------------------------------------------------------------
+
+
+def _parse_atom_entry(raw: bytes, arxiv_id: str) -> NormalizedItem:
+    """Parse a single entry from an arXiv Atom API response.
+
+    Args:
+        raw: Raw bytes from the Atom API response.
+        arxiv_id: The arXiv ID that was requested (used in the returned URL
+            and in the error message if no entry is found).
+
+    Returns:
+        NormalizedItem populated from the Atom entry.
+
+    Raises:
+        ValueError: if the response is not valid XML.
+        RuntimeError: if the response contains no entry for the given ID.
+    """
+    try:
+        root = ET.fromstring(raw)
+    except ET.ParseError as exc:
+        raise ValueError(f"arXiv Atom response is not valid XML: {exc}") from exc
+
+    entry = root.find(f"{{{_ATOM_NS}}}entry")
+    if entry is None:
+        raise RuntimeError(f"arXiv Atom API returned no entry for ID {arxiv_id!r}")
+
+    def _atom_text(tag: str) -> str:
+        el = entry.find(f"{{{_ATOM_NS}}}{tag}")
+        return (el.text or "").strip() if el is not None else ""
+
+    authors = [
+        (a.find(f"{{{_ATOM_NS}}}name").text or "").strip()
+        for a in entry.findall(f"{{{_ATOM_NS}}}author")
+        if a.find(f"{{{_ATOM_NS}}}name") is not None
+    ]
+
+    return NormalizedItem(
+        source_id="arxiv",
+        source_type="research_paper",
+        title=_atom_text("title").replace("\n", " "),
+        url=f"https://arxiv.org/abs/{arxiv_id}",
+        published_at=_atom_text("published")[:10],  # YYYY-MM-DD
+        authors=authors,
+        summary=_atom_text("summary").replace("\n", " "),
+    )
+
 
 def _text(element: ET.Element, tag: str) -> str:
     el = element.find(tag)

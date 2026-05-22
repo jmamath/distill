@@ -174,3 +174,47 @@ For each item passed in from pass-1:
 - `source_credibility` is `null` when no affiliations match the table
 - `temporal_freshness` reflects a 365-day linear decay — not the topic `signal_horizon`
 - A batch of pass-1 items can be scored end-to-end and produce valid signal files
+
+---
+
+## Sub-task D — End-to-End Smoke Script
+
+**Depends on:** Sub-tasks A, B, C.
+
+Operator-facing script that runs the full pass-1 → pass-2 pipeline against a
+local fixture file and prints the written signal for inspection. Bridges the
+gap between unit tests (all mocked) and live ingestion (requires network and
+a real feed).
+
+**Why this matters:** Every component is unit-tested in isolation with mocks.
+This script is the first time the real LLM, real prompt, and real schema all
+run together — it surfaces prompt regressions, schema mismatches, and
+credibility/freshness edge cases that mocks cannot catch.
+
+### Changes
+
+| File | Action | Description |
+|---|---|---|
+| `scripts/smoke_pass2.py` | **NEW** | Accepts `--url` (arXiv or lab blog), optional `--pass 1\|2`, and optional `--model`; fetches real metadata and full text live; runs pass-1 only, pass-2 only (bypassing pass-1 with a synthetic score), or both end-to-end; prints the Pass1Score or written signal for inspection |
+
+### Usage
+
+```bash
+source .venv/bin/activate
+# End-to-end
+PYTHONPATH=src python scripts/smoke_pass2.py --url https://arxiv.org/abs/<id>
+# Pass-1 only — inspect the relevance score and reason
+PYTHONPATH=src python scripts/smoke_pass2.py --url https://arxiv.org/abs/<id> --pass 1
+# Pass-2 only — bypass pass-1 and inspect the signal directly
+PYTHONPATH=src python scripts/smoke_pass2.py --url https://arxiv.org/abs/<id> --pass 2
+# Model override
+PYTHONPATH=src python scripts/smoke_pass2.py --url https://arxiv.org/abs/<id> --model gemini-2.5-pro
+```
+
+### Verification
+
+- `--pass 1` prints a relevance score and reason without writing any file
+- `--pass 2` writes a signal file and prints it, regardless of relevance
+- End-to-end run gates pass-2 on the pass-1 threshold — a below-threshold item prints "DROPPED" and exits
+- Signal frontmatter contains `applicability_score`, `candidate_themes`, `source_credibility`, and `temporal_freshness`
+- Operator reads the printed signal and judges whether the scoring is coherent

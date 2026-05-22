@@ -1,18 +1,27 @@
 """Source adapter for lab and engineering blog RSS feeds.
 
-Fetches RSS 2.0 feeds from AI labs and engineering blogs. Handles the three
-main field variations found across the tracked feeds:
-  - Standard RSS 2.0: <description>, <author>, <pubDate>
-  - Dublin Core extension: <dc:creator> for author (The Gradient, Vector Institute)
-  - content:encoded extension: present in some feeds but not consumed
+Two fetch modes:
 
-Raw payloads are preserved as .xml files without format coercion.
+1. RSS feed (batch ingestion) — fetch() + parse()
+   Fetches RSS 2.0 feeds from AI labs and engineering blogs. Handles the
+   three main field variations found across the tracked feeds:
+     - Standard RSS 2.0: <description>, <author>, <pubDate>
+     - Dublin Core extension: <dc:creator> for author (The Gradient, Vector Institute)
+     - content:encoded extension: present in some feeds but not consumed
+   Raw payloads are preserved as .xml files without format coercion.
+
+2. HTML scrape (single-post lookup) — fetch_item(url)
+   Fetches a single post URL and extracts metadata from HTML meta tags
+   (og:title, og:description, article:published_time, etc.). Best-effort:
+   blog HTML varies widely and not all fields will be populated for every
+   post. Used for ad-hoc runs and smoke testing.
 """
 
 import logging
 import re
 import urllib.request
 import xml.etree.ElementTree as ET
+from datetime import date
 from email.utils import parsedate_to_datetime
 
 from sources import register
@@ -32,6 +41,32 @@ class LabBlogAdapter(SourceAdapter):
 
     def source_id(self) -> str:
         return "lab_blog"
+
+    def fetch_item(self, url: str) -> NormalizedItem:
+        """Fetch metadata for a single blog post by its URL.
+
+        Fetches the article HTML and extracts title, summary, author, and
+        publication date from meta tags (og:title, og:description,
+        article:published_time, meta name=author). Best-effort: not all
+        fields will be populated for every post.
+
+        Args:
+            url: Direct URL to the blog post.
+
+        Returns:
+            NormalizedItem with metadata extracted from the page HTML.
+
+        Raises:
+            RuntimeError: if the HTTP request fails.
+        """
+        logger.info("Fetching lab blog item metadata: %s", url)
+        try:
+            req = urllib.request.Request(url, headers={"User-Agent": "SonarynResearch/1.0"})
+            with urllib.request.urlopen(req, timeout=30) as resp:
+                html = resp.read().decode("utf-8", errors="replace")
+        except Exception as exc:
+            raise RuntimeError(f"Lab blog fetch failed for {url!r}: {exc}") from exc
+        return _parse_html_item(html, url)
 
     def fetch_full_text(self, url: str) -> bytes:
         """Fetch the full text of a blog article by its URL.
@@ -155,6 +190,63 @@ class LabBlogAdapter(SourceAdapter):
 # ---------------------------------------------------------------------------
 # Helpers
 # ---------------------------------------------------------------------------
+
+def _parse_html_item(html: str, url: str) -> NormalizedItem:
+    """Extract a NormalizedItem from blog post HTML via meta tags.
+
+    Tries og: properties first (most reliable across modern blogs), then
+    falls back to standard meta name= attributes, then degrades gracefully
+    to the page title or raw URL when nothing is found.
+
+    Args:
+        html: Full HTML source of the blog post page.
+        url: Canonical URL of the post (used as fallback title and item URL).
+
+    Returns:
+        NormalizedItem populated from whatever metadata could be extracted.
+    """
+    def _meta(*names: str) -> str:
+        """Return the content of the first matching meta tag."""
+        for name in names:
+            for attr in ("property", "name"):
+                m = re.search(
+                    rf'<meta[^>]+{attr}=["\'](?:og:)?{re.escape(name)}["\'][^>]+content=["\']([^"\']+)["\']',
+                    html, re.IGNORECASE,
+                )
+                if not m:
+                    m = re.search(
+                        rf'<meta[^>]+content=["\']([^"\']+)["\'][^>]+{attr}=["\'](?:og:)?{re.escape(name)}["\']',
+                        html, re.IGNORECASE,
+                    )
+                if m:
+                    return m.group(1).strip()
+        return ""
+
+    title = _meta("title")
+    if not title:
+        m = re.search(r"<title[^>]*>([^<]+)</title>", html, re.IGNORECASE)
+        title = m.group(1).strip() if m else url
+
+    summary = _meta("description") or _strip_html(html)[:500]
+
+    # article:published_time is the most reliable publication date signal.
+    # Fall back to today when no date is found — better than an empty string
+    # that would break downstream date-dependent logic (signal path, freshness).
+    published_raw = _meta("article:published_time", "published_time")
+    published_at = published_raw[:10] if published_raw else date.today().isoformat()
+
+    author = _meta("author")
+
+    return NormalizedItem(
+        source_id="lab_blog",
+        source_type="lab_post",
+        title=title,
+        url=url,
+        published_at=published_at,
+        authors=[author] if author else [],
+        summary=summary,
+    )
+
 
 def _text(element: ET.Element, tag: str) -> str:
     el = element.find(tag)
