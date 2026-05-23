@@ -179,6 +179,8 @@ For each item passed in from pass-1:
 
 ## Sub-task D — End-to-End Smoke Script
 
+**Status: passed** — 115 tests passing as of 2026-05-22.
+
 **Depends on:** Sub-tasks A, B, C.
 
 Operator-facing script that runs the full pass-1 → pass-2 pipeline against a
