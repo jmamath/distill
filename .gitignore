@@ -17,3 +17,5 @@ data/credibility/*.csv
 .idea/
 .vscode/
 *.swp
+
+docs/brand/*.md
