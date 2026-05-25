@@ -59,7 +59,7 @@ Optional fields (added incrementally as the pipeline matures):
 | `scope_out` | list of strings | Explicit exclusions |
 | `signal_classes` | list of `SignalClass` enum values | Which signal types to accept |
 | `source_priorities` | ordered list of strings | Preferred sources, most- to least-preferred |
-| `taxonomy` | list of `{id, name, description}` | Subtopic areas for organising themes |
+| `taxonomy` | list of `{id, name, theme_ref}` | Subtopic areas; `theme_ref` links each entry to its theme file (e.g. `themes/synthetic-data-generation.md`) |
 | `scoring_dimensions` | list of `{id, name, description}` | Axes used to score a signal |
 | `action_vocabulary` | list of `ActionLabel` enum values | Allowed action recommendations |
 

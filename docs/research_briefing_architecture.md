@@ -207,7 +207,6 @@ A topic-oriented structure could look like:
 ```text
 data/research_topics/{topic_id}/
 ├── topic.md
-├── taxonomy.md
 ├── overview.md
 ├── hypotheses.json
 ├── evidence.json
@@ -232,8 +231,7 @@ Intermediate pipeline artifacts (`normalized/` as daily JSON bundles, etc.) can 
 
 | File or directory | Purpose |
 | --- | --- |
-| `topic.md` | Topic metadata and configuration in frontmatter (id, thesis, audience ref, scope, scoring hooks, enabled source adapters); body optional |
-| `taxonomy.md` | Human-readable subtopic schema and boundaries |
+| `topic.md` | Topic metadata and configuration in frontmatter (id, thesis, audience ref, scope, scoring hooks, enabled source adapters, taxonomy with `theme_ref` links); body optional |
 | `overview.md` | Landing view for the topic; rendered from dossier intro prose + theme summary list + top open questions from `open_questions.json` |
 | `hypotheses.json` | Flat JSON array of strategic belief records; stores prior/posterior belief, rationale, implications, dependencies, and linked evidence ids |
 | `evidence.json` | Flat JSON array of evidence records linking signals to hypotheses with stance (`for`, `against`, `mixed`, `neutral`), strength, provenance, and update notes |

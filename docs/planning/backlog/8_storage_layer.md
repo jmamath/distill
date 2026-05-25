@@ -15,7 +15,6 @@ Add the read/merge helpers that make topic files safely accessible to downstream
 |---|---|---|
 | `src/topics/storage.py` | **NEW** | Save/load helpers for topic files and run outputs (frontmatter-aware read/write, list/merge by stable id); signal helpers conform to the pass-2 schema and support partial updates so the wiki updater can write back `classification` and `theme_id_assigned`; evidence helpers expose a credibility-weighted `strength` increment with provenance append; open-question helpers expose a `count` increment with provenance append |
 | `data/research_topics/README.md` | **UPDATE** | Document the flat layout from architecture §6, including signal schema reference |
-| `data/research_topics/data_advantage/taxonomy.md` | **NEW** | First topic taxonomy |
 | `data/research_topics/data_advantage/hypotheses.json` | **NEW** | Durable belief store for strategic topic hypotheses with prior/posterior state and a derived `convergence` score updated by the knowledge update loop |
 | `data/research_topics/data_advantage/evidence.json` | **NEW** | Evidence records linking claims to hypotheses; each record holds `id`, `claim`, `stance`, a `strength` counter (incremented per supporting signal, weighted by `source_credibility`), and a `provenance` list of `{signal_id, weight_applied}` entries |
 | `data/research_topics/data_advantage/raw/` | **NEW** | Original fetched payloads, partitioned `{yyyy-mm-dd}/{source_name}{.xml/.html}` (native format, not coerced to JSON) |
