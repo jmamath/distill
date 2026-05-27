@@ -21,7 +21,7 @@ Build the mechanism that turns newly scored signals into updated topic beliefs a
 | `src/topics/open_question_updater.py` | **NEW** | Dedups `new_open_questions` from pass-2 signals against `open_questions.json`; increments `count`; appends `signal_id` to provenance |
 | `src/topics/entities.py` | **NEW** | Entity extraction or normalization helpers |
 | `src/topics/timeline.py` | **NEW** | Append/update notable changes over time (substantive shifts only; replication does not append) |
-| `src/topics/propagation.py` | **NEW** | Re-evaluates dependent hypotheses, theme sections, and briefing conclusions when hypothesis belief changes |
+| `src/topics/propagation.py` | **NEW** | Re-evaluates dependent hypotheses when belief changes; dependency weight is derived at propagation time as the lower bound of the dependency hypothesis's credible interval — `scipy.stats.beta.ppf(DEPENDENCY_WEIGHT_PERCENTILE, α, β)` — where `DEPENDENCY_WEIGHT_PERCENTILE = 0.05` is a named constant; this discounts weakly evidenced dependencies automatically without any manually authored weight |
 | `src/topics/anchors.py` | **NEW** | Stable `<a id="..."></a>` generation and resolution for adjacent-block linking (architecture §12) |
 | `tests/test_wiki_updater.py` | **NEW** | Theme updates remain idempotent across replication, adjacent, and wholly_new cases; classification is written back to signal frontmatter |
 | `tests/test_hypothesis_updater.py` | **NEW** | Support, weakening, opposing, and new-hypothesis cases update durable belief state correctly; strength increments scale with source credibility |
@@ -37,7 +37,7 @@ Build the mechanism that turns newly scored signals into updated topic beliefs a
 - convergence computation: derive `convergence` from recent supporting-signal density and stance alignment in evidence provenance
 - entity and timeline updates: appends new entries by id (timeline only on substantive shifts; replication does not append)
 - bounded Bayesian-style updates: stronger credible evidence moves posterior more; negative evidence lowers belief rather than spawning a separate contradiction object
-- propagation rules: when a hypothesis changes meaningfully, re-evaluate dependent hypotheses and any briefing-facing conclusions they feed
+- propagation rules: when a hypothesis changes meaningfully, re-evaluate dependent hypotheses; the weight applied to each `depends_on` edge is `scipy.stats.beta.ppf(DEPENDENCY_WEIGHT_PERCENTILE, α, β)` — the lower bound of the dependency hypothesis's credible interval; a hypothesis with mean 0.71 but only 3.5 units of accumulated evidence yields a weight of ≈ 0.30 rather than 0.71, correctly discounting fragile beliefs; `DEPENDENCY_WEIGHT_PERCENTILE = 0.05` is a named constant — raising it makes propagation more conservative, lowering it more aggressive
 
 The updater should treat `depends_on` as the canonical first-pass edge field.
 
