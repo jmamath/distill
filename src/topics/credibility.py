@@ -11,11 +11,8 @@ Public API:
 
 from datetime import datetime, timezone
 
-# Freshness decays to 0 at this age regardless of topic signal_horizon.
-# Decoupled from signal_horizon intentionally: signal_horizon controls what
-# gets ingested; this constant controls how freshness is scored once a signal
-# is in the pipeline.  A paper just past the ingestion window should not hard-
-# floor to 0 — it should still carry a meaningful (low) freshness score.
+# Fixed reference window for freshness decay, independent of any ingestion filter.
+# A paper just past an ingestion cutoff should carry a low but non-zero score.
 _FRESHNESS_REFERENCE_DAYS = 365
 
 

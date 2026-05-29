@@ -17,7 +17,6 @@ thesis: >
   new data assets emerge.
 audience_ref: technical_decision_makers
 bootstrap_horizon: "2012–present (deep learning era)"
-signal_horizon: "rolling 60 days"
 scope_in:
   - Scale-unlocking corpora that enable new capability regimes
   - Quality-and-filtering advances (deduplication, curation, contamination control)

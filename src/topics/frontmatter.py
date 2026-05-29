@@ -42,7 +42,6 @@ class TopicFrontmatter(BaseModel):
     thesis: str
     audience_ref: str | None = None
     bootstrap_horizon: str | None = None
-    signal_horizon: str | None = None
     scope_in: list[str] = Field(default_factory=list)
     scope_out: list[str] = Field(default_factory=list)
 

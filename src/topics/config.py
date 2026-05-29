@@ -130,9 +130,8 @@ class TopicConfig(BaseModel):
     thesis: str
     audience_ref: str
 
-    # Time scope — separate horizons for bootstrap deep-research vs. live ingestion
+    # Time scope — historical depth for bootstrap deep-research prompt
     bootstrap_horizon: str | None = None
-    signal_horizon: str | None = None
 
     # Signal filtering
     scope_in: list[str] = Field(default_factory=list)
