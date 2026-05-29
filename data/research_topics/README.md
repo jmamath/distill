@@ -54,7 +54,6 @@ Optional fields (added incrementally as the pipeline matures):
 | Field | Type | Purpose |
 |---|---|---|
 | `bootstrap_horizon` | string | Historical lookback for the deep-research bootstrap prompt (e.g. "2012–present") |
-| `signal_horizon` | string | Recency window for live signal ingestion (e.g. "rolling 60 days") |
 | `scope_in` | list of strings | Signal classes and topics that count as in-scope |
 | `scope_out` | list of strings | Explicit exclusions |
 | `signal_classes` | list of `SignalClass` enum values | Which signal types to accept |
