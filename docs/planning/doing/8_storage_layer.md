@@ -16,7 +16,7 @@ Add the read/merge helpers that make topic files safely accessible to downstream
 | `src/topics/storage.py` | **NEW** | Save/load helpers for topic files and run outputs (frontmatter-aware read/write, list/merge by stable id); signal helpers conform to the pass-2 schema and support partial updates so the wiki updater can write back `classification` and `theme_id_assigned`; evidence helpers expose a credibility-weighted `strength` increment with provenance append; open-question helpers expose a `count` increment with provenance append |
 | `data/research_topics/README.md` | **UPDATE** | Document the flat layout from architecture §6, including signal schema reference |
 | `data/research_topics/data_advantage/hypotheses.json` | **NEW** | Durable belief store for strategic topic hypotheses; belief state is a Beta distribution parameterised by `(alpha, beta)` — a weighted accumulator over evidence strength |
-| `data/research_topics/data_advantage/evidence.json` | **NEW** | Evidence records linking claims to hypotheses; `strength` is a weighted accumulator (sum of `source_credibility` from contributing signals); `provenance` is an append-only list of `{signal_id, weight_applied}` |
+| `data/research_topics/data_advantage/evidence.json` | **NEW** | Evidence records linking claims to hypotheses; `strength` is a weighted accumulator (sum of `weight_applied` across contributing signals, where `weight_applied = source_credibility / 10`); `provenance` is an append-only list of `{signal_id, weight_applied}` |
 | `data/research_topics/data_advantage/raw/` | **NEW** | Original fetched payloads, partitioned `{yyyy-mm-dd}/{source_name}{.xml/.html}` (native format, not coerced to JSON) |
 | `tests/test_topic_storage.py` | **NEW** | Round-trip read/write for each file type; frontmatter preserved on update |
 
@@ -91,16 +91,36 @@ Field notes:
 Field notes:
 
 - `stance`: `for | against | mixed | neutral`
-- `strength`: weighted accumulator — each contributing signal appends its `source_credibility` to `provenance` and adds that value to `strength`; `null` credibility falls back to a neutral weight (0.5, defined in Plan 9)
-- `provenance`: append-only list of `{signal_id, weight_applied}`; grows as new signals support the same claim
+- `strength`: weighted accumulator on a 0–1-per-signal scale. Each contributing signal normalises its `source_credibility` (0–10, see Plan 6/7) to `weight_applied = source_credibility / 10`, appends `{signal_id, weight_applied}` to `provenance`, and adds `weight_applied` to `strength`. `null` credibility (no affiliation matched the table) falls back to a neutral `weight_applied = 0.5` (the neutral-weight constant is defined in Plan 9). Thus a single maximally-credible signal contributes `1.0`; `strength` reads as an effective count of fully-credible confirmations and never recomputes from scratch.
+- `provenance`: append-only list of `{signal_id, weight_applied}`; grows as new signals support the same claim. `weight_applied` is stored per entry so the contribution of each signal stays auditable even if the credibility table changes later
 - `summary`: human-readable description of the current evidence state; updated by the wiki updater as new signals arrive
 
 ## Open question schema (`open_questions.json`)
 
-Extends the existing bootstrapped records with two new fields (backward-compatible; absent fields default to `0` / `[]`):
+`open_questions.json` is a flat JSON array. Plan 1 bootstrap seeds each record with `id`, `question`, `theme_ids`, and `priority`. This plan extends those records with two new fields (backward-compatible; absent fields default to `0` / `[]`):
 
-- `count`: integer count of distinct signals that have raised this question
-- `provenance`: append-only list of `{signal_id}` references
+```json
+{
+  "id": "data-wall-vs-filtering",
+  "question": "Is the 'data wall' real, or an artifact of stopping before we learn to filter better? How many more MMLU points remain to be extracted from existing Common Crawl via better curation?",
+  "theme_ids": ["quality-filtering-curation"],
+  "priority": "medium",
+  "count": 2,
+  "provenance": [
+    {"signal_id": "arxiv_2026-04-26_a3f7b2c1de"},
+    {"signal_id": "arxiv_2026-05-01_b9c3d4e2fa"}
+  ]
+}
+```
+
+Field notes:
+
+- `id`: stable slug; records merge by id (the open-question updater dedups against it)
+- `question`: human-readable open question (seeded by bootstrap, editable in the wiki)
+- `theme_ids`: themes this question relates to (many-to-many; surfaced through `overview.md`)
+- `priority`: `high | medium | low`
+- `count`: integer count of distinct signals that have raised this question; incremented on each new non-duplicate `signal_id`
+- `provenance`: append-only list of `{signal_id}` references; `count` equals `len(provenance)`
 
 **Explicitly out of scope:** `overview.md`, `themes/`, `entities.json`, `timeline.json` — those come from Plan 1 (bootstrap). There is **no** `wiki/` subdirectory; the wiki is the flat human-readable tree.
 
