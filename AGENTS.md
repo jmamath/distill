@@ -104,6 +104,17 @@ Tests are offline by default — Gemini is mocked. No API key needed for `pytest
 
 ---
 
+## Planning Workflow & Source of Truth
+
+Not all docs carry equal authority. When they disagree, trust them in this order:
+
+1. **The code and tests** — the ground truth for what exists today.
+2. **Plans in `docs/planning/doing/` and `docs/planning/done/`** — authoritative and fine-grained. These reflect decisions actually made and (for `done/`) shipped. Schema examples and field semantics here are real.
+3. **Plans in `docs/planning/backlog/`** — directional, not final. They are intentionally **coarser**: details (exact schemas, thresholds, constants) are deliberately deferred and get pinned down only when a plan moves into `doing/`. Do not treat backlog field names, numbers, or structures as settled.
+4. **`docs/research_briefing_architecture.md`** — a **brainstorming / design document**, not a spec. It was written early while exploring ideas with other models and is explicitly **non-authoritative**. Where it conflicts with a plan, the plan wins. Use it for high-level intent and vocabulary, not for implementation contracts.
+
+Plans flow `backlog/ → doing/ → done/`. Refinement happens at the `doing/` boundary: that is when coarse intent becomes concrete schema. Expect — and surface — inconsistencies between the architecture doc and the plans, and between backlog plans and the implemented system.
+
 ## Specs System
 
 Task specs live in `docs/specs/` as `.test.md` files. Each spec:
