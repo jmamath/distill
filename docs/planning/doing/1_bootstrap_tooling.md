@@ -2,6 +2,26 @@
 
 **Original task id:** 15.0
 **Status: passed** — 13 tests passing as of 2026-04-25. Spec: `docs/specs/15_0_bootstrap_tooling.test.md`.
+**Reopened: 2026-06-06** — see "Revision — open questions become hypotheses" below. Moved back to `doing/` because the original `open_questions.json` contract is now superseded.
+
+---
+
+## Revision (2026-06-06) — open questions become hypotheses
+
+**Status of this revision: pending.** Everything above shipped and passed; this section reopens the plan. Open questions are no longer a separate claim store — they are hypotheses sitting near a uniform prior. The authoritative hypothesis schema, the betting-market authoring constraint, and the `resolution_criterion` field live in **Plan 8**; this revision makes bootstrap produce that shape.
+
+**Depends on:** Plan 8 (hypothesis schema + `resolution_criterion`) must land first.
+
+### What changes
+
+- `src/topics/bootstrap/seeder.py` — replace `_seed_open_questions_json` with `_seed_hypotheses_json`: write uniform-prior (`alpha = beta = 1.0`) hypothesis records to `hypotheses.json` instead of `open_questions.json`. `_seed_overview` renders its "Top Open Questions" view from low-confidence, high-priority hypotheses rather than reading a JSON file.
+- `src/topics/bootstrap/parser.py` — `DossierOpenQuestion` becomes a hypothesis-shaped model carrying `statement`, an **optional** `resolution_criterion` (metric/threshold/scope/horizon), `theme_ids`, and an initial `action_posture`. The parser validates the criterion's *shape* when present; it does **not** hard-reject on its absence — resolvability is a quality property enforced by the dossier prompt and Plan 13's eval, not by a structural parse check.
+- `src/topics/bootstrap/prompt.py` — the dossier prompt asks the model to emit hypotheses as *resolvable* directional bets (concrete enough that two reviewers would settle them the same way), using a resolution criterion wherever the statement isn't already unambiguous; magnitude → threshold bets, "which approach wins" → scoped binary bets (see Plan 8's authoring constraint). It no longer asks for vague open questions.
+- `tests/test_bootstrap_parser.py` — fixtures carry hypotheses; assert resolution criteria parse and that a record without one is rejected.
+
+### Migration of existing data
+
+The current `data/research_topics/data_advantage/open_questions.json` (10 vague questions) is regenerated into hypotheses by re-running bootstrap against a fresh dossier — an LLM run plus human review, not a script. The quality of the generated bets is validated by Plan 13's hypothesis-generation eval.
 
 ---
 

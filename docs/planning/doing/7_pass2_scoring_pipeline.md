@@ -2,6 +2,26 @@
 
 **Original task ids:** 15.3b-ii (Full-Text Adapter Extension), 15.3b-iii (Pass-2 Prompt And Signal Schema), 15.3b-iv (Pass-2 Orchestration And Signal Writing)
 **Depends on:** Plan 4 source adapter contract; Plan 3 seeded `themes/`; Plan 6 credibility functions.
+**Reopened: 2026-06-06** — see "Revision — remove `new_open_questions`" below. Moved back to `doing/` because the signal schema's `new_open_questions` field is now superseded.
+
+---
+
+## Revision (2026-06-06) — remove `new_open_questions`
+
+**Status of this revision: pending.** Sub-tasks A–D shipped and passed; this section reopens the signal schema only. Open questions are now hypotheses (see Plan 8), so the signal no longer emits free-text open questions.
+
+**Depends on:** Plan 8 (hypothesis/evidence schema). The consumer of the new shape is Plan 9 (`hypothesis_updater`).
+
+### What changes
+
+- `src/topics/models.py` — remove `new_open_questions` and the `OpenQuestion` model from `Pass2Score`.
+- `src/topics/prompts.py` — drop the `new_open_questions` instruction from `build_pass2_prompt`.
+- `src/topics/scoring.py` — stop writing `new_open_questions` into signal frontmatter (~line 358).
+- `tests/test_pass2_schema.py`, `tests/test_topic_scoring_pass2.py` — remove `new_open_questions` assertions.
+
+### One detail to settle inside this revision
+
+When a signal surfaces something the store has no hypothesis for, does it emit a `new_hypotheses` field (candidate resolvable bets), or only `new_evidences` that spawn a hypothesis in the Plan 9 updater when no match exists? Decide here before deleting `new_open_questions`. Current lean: `new_evidences`-only, with the updater synthesising the bet framing — keeps the pass-2 prompt cheap — but the resolvability discipline has to live *somewhere*, so confirm against Plan 9 before committing.
 
 ---
 

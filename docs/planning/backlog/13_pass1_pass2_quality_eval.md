@@ -1,6 +1,6 @@
 # Plan 13 — Pass-1 and Pass-2 Quality Evaluation
 
-**Depends on:** Plan 5 (pass-1 relevance filter), Plan 7 (pass-2 scoring pipeline).
+**Depends on:** Plan 5 (pass-1 relevance filter), Plan 7 (pass-2 scoring pipeline), Plan 8 (hypothesis schema), Plan 1 revision (bootstrap emits hypotheses).
 
 ---
 
@@ -55,6 +55,10 @@ functions over `(golden, run_dir) → report`.
 
 A is a prerequisite for B; B is a prerequisite for C, D.1, D.2. C, D.1, and D.2
 are independent of each other and can land in any order.
+
+- **Sub-task E — Evaluate Hypothesis Generation Quality.** Independent of the
+  pass-1/pass-2 run-dir flow above; it evaluates the bootstrap hypothesis output
+  introduced by the Plan 1 revision and reuses the LLM-as-judge infrastructure.
 
 ---
 
@@ -565,7 +569,7 @@ number is actionable (extend alias map, file adapter bug, fix golden label).
 |---|---|
 | `applicability_score`, `strategic_significance` | Bucket match: `low` (0–3), `medium` (4–7), `high` (8–10). Pass = bucket matches the golden bucket. |
 | `candidate_themes` | Top-1 `theme_id` must equal the golden `expected_top_theme`. Secondary themes graded as recall@3 against `acceptable_themes`. |
-| `new_open_questions`, `new_evidences`, `rationale` | LLM-as-judge rubric (from `evals/golden/judge_prompt.md`) returns a 1–5 score + one-line justification per field. |
+| `new_evidences`, `rationale` | LLM-as-judge rubric (from `evals/golden/judge_prompt.md`) returns a 1–5 score + one-line justification per field. (`new_open_questions` is removed by the Plan 7 revision — open questions are hypotheses now.) |
 | `paper_audience` | LLM-as-judge: same rubric, 1–5. |
 
 Numeric / categorical checks are deterministic; only free-text fields go to
@@ -609,7 +613,6 @@ Scoring model: {manifest.models.pass2}   Judge model: {JUDGE_MODEL}
 | Top-1 theme match               | 9/10  |
 | Theme recall@3                  | 0.87  |
 | Rationale judge mean            | 4.2   |
-| Open-questions judge mean       | 3.8   |
 | Evidences judge mean            | 4.1   |
 | Audience judge mean             | 4.4   |
 
@@ -624,7 +627,6 @@ Scoring model: {manifest.models.pass2}   Judge model: {JUDGE_MODEL}
 | top-1 theme | synthetic-data-generation | synthetic-data-generation | ✅ |
 | theme recall@3 | — | 2/2 acceptable found | ✅ |
 | rationale (judge) | — | 4 — covers self-play loop; misses scaling note | — |
-| open_questions (judge) | — | 3 — two questions, one is trivial | — |
 | evidences (judge) | — | 5 — all three claims faithful, stances correct | — |
 | audience (judge) | — | 5 — names "post-training infra teams" | — |
 ```
@@ -648,6 +650,44 @@ Scoring model: {manifest.models.pass2}   Judge model: {JUDGE_MODEL}
 
 ---
 
+## Sub-task E — Evaluate Hypothesis Generation Quality
+
+**Depends on:** Plan 8 (hypothesis schema), Plan 1 revision (bootstrap emits hypotheses).
+
+The Plan 1 revision makes bootstrap (and, via Plan 9, the signal pipeline) emit
+hypotheses as falsifiable directional bets. A *schema-valid* hypothesis can
+still be a *bad bet*: a vague metric, an unfalsifiable threshold, a missing
+horizon, or two claims smuggled into one record. Shape tests cannot catch any
+of that — this dimension does. It is the quality gate for the betting-market
+authoring constraint defined in Plan 8.
+
+### Changes
+
+| File | Action | Description |
+|---|---|---|
+| `evals/golden/hypotheses.yaml` | **NEW** | A handful of golden dossiers/inputs paired with human judgments on what a good generated hypothesis set looks like for each. |
+| `evals/eval_hypotheses.py` | **NEW** | Runs bootstrap hypothesis generation over the golden inputs and judges each emitted hypothesis with an LLM-as-judge rubric; writes a markdown report. |
+| `evals/golden/judge_prompt_hypotheses.md` | **NEW** | Frozen rubric scoring each hypothesis on: (1) single directional claim (atomicity); (2) **resolvability** — could two reviewers independently settle the bet the same way, given the statement plus whatever `resolution_criterion` scaffolding is present; (3) strategically relevant to the topic. Falsifiability is not a separate axis — a resolvable bet is by definition falsifiable. |
+
+### Grading
+
+| Check | Method |
+|---|---|
+| Atomicity (one directional claim) | LLM-as-judge, 1–5 |
+| Resolvability (could two reviewers independently settle the bet the same way?) | LLM-as-judge, 1–5. The `resolution_criterion` 4-tuple is the scaffold the judge looks for *where the statement isn't already unambiguous* — not a presence check, since the field is optional |
+| Strategic relevance | LLM-as-judge, 1–5 |
+
+### Verification
+
+- A hypothesis that isn't resolvable — a vague claim, or a resolution criterion
+  too loose for two reviewers to settle the same way — scores low and is named
+  in the report. A green run means the generated bets are actually resolvable.
+- A multi-claim "hypothesis" is flagged by the atomicity check.
+- Re-running on the same generated set produces a near-identical report (±1
+  judge drift).
+
+---
+
 ## Out of scope
 
 - **Inter-rater agreement against humans.** Worth doing once the 10-paper set
@@ -658,5 +698,7 @@ Scoring model: {manifest.models.pass2}   Judge model: {JUDGE_MODEL}
   not the question this plan is answering.
 - **Cross-run diff tooling.** Two reports diffed in `git diff` is good
   enough at 10 papers. A dedicated diff script is a follow-up if we scale up.
-- **Eval for the bootstrap, wiki-update, or briefing stages.** Those are
-  separate plans on separate pipeline stages.
+- **Eval for the wiki-update or briefing stages.** Those are separate plans on
+  separate pipeline stages. (Bootstrap *hypothesis-generation* quality is now
+  in scope — see Sub-task E — because it shares the judge infrastructure and
+  gates the betting-market authoring constraint.)
