@@ -69,7 +69,7 @@ Build a focused evaluation suite for the hardest part of the system: whether kno
 
 | File | Action | Description |
 |---|---|---|
-| `tests/test_hypothesis_propagation.py` | **NEW** | Multi-step fixtures that verify support, weakening, opposition, convergence, and downstream propagation |
+| `tests/test_hypothesis_propagation.py` | **NEW** | Multi-step fixtures that verify support, weakening, opposition, convergence, downstream propagation, and comparative (pairwise-edge) updates |
 | `docs/specs/15_5b_hypothesis_revision_propagation.test.md` | **NEW** | Human-readable spec describing why ripple-effect failures matter to briefing quality |
 
 ### Evaluation cases
@@ -79,9 +79,11 @@ Build a focused evaluation suite for the hardest part of the system: whether kno
 - an opposition case where evidence against a current hypothesis lowers posterior belief
 - a propagation case where changing one hypothesis updates a dependent hypothesis or briefing conclusion
 - a convergence case where multiple weak signals together change belief state
+- a comparative-update case where head-to-head evidence moves the belief on the *correct* pairwise edge; a new contender adds a fresh edge without disturbing existing ones; and a cycle (A>B, B>C, C>A) is preserved as conditional dominance rather than forced into a total order
 
 ### Verification
 
 - belief state changes are visible in durable files, not only theme prose
 - downstream derived outputs change when upstream beliefs change
 - opposing evidence remains visible in the hypothesis history and affects posterior belief
+- head-to-head evidence moves the belief on the correct pairwise edge; a new contender adds edges rather than rebuilding, and cycles are not "resolved" away into a fabricated global ranking

@@ -667,7 +667,7 @@ authoring constraint defined in Plan 8.
 |---|---|---|
 | `evals/golden/hypotheses.yaml` | **NEW** | A handful of golden dossiers/inputs paired with human judgments on what a good generated hypothesis set looks like for each. |
 | `evals/eval_hypotheses.py` | **NEW** | Runs bootstrap hypothesis generation over the golden inputs and judges each emitted hypothesis with an LLM-as-judge rubric; writes a markdown report. |
-| `evals/golden/judge_prompt_hypotheses.md` | **NEW** | Frozen rubric scoring each hypothesis on: (1) single directional claim (atomicity); (2) **resolvability** — could two reviewers independently settle the bet the same way, given the statement plus whatever `resolution_criterion` scaffolding is present; (3) strategically relevant to the topic. Falsifiability is not a separate axis — a resolvable bet is by definition falsifiable. |
+| `evals/golden/judge_prompt_hypotheses.md` | **NEW** | Frozen rubric scoring each hypothesis on: (1) single directional claim (atomicity); (2) **resolvability** — could two reviewers independently settle the bet the same way, given the statement plus whatever `resolution_criterion` scaffolding is present; (3) **shape recognition** — the bet's shape matches the claim (a relational "A beats B" claim is written as a comparative bet with `comparison` populated by the correct two subjects; a standalone claim is not spuriously marked comparative); (4) strategically relevant to the topic. Falsifiability is not a separate axis — a resolvable bet is by definition falsifiable. |
 
 ### Grading
 
@@ -675,6 +675,7 @@ authoring constraint defined in Plan 8.
 |---|---|
 | Atomicity (one directional claim) | LLM-as-judge, 1–5 |
 | Resolvability (could two reviewers independently settle the bet the same way?) | LLM-as-judge, 1–5. The `resolution_criterion` 4-tuple is the scaffold the judge looks for *where the statement isn't already unambiguous* — not a presence check, since the field is optional |
+| Shape recognition (standalone vs comparative) + subject accuracy | LLM-as-judge, 1–5. When the underlying claim is relational, is `comparison` populated with the *correct* two subjects and the statement a faithful, resolvable "A vs B"? Penalize a relational claim flattened into a standalone statement, and a standalone claim spuriously marked comparative |
 | Strategic relevance | LLM-as-judge, 1–5 |
 
 ### Verification
@@ -683,6 +684,9 @@ authoring constraint defined in Plan 8.
   too loose for two reviewers to settle the same way — scores low and is named
   in the report. A green run means the generated bets are actually resolvable.
 - A multi-claim "hypothesis" is flagged by the atomicity check.
+- A relational claim written as a standalone statement (or a standalone claim
+  spuriously marked comparative) is flagged; comparative bets name the correct
+  two subjects.
 - Re-running on the same generated set produces a near-identical report (±1
   judge drift).
 
