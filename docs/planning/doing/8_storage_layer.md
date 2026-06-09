@@ -51,6 +51,7 @@ Add the read/merge helpers that make topic files safely accessible to downstream
     "scope": "publicly documented frontier-class releases",
     "horizon": "2027-06-30"
   },
+  "comparison": null,
   "depends_on": [
     {
       "hypothesis_id": "synthetic_data_quality_rising",
@@ -64,11 +65,33 @@ Add the read/merge helpers that make topic files safely accessible to downstream
 
 **Hypothesis authoring constraint (the betting-market test):** each record must be a single *directional, resolvable bet* — a claim concrete enough that two reviewers could independently settle it the same way once evidence arrives. **Resolvability is the requirement.** The optional **resolution criterion** (metric + threshold + scope + horizon) is *scaffolding that helps achieve resolvability*, not a mandatory four-field literal: for an already-crisp binary event claim the metric and threshold are often implicit in the statement, while scope and horizon are usually still worth pinning (scope prevents one Beta from fusing different contexts; horizon makes "against" reachable and keeps the claim an actual bet). Multi-dimensional claims must be decomposed into separate records; relationships between them are expressed through `depends_on` edges.
 
-This single rule subsumes what used to be modelled as separate "open questions":
+**"Open" is a belief state, not a shape.** An open question is simply any bet sitting near its uniform prior with little accumulated evidence — high entropy, low evidence mass. It is *not* a separate object type, which is why open questions live in this store with no parallel schema (see "Open questions are hypotheses" below). This is orthogonal to the *shape* of the bet, described next.
 
-- An open question is just a hypothesis whose belief still sits near the uniform prior with little accumulated evidence. **"Open" is a belief-state (high entropy, low evidence mass), not a separate object type.**
-- **Magnitude questions** ("how far / how much?") become **threshold bets** ("metric exceeds X by horizon Y"). A single threshold is enough when only clearing one bar matters; a ladder of thresholds approximates the full curve when the magnitude itself is decision-relevant.
-- **Unframed questions** ("which approach will win?") reduce to **scoped binary bets**. Because incoming signals (papers) arrive with experiments, the framing almost always comes bundled with the evidence, so genuinely unframed uncertainty is a transient. The only residue is the open-world catch-all ("some approach nobody has proposed yet wins") — itself a valid bet that self-liquidates into named bets as evidence arrives.
+### Nature of the bet
+
+Every hypothesis is one resolvable bet; these are the shapes it takes. The shape determines which optional fields carry the resolvability:
+
+- **Standalone** — the claim stands on its own; `comparison` is `null`.
+  - *Simple binary* — a discrete outcome ("X is released", "X surpasses Y"). Often resolvable from the `statement` alone.
+  - *Magnitude* — a "how far / how much" question reduced to a threshold bet ("metric exceeds X by the horizon"); the `resolution_criterion` carries the cut. A single threshold suffices when only clearing one bar matters; a ladder of thresholds approximates the full curve when the magnitude itself is decision-relevant.
+- **Comparative** — a relational claim ("A beats B"); names the two sides under `comparison` and becomes a pairwise edge in the belief graph (Bradley-Terry-style; see Plan 9). A "which of N wins" question is a *set* of these, one per pair.
+- **Unframed** — the candidates are not yet known. This is a *transient*, not a durable shape: as incoming signals (papers, which arrive with experiments) name the options, it resolves into comparative or simple-binary bets. The only lasting residue is the open-world catch-all ("some approach nobody has proposed yet wins") — itself a valid bet that self-liquidates into named bets as evidence arrives.
+
+A populated `comparison` looks like:
+
+```json
+{
+  "id": "synthetic_beats_human_curated_for_instruction_tuning",
+  "statement": "Synthetic instruction data will outperform human-curated instruction data for post-training.",
+  "comparison": {"subject_a": "synthetic instruction data", "subject_b": "human-curated instruction data"},
+  "belief": {"alpha": 1.0, "beta": 1.0},
+  "status": "active"
+}
+```
+
+(Common fields — `theme_ids`, `resolution_criterion`, `action_posture`, timestamps — are identical to the standalone record above and omitted here for brevity.)
+
+Both `resolution_criterion` and `comparison` are **optional fields in service of resolvability**: one operationalizes an otherwise-vague claim, the other anchors a relational one. Populate whichever the bet's shape calls for — a simple binary may need neither. Crucially there is **no type tag**: code infers the shape from content (a populated `comparison` means a pairwise edge), and everything mechanical (`id`, the uniform-prior `belief`, the edge derivation) is derived rather than authored. This keeps the model on what it does well — writing a clear, resolvable claim and naming the subjects involved — and off what it does poorly: classifying into a taxonomy.
 
 Continuous parameter estimates that cannot be reduced to a threshold bet, and vague trend statements with no resolution criterion, remain out of scope for this store.
 
@@ -77,6 +100,8 @@ Field notes:
 - `status`: `active | watch | retired | superseded`
 - `belief.alpha` / `belief.beta`: Beta distribution parameters; updated by appending evidence strength (`alpha += strength` for `for`, `beta += strength` for `against`, split 50/50 for `mixed`); initialised at `alpha = beta = 1.0` (uniform — no prior belief either way)
 - All rendering derivatives (mean, confidence label, convergence label) are computed from `alpha` and `beta` at read time — none are stored
+- Belief is read as **both** its mean and its evidence mass (`alpha + beta`): a tie from no evidence (`1, 1`) and a tie from much conflicting evidence (e.g. `40, 40`) share the same mean but mean opposite things — ignorance vs entrenched conflict. Never read the mean alone
+- `comparison` (optional): `{subject_a, subject_b}` — non-null only for comparative bets, `null` for standalone ones. A non-null value is what marks the record as a pairwise edge in the belief graph; `null` means a standalone bet. No separate type flag is stored
 - `resolution_criterion`: **optional** scaffolding for resolvability — `metric` (what is measured), `threshold` (the yes/no cut), `scope` (the population/domain the claim ranges over), `horizon` (the date by which it should resolve). Populate the parts that the `statement` does not already make unambiguous. What is *required* is that the hypothesis be resolvable; a record that is not resolvable (no shared rule for what counts as for/against) is not a valid hypothesis, with or without this field
 - `action_posture`: one of the topic's `action_vocabulary` values (`ignore | monitor | prototype | invest`)
 - `depends_on.relationship`: `supports | weakens`; `weight` is 0.0–1.0; edges live on the hypothesis node (no separate edge store)
