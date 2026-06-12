@@ -146,3 +146,9 @@ Read `CODING_PRINCIPLES.md` for the full set. The highlights:
 - **File-level docstrings** are mandatory: every file states why it exists and how to run it
 - **Logging:** entry points call `logging.basicConfig` with `%(asctime)s - %(name)s - %(levelname)s - %(message)s`; all other modules use `logging.getLogger(__name__)` only
 - **Commits:** never commit without explicit instruction from the human; never add agent attribution lines
+
+---
+
+## Discussion Style
+
+When discussing ideas (as opposed to listing concrete changes), work in concept space at a high level and use clear, plain language. Build an argument as connected reasoning — each point should follow from the last, so the thread can be read top to bottom and understood as one line of thought. Prefer prose that draws the logical links explicitly over a stack of bullet points whose relationship the reader has to reconstruct. Bullets are for genuinely parallel, independent items; do not use them to fragment a single argument into disconnected shards that cost extra effort to reassemble.
