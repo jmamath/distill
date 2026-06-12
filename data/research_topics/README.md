@@ -10,19 +10,17 @@ everything the pipeline knows about a research area.
 ```
 data/research_topics/{topic_id}/
 ├── topic.md          ← Topic config (YAML frontmatter). The pipeline's primary input.
-├── taxonomy.md       ← Human-readable subtopic schema and boundaries (15.3)
 ├── overview.md       ← Landing view; mix of rendered aggregates and editorial slot (15.0)
-├── watchlist.md      ← Open questions and standalone watch items (15.0)
+├── hypotheses.json   ← Durable belief records, including low-evidence open hypotheses
+├── evidence.json     ← Evidence records linked to hypotheses and signal provenance
+├── entities.json     ← Flat array of entities (lab, dataset, method, benchmark…)
+├── timeline.json     ← Flat array of notable dated events
 ├── themes/           ← One .md per theme; body grows as signals land (15.0)
 │   └── {theme_id}.md
-├── entities/         ← One .md per entity (lab, dataset, method, benchmark…) (15.0)
-│   └── {entity_id}.md
-├── timeline/         ← One .md per notable dated event; frozen after creation (15.0)
-│   └── {yyyy-mm-dd-slug}.md
 ├── signals/          ← One .md per scored signal, partitioned by date (15.3)
 │   └── {yyyy}/{mm}/{dd}/{signal_id}.md
 ├── raw/              ← Original fetched source payloads for traceability (15.3)
-│   └── {yyyy-mm-dd}/{source_name}.json
+│   └── {yyyy-mm-dd}/{source_name}{.xml/.html}
 ├── dossiers/         ← Pasted outputs from deep-research runs (15.0)
 │   └── {purpose}_{yyyy-mm-dd}.md
 └── briefings/        ← Generated briefs; status in frontmatter (15.6)
@@ -88,6 +86,10 @@ Files only list what they point to, not what points to them. A theme declares
 its `key_entity_ids`; an entity does not store a back-list of themes. Reverse
 queries are answered by scanning frontmatter on demand. This keeps each fact
 canonical in one place.
+
+Open questions are not stored in a separate `open_questions.json` file. They
+are low-evidence hypotheses in `hypotheses.json`; rendered views such as
+`overview.md` derive their "open" sections from that belief state.
 
 ---
 

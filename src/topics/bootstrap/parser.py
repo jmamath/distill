@@ -15,7 +15,7 @@ ids and prose headings, before the seeder ever touches disk — no partial write
 on failure.
 
 Public API:
-    DossierTheme, DossierEntity, DossierTimelineEntry, DossierOpenQuestion,
+    DossierTheme, DossierEntity, DossierTimelineEntry, DossierHypothesis,
     DossierPayload — typed structures for dossier records.
     ParsedDossier      — wrapper returned by parse_dossier().
     extract_json_block(text) — returns the raw JSON string.
@@ -26,7 +26,7 @@ Public API:
 import json
 import logging
 import re
-from dataclasses import dataclass, field
+from dataclasses import dataclass
 
 from pydantic import BaseModel, Field, ValidationError
 
@@ -77,13 +77,40 @@ class DossierTimelineEntry(BaseModel):
     body: str = ""
 
 
-class DossierOpenQuestion(BaseModel):
-    """A single open question from the dossier JSON."""
+class DossierResolutionCriterion(BaseModel):
+    """Optional scaffolding that makes a hypothesis easier to resolve."""
+
+    metric: str | None = None
+    threshold: str | None = None
+    scope: str | None = None
+    horizon: str | None = None
+
+
+class DossierComparison(BaseModel):
+    """Pairwise comparison subjects for a comparative hypothesis."""
+
+    subject_a: str
+    subject_b: str
+
+
+class DossierDependency(BaseModel):
+    """A directional dependency on another hypothesis."""
+
+    hypothesis_id: str
+    relationship: str
+
+
+class DossierHypothesis(BaseModel):
+    """A resolvable directional bet from the dossier JSON."""
 
     id: str
-    question: str
+    statement: str
     theme_ids: list[str] = Field(default_factory=list)
-    priority: str = "medium"
+    action_posture: str = "monitor"
+    why_it_matters: str = ""
+    resolution_criterion: DossierResolutionCriterion | None = None
+    comparison: DossierComparison | None = None
+    depends_on: list[DossierDependency] = Field(default_factory=list)
 
 
 class DossierPayload(BaseModel):
@@ -92,7 +119,7 @@ class DossierPayload(BaseModel):
     themes: list[DossierTheme]
     entities: list[DossierEntity]
     timeline: list[DossierTimelineEntry] = Field(default_factory=list)
-    open_questions: list[DossierOpenQuestion] = Field(default_factory=list)
+    hypotheses: list[DossierHypothesis] = Field(default_factory=list)
 
 
 @dataclass
@@ -208,10 +235,10 @@ def parse_dossier(dossier_text: str) -> ParsedDossier:
         )
 
     logger.info(
-        "Parsed dossier: %d themes, %d entities, %d timeline entries, %d open questions",
+        "Parsed dossier: %d themes, %d entities, %d timeline entries, %d hypotheses",
         len(payload.themes),
         len(payload.entities),
         len(payload.timeline),
-        len(payload.open_questions),
+        len(payload.hypotheses),
     )
     return ParsedDossier(payload=payload, theme_sections=theme_sections, intro=intro)

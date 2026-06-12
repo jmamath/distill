@@ -45,12 +45,12 @@ Build the GitHub Actions workflow and context assembly script that let the human
 | File | Action | Description |
 |---|---|---|
 | `.github/workflows/pr-comment.yml` | **NEW** | Triggers on `issue_comment` events; checks for trigger phrase (`@agent`); assembles context; calls Gemini API; commits result to the PR branch |
-| `scripts/pr_agent.py` | **NEW** | Context assembly + Gemini API call: always fetches the three reference JSONs (`entities.json`, `open_questions.json`, `timeline.json`), fetches any theme files named in the comment, builds the prompt, applies the response as a file edit |
+| `scripts/pr_agent.py` | **NEW** | Context assembly + Gemini API call: always fetches the core reference JSONs (`entities.json`, `timeline.json`, `hypotheses.json`, `evidence.json`), fetches any theme files named in the comment, builds the prompt, applies the response as a file edit |
 | `docs/editorial_review_workflow.md` | **UPDATE** | Document the comment convention: `@agent <instruction> — see themes/<theme_id>.md` |
 
 ### Context assembly rules
 
-- Always include: `entities.json`, `open_questions.json`, `timeline.json` — small, stable, always relevant
+- Always include: `entities.json`, `timeline.json`, `hypotheses.json`, `evidence.json` — small, stable, always relevant
 - Theme files: fetched only if named explicitly in the comment (`— see themes/filtering-and-curation.md`); not guessed, not passed wholesale
 - PR diff: always included as the primary context for what the comment is responding to
 

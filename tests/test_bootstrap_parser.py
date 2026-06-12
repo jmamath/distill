@@ -16,6 +16,7 @@ from pathlib import Path
 import pytest
 
 from topics.bootstrap.parser import (
+    DossierComparison,
     DossierPayload,
     ParsedDossier,
     extract_json_block,
@@ -71,18 +72,36 @@ _VALID_JSON = """\
       "body": "The update refined the preference data pipeline for constitutional AI training."
     }
   ],
-  "open_questions": [
+  "hypotheses": [
     {
-      "id": "oq-synthetic-quality-threshold",
-      "question": "At what quality level does synthetic data match real-world data?",
+      "id": "synthetic_quality_matches_real_data",
+      "statement": "Synthetic data will match real-world data quality for instruction tuning in at least one frontier-relevant domain by 2027.",
       "theme_ids": ["synthetic-data-generation"],
-      "priority": "high"
+      "action_posture": "monitor",
+      "why_it_matters": "If true, static access to real-world data becomes a weaker moat.",
+      "resolution_criterion": {
+        "metric": "instruction-tuning benchmark parity in a frontier-relevant domain",
+        "threshold": "synthetic-data-trained model matches real-data baseline",
+        "scope": "publicly documented instruction-tuning experiments",
+        "horizon": "2027-12-31"
+      },
+      "comparison": null,
+      "depends_on": []
     },
     {
-      "id": "oq-rlhf-collapse",
-      "question": "How do RLHF pipelines avoid reward model collapse under synthetic data?",
+      "id": "rlhf_pipelines_avoid_synthetic_collapse",
+      "statement": "RLHF pipelines using synthetic preference data will avoid measurable reward-model collapse through 2027.",
       "theme_ids": ["rlhf-data-curation"],
-      "priority": "medium"
+      "action_posture": "monitor",
+      "why_it_matters": "If false, preference-data quality remains a durable bottleneck.",
+      "resolution_criterion": {
+        "metric": "reported reward-model degradation under synthetic preference data",
+        "threshold": "no measurable collapse versus human-preference baseline",
+        "scope": "public RLHF and preference-optimization studies",
+        "horizon": "2027-12-31"
+      },
+      "comparison": null,
+      "depends_on": []
     }
   ]
 }"""
@@ -134,18 +153,36 @@ _SECOND_JSON = """\
     }
   ],
   "timeline": [],
-  "open_questions": [
+  "hypotheses": [
     {
-      "id": "oq-synthetic-quality-threshold",
-      "question": "At what quality level does synthetic data match real-world data?",
+      "id": "synthetic_quality_matches_real_data",
+      "statement": "Synthetic data will match real-world data quality for instruction tuning in at least one frontier-relevant domain by 2027.",
       "theme_ids": ["synthetic-data-generation"],
-      "priority": "high"
+      "action_posture": "monitor",
+      "why_it_matters": "If true, static access to real-world data becomes a weaker moat.",
+      "resolution_criterion": {
+        "metric": "instruction-tuning benchmark parity in a frontier-relevant domain",
+        "threshold": "synthetic-data-trained model matches real-data baseline",
+        "scope": "publicly documented instruction-tuning experiments",
+        "horizon": "2027-12-31"
+      },
+      "comparison": null,
+      "depends_on": []
     },
     {
-      "id": "oq-rat-cost",
-      "question": "Is retrieval-augmented training cost-competitive with synthetic pipelines?",
+      "id": "retrieval_training_cost_competitive",
+      "statement": "Retrieval-augmented training will be cost-competitive with synthetic-data pipelines for enterprise NLP by 2027.",
       "theme_ids": ["retrieval-augmented-training"],
-      "priority": "medium"
+      "action_posture": "prototype",
+      "why_it_matters": "If true, data advantage shifts toward retrieval infrastructure and corpus access.",
+      "resolution_criterion": {
+        "metric": "reported total training cost at comparable quality",
+        "threshold": "retrieval-augmented training cost is within 10% of synthetic-data pipeline cost",
+        "scope": "enterprise NLP training runs with public cost reporting",
+        "horizon": "2027-12-31"
+      },
+      "comparison": null,
+      "depends_on": []
     }
   ]
 }"""
@@ -161,6 +198,57 @@ rather than relying purely on memorized patterns.
 
 ```json
 {_SECOND_JSON}
+```"""
+
+# A dossier whose single hypothesis is a *comparative* bet: it names two subjects
+# under `comparison`, which marks it as a pairwise edge in the belief graph
+# (Plan 8). Exercises the non-null `comparison` path through parser and seeder.
+_COMPARATIVE_JSON = """\
+{
+  "themes": [
+    {
+      "id": "synthetic-data-generation",
+      "name": "Synthetic Data Generation",
+      "description": "Using model-generated data to train better models.",
+      "taxonomy_ref": "synthetic-data",
+      "key_entity_ids": ["anthropic"]
+    }
+  ],
+  "entities": [
+    {
+      "id": "anthropic",
+      "name": "Anthropic",
+      "entity_type": "lab",
+      "description": "AI safety company and creator of Claude."
+    }
+  ],
+  "timeline": [],
+  "hypotheses": [
+    {
+      "id": "synthetic_beats_human_curated_for_instruction_tuning",
+      "statement": "Synthetic instruction data will outperform human-curated instruction data for post-training.",
+      "theme_ids": ["synthetic-data-generation"],
+      "action_posture": "monitor",
+      "why_it_matters": "If true, the moat shifts from owning labelled data to running generation pipelines.",
+      "comparison": {
+        "subject_a": "synthetic instruction data",
+        "subject_b": "human-curated instruction data"
+      },
+      "depends_on": []
+    }
+  ]
+}"""
+
+_COMPARATIVE_DOSSIER = f"""\
+# Data Advantage — Comparative Dossier
+
+## Theme: synthetic-data-generation
+
+A head-to-head framing: does synthetic instruction data beat human-curated data
+for post-training, holding the budget fixed?
+
+```json
+{_COMPARATIVE_JSON}
 ```"""
 
 
@@ -198,7 +286,7 @@ def test_parse_dossier_valid():
     assert len(parsed.payload.entities) == 2
     assert parsed.payload.entities[0].entity_type == "lab"
     assert len(parsed.payload.timeline) == 1
-    assert len(parsed.payload.open_questions) == 2
+    assert len(parsed.payload.hypotheses) == 2
     assert "synthetic-data-generation" in parsed.theme_sections
     assert "rlhf-data-curation" in parsed.theme_sections
     assert "This is prose context" in parsed.intro
@@ -232,7 +320,7 @@ Some prose for bar.
   ],
   "entities": [],
   "timeline": [],
-  "open_questions": []
+  "hypotheses": []
 }
 ```"""
     with pytest.raises(ValueError, match="no matching"):
@@ -251,7 +339,7 @@ Prose for an extra section with no JSON entry.
   "themes": [],
   "entities": [],
   "timeline": [],
-  "open_questions": []
+  "hypotheses": []
 }
 ```"""
     with pytest.raises(ValueError, match="no matching"):
@@ -264,7 +352,7 @@ Prose for an extra section with no JSON entry.
 
 
 def test_seeder_creates_files(tmp_path):
-    """Seeder writes themes/, entities.json, timeline.json, open_questions.json,
+    """Seeder writes themes/, entities.json, timeline.json, hypotheses.json,
     overview.md, and dossiers/."""
     parsed = parse_dossier(_VALID_DOSSIER)
     seed_topic(tmp_path, parsed, dossier_raw=_VALID_DOSSIER, dossier_date="2026-04-21")
@@ -273,7 +361,8 @@ def test_seeder_creates_files(tmp_path):
     assert (tmp_path / "themes" / "rlhf-data-curation.md").exists()
     assert (tmp_path / "entities.json").exists()
     assert (tmp_path / "timeline.json").exists()
-    assert (tmp_path / "open_questions.json").exists()
+    assert (tmp_path / "hypotheses.json").exists()
+    assert not (tmp_path / "open_questions.json").exists()
     assert (tmp_path / "overview.md").exists()
     assert (tmp_path / "dossiers" / "bootstrap_2026-04-21.md").exists()
     # Old per-file directories must not exist.
@@ -319,7 +408,7 @@ def test_seeder_idempotent(tmp_path):
     assert first_themes == second_themes, "Theme files changed on second seed run"
 
     # JSON reference files exist in both runs.
-    for json_file in ("entities.json", "timeline.json", "open_questions.json"):
+    for json_file in ("entities.json", "timeline.json", "hypotheses.json"):
         assert json_file in files_after_first
         assert json_file in files_after_second
 
@@ -344,22 +433,86 @@ def test_seeder_merges_second_dossier(tmp_path):
     assert "anthropic" in entity_ids
     assert entity_ids.count("anthropic") == 1
 
-    # open_questions.json: shared id must appear exactly once; new id present.
-    questions = json.loads((tmp_path / "open_questions.json").read_text())
-    question_ids = [q["id"] for q in questions]
-    assert question_ids.count("oq-synthetic-quality-threshold") == 1
-    assert "oq-rat-cost" in question_ids
+    # hypotheses.json: shared id must appear exactly once; new id present.
+    hypotheses = json.loads((tmp_path / "hypotheses.json").read_text())
+    hypothesis_ids = [h["id"] for h in hypotheses]
+    assert hypothesis_ids.count("synthetic_quality_matches_real_data") == 1
+    assert "retrieval_training_cost_competitive" in hypothesis_ids
 
 
-def test_overview_contains_theme_links_and_top_questions(tmp_path):
-    """overview.md contains a link to each theme and a top open questions section."""
+def test_seeder_hypothesis_record_shape(tmp_path):
+    """Seeded hypotheses carry the durable belief shape: uniform prior, status,
+    timestamps, and the optional resolution_criterion preserved when present."""
+    parsed = parse_dossier(_VALID_DOSSIER)
+    seed_topic(tmp_path, parsed, dossier_raw=_VALID_DOSSIER, dossier_date="2026-04-21")
+
+    hypotheses = json.loads((tmp_path / "hypotheses.json").read_text())
+    by_id = {h["id"]: h for h in hypotheses}
+    record = by_id["synthetic_quality_matches_real_data"]
+
+    # Mechanical fields are derived by the seeder, not authored in the dossier.
+    assert record["status"] == "active"
+    assert record["belief"] == {"alpha": 1.0, "beta": 1.0}
+    assert record["created_at"] == "2026-04-21"
+    assert record["last_updated_at"] == "2026-04-21"
+
+    # Authored fields carry through unchanged.
+    assert record["statement"].startswith("Synthetic data will match real-world data quality")
+    assert record["theme_ids"] == ["synthetic-data-generation"]
+    assert record["action_posture"] == "monitor"
+    assert record["why_it_matters"]
+    assert record["depends_on"] == []
+
+    # Optional scaffolding is preserved with all four sub-fields when present.
+    assert record["resolution_criterion"]["horizon"] == "2027-12-31"
+    assert set(record["resolution_criterion"]) == {
+        "metric", "threshold", "scope", "horizon",
+    }
+    # A standalone bet carries no comparison edge.
+    assert "comparison" not in record
+
+
+def test_parse_comparative_hypothesis(tmp_path):
+    """A comparative hypothesis parses into a typed DossierComparison rather than
+    a raw dict, so the seeder can treat it as a pairwise edge."""
+    parsed = parse_dossier(_COMPARATIVE_DOSSIER)
+
+    assert len(parsed.payload.hypotheses) == 1
+    comparison = parsed.payload.hypotheses[0].comparison
+    assert isinstance(comparison, DossierComparison)
+    assert comparison.subject_a == "synthetic instruction data"
+    assert comparison.subject_b == "human-curated instruction data"
+
+
+def test_seeder_preserves_comparison(tmp_path):
+    """The seeded record carries a non-null comparison through unchanged — the
+    only marker that distinguishes a pairwise-edge bet from a standalone one."""
+    parsed = parse_dossier(_COMPARATIVE_DOSSIER)
+    seed_topic(tmp_path, parsed, dossier_raw=_COMPARATIVE_DOSSIER, dossier_date="2026-04-21")
+
+    hypotheses = json.loads((tmp_path / "hypotheses.json").read_text())
+    record = hypotheses[0]
+
+    assert record["comparison"] == {
+        "subject_a": "synthetic instruction data",
+        "subject_b": "human-curated instruction data",
+    }
+    # A comparative bet that omits resolution_criterion does not get an empty one.
+    assert "resolution_criterion" not in record
+    # Mechanical fields are still derived as for any other hypothesis.
+    assert record["belief"] == {"alpha": 1.0, "beta": 1.0}
+    assert record["status"] == "active"
+
+
+def test_overview_contains_theme_links_and_top_hypotheses(tmp_path):
+    """overview.md contains a link to each theme and a top open hypotheses section."""
     parsed = parse_dossier(_VALID_DOSSIER)
     seed_topic(tmp_path, parsed, dossier_raw=_VALID_DOSSIER, dossier_date="2026-04-21")
 
     _, body = load_frontmatter(tmp_path / "overview.md")
     assert "themes/synthetic-data-generation.md" in body
     assert "themes/rlhf-data-curation.md" in body
-    assert "At what quality level does synthetic data match real-world data?" in body
+    assert "Synthetic data will match real-world data quality" in body
 
 
 def test_no_partial_writes_on_parse_failure(tmp_path):

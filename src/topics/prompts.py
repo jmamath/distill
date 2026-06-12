@@ -107,7 +107,6 @@ def build_pass2_prompt(
         '    {"theme_id": "<id from the list above>", "confidence": <0-10>, '
         '"rationale": "<one sentence: why this confidence level>"}\n'
         "  ],\n"
-        '  "new_open_questions": [{"text": "<question text>"}],\n'
         '  "new_evidences": [{"claim": "<claim text>", "stance": "<for|against|mixed|neutral>"}],\n'
         '  "affiliations": ["<author organization as cited in the source>"],\n'
         '  "rationale": "<markdown paragraph explaining the applicability score>"\n'

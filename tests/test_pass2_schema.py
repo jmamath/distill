@@ -16,7 +16,6 @@ from topics.config import TaxonomyEntry, TopicConfig
 from topics.models import (
     CandidateTheme,
     Evidence,
-    OpenQuestion,
     Pass2Score,
     make_signal_id,
 )
@@ -73,7 +72,6 @@ class TestPass2Score:
                     "rationale": "Core contribution is a scalable synthetic pipeline.",
                 }
             ],
-            "new_open_questions": [{"text": "How does this scale beyond 70B parameters?"}],
             "new_evidences": [
                 {
                     "claim": "Self-play achieves parity with human-curated data on benchmark X.",
@@ -118,7 +116,6 @@ class TestPass2Score:
             strategic_significance_rationale="Incremental result with limited strategic impact.",
             paper_audience="general",
             candidate_themes=[],
-            new_open_questions=[],
             new_evidences=[],
             affiliations=[],
             rationale="Marginally relevant.",

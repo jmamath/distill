@@ -28,10 +28,6 @@ The honest read for a builder in 2026: the highest-ROI data work is probably **n
 - [Annotation-Dense Datasets](themes/annotation-dense-datasets.md) — Datasets with rich structured supervision (boxes, masks, captions, scene graphs, reasoning traces) that encode priors self-supervision cannot reach efficiently.
 - [Provenance, Licensing, and the Legal Moat](themes/provenance-and-licensing.md) — Copyright rulings, licensing deals, opt-outs, and dataset audits that reshape which data is practically and legally usable.
 
-## Top Open Questions
+## Top Open Hypotheses
 
-1. Does synthetic pretraining data (Phi/Cosmopedia-style) scale past ~14B parameters, or does it hit a benchmark-gaming ceiling that independent evaluations will continue to expose?
-2. How far does R1-style reasoning-trace distillation transfer beyond math and code into domains without verifiable rewards (medicine, law, open-ended science), and is the quality ceiling set by the teacher model or by the verifier?
-3. Will exclusive licensing deals (OpenAI-Reddit, Google-Reddit, OpenAI-News Corp) produce a durable data moat, or will court rulings on fair use (Bartz, Kadrey) commoditize access to copyrighted training data?
-4. Is the 'data wall' real, or is it an artifact of stopping before we learn to filter better? DCLM and FineWeb-Edu suggest most web tokens are still wasted; how many more MMLU points remain to be extracted from existing Common Crawl via better curation?
-5. Can robotics reach a GPT-3-like scale moment via consortium data collection (Open X-Embodiment, DROID), or is embodiment-specific teleoperation inherently non-scaling, requiring a sim-to-real or video-learning breakthrough instead?
+No seeded hypotheses yet. Re-run bootstrap with the hypothesis-shaped dossier schema to populate `hypotheses.json`.

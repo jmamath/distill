@@ -1,8 +1,8 @@
 """Frontmatter models and file helpers for topic wiki Markdown files.
 
 Every wiki file (topic.md, themes/*.md, overview.md) is Markdown with a YAML
-frontmatter block.  Reference data (entities, timeline, open_questions) lives as
-flat JSON arrays at the topic root, not as per-file Markdown.
+frontmatter block. Reference data (entities, timeline, hypotheses, evidence)
+lives as flat JSON arrays at the topic root, not as per-file Markdown.
 
 This module provides:
   - Pydantic models that define the expected frontmatter schema per file type.

@@ -1,7 +1,7 @@
 # Plan 8 — Topic Storage Helpers And Layout Documentation
 
 **Original task id:** 15.4
-**Depends on:** Plan 1 (bootstrap tooling, seeds `overview.md`, `themes/`, `entities.json`, `timeline.json`, `open_questions.json`); Plan 1 pass-2 pipeline (defines the signal frontmatter schema that storage helpers must honour).
+**Depends on:** Plan 1 (bootstrap tooling, seeds `overview.md`, `themes/`, `entities.json`, `timeline.json`, `hypotheses.json`); Plan 7 pass-2 pipeline (defines the signal frontmatter schema that storage helpers must honour).
 
 ---
 
@@ -25,7 +25,7 @@ Add the read/merge helpers that make topic files safely accessible to downstream
 - raw ingested items (`raw/`)
 - scored signals (`signals/`)
 - durable belief graph state (`hypotheses.json`, `evidence.json`)
-- wiki state (flat: `themes/*.md`, `entities.json`, `timeline.json`, `open_questions.json`, `overview.md`); storage helpers do JSON load/merge by id (in addition to YAML frontmatter for themes/overview)
+- wiki state (flat: `themes/*.md`, `entities.json`, `timeline.json`, `overview.md`); storage helpers do JSON load/merge by id (in addition to YAML frontmatter for themes/overview)
 - generated briefings (`briefings/`)
 - dossiers (`dossiers/`)
 
@@ -141,7 +141,7 @@ There is **no** separate open-question *claim* schema. Per the authoring constra
 
 Consequences left for downstream plans (out of scope here):
 
-- The `open_questions.json` seeded by Plan 1 bootstrap must be migrated into uniform-prior hypotheses; bootstrap should seed `hypotheses.json` directly (bootstrap / Plan 9).
+- The legacy `open_questions.json` seeded by Plan 1 bootstrap is removed; bootstrap seeds `hypotheses.json` directly.
 - Whether a thin, **non-authoritative rendering** of low-confidence, high-priority hypotheses survives in `overview.md` as an "open questions" view is a rendering decision, not a storage one.
 
 **Explicitly out of scope:** `overview.md`, `themes/`, `entities.json`, `timeline.json` — those come from Plan 1 (bootstrap). There is **no** `wiki/` subdirectory; the wiki is the flat human-readable tree.

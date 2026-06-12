@@ -14,10 +14,10 @@
 
 ### What changes
 
-- `src/topics/bootstrap/seeder.py` — replace `_seed_open_questions_json` with `_seed_hypotheses_json`: write uniform-prior (`alpha = beta = 1.0`) hypothesis records to `hypotheses.json` instead of `open_questions.json`. `_seed_overview` renders its "Top Open Questions" view from low-confidence, high-priority hypotheses rather than reading a JSON file.
-- `src/topics/bootstrap/parser.py` — `DossierOpenQuestion` becomes a hypothesis-shaped model carrying `statement`, an **optional** `resolution_criterion` (metric/threshold/scope/horizon), `theme_ids`, and an initial `action_posture`. The parser validates the criterion's *shape* when present; it does **not** hard-reject on its absence — resolvability is a quality property enforced by the dossier prompt and Plan 13's eval, not by a structural parse check.
+- `src/topics/bootstrap/seeder.py` — replace `_seed_open_questions_json` with `_seed_hypotheses_json`: write uniform-prior (`alpha = beta = 1.0`) hypothesis records to `hypotheses.json` instead of `open_questions.json`. `_seed_overview` renders its "Top Open Hypotheses" view from low-evidence hypotheses rather than reading a separate question file.
+- `src/topics/bootstrap/parser.py` — `DossierHypothesis` carries `statement`, an **optional** `resolution_criterion` (metric/threshold/scope/horizon), `theme_ids`, and an initial `action_posture`. The parser validates the criterion's *shape* when present; it does **not** hard-reject on its absence — resolvability is a quality property enforced by the dossier prompt and Plan 13's eval, not by a structural parse check.
 - `src/topics/bootstrap/prompt.py` — the dossier prompt asks the model to emit hypotheses as *resolvable* directional bets (concrete enough that two reviewers would settle them the same way), using a resolution criterion wherever the statement isn't already unambiguous; magnitude → threshold bets, "which approach wins" → scoped binary bets (see Plan 8's authoring constraint). It no longer asks for vague open questions.
-- `tests/test_bootstrap_parser.py` — fixtures carry hypotheses; assert resolution criteria parse and that a record without one is rejected.
+- `tests/test_bootstrap_parser.py` — fixtures carry hypotheses; assert resolution criteria parse when present and that bootstrap no longer writes `open_questions.json`.
 
 ### Migration of existing data
 
@@ -36,7 +36,7 @@ Build the code that can parse a deep-research dossier and seed the topic wiki fr
 | `src/topics/frontmatter.py` | **NEW** | Pydantic models per file type + safe load/update/write for YAML frontmatter |
 | `src/topics/bootstrap/prompt.py` | **NEW** | Builds the bootstrap deep research prompt from minimal `topic.md` fields |
 | `src/topics/bootstrap/parser.py` | **NEW** | Extracts and validates the JSON block; maps records to typed structures |
-| `src/topics/bootstrap/seeder.py` | **NEW** | Writes `themes/*.md` (frontmatter + prose body), `entities.json`, `timeline.json`, `open_questions.json`, `overview.md` (rendered from intro prose + theme list + top open questions); archives raw dossier under `dossiers/` |
+| `src/topics/bootstrap/seeder.py` | **NEW** | Writes `themes/*.md` (frontmatter + prose body), `entities.json`, `timeline.json`, `hypotheses.json`, `overview.md` (rendered from intro prose + theme list + top open hypotheses); archives raw dossier under `dossiers/` |
 | `tests/test_bootstrap_parser.py` | **NEW** | Fixture dossier → expected records; idempotent re-parse |
 
 ## Contract

@@ -6,13 +6,13 @@ the seeder creates:
   themes/{theme_id}.md       — one file per theme (frontmatter + full prose section)
   entities.json              — flat JSON array of entity records
   timeline.json              — flat JSON array of timeline entries
-  open_questions.json        — flat JSON array of open question records
-  overview.md                — intro prose + theme list + top open questions
+  hypotheses.json            — flat JSON array of uniform-prior hypothesis records
+  overview.md                — intro prose + theme list + low-evidence hypotheses
   dossiers/bootstrap_{date}.md — archived raw dossier text
 
 Idempotency contract:
   - theme files are skipped if a file with the same id already exists.
-  - entities.json, timeline.json, open_questions.json: load → merge by id → write.
+  - entities.json, timeline.json, hypotheses.json: load → merge by id → write.
     New ids are appended; existing ids are unchanged.
   - overview.md is always rewritten from current state (deterministic render).
   - The raw dossier is archived with a date-based name; existing archives are
@@ -63,8 +63,8 @@ from topics.frontmatter import (
 
 logger = logging.getLogger(__name__)
 
-_PRIORITY_ORDER = {"high": 0, "medium": 1, "low": 2}
-_TOP_QUESTIONS_N = 5
+_ACTION_POSTURE_ORDER = {"invest": 0, "prototype": 1, "monitor": 2, "ignore": 3}
+_TOP_HYPOTHESES_N = 5
 
 
 def seed_topic(
@@ -93,7 +93,7 @@ def seed_topic(
     _seed_themes(topic_dir, parsed, dossier_date)
     _seed_entities_json(topic_dir, parsed.payload)
     _seed_timeline_json(topic_dir, parsed.payload)
-    _seed_open_questions_json(topic_dir, parsed.payload)
+    _seed_hypotheses_json(topic_dir, parsed.payload, dossier_date)
     _seed_overview(topic_dir, parsed, dossier_date)
     logger.info("Seeding complete for topic directory: %s", topic_dir)
 
@@ -171,14 +171,18 @@ def _seed_timeline_json(topic_dir: Path, payload: DossierPayload) -> None:
     logger.debug("Wrote timeline.json (%d total, %d new)", len(merged), len(new_entries))
 
 
-def _seed_open_questions_json(topic_dir: Path, payload: DossierPayload) -> None:
-    dest = topic_dir / "open_questions.json"
+def _seed_hypotheses_json(topic_dir: Path, payload: DossierPayload, date: str) -> None:
+    dest = topic_dir / "hypotheses.json"
     existing = _load_json_array(dest)
-    existing_ids = {q["id"] for q in existing}
-    new_entries = [q.model_dump() for q in payload.open_questions if q.id not in existing_ids]
+    existing_ids = {h["id"] for h in existing}
+    new_entries = [
+        _hypothesis_record(h.model_dump(exclude_none=True), date)
+        for h in payload.hypotheses
+        if h.id not in existing_ids
+    ]
     merged = existing + new_entries
     dest.write_text(json.dumps(merged, indent=2, ensure_ascii=False), encoding="utf-8")
-    logger.debug("Wrote open_questions.json (%d total, %d new)", len(merged), len(new_entries))
+    logger.debug("Wrote hypotheses.json (%d total, %d new)", len(merged), len(new_entries))
 
 
 def _seed_overview(topic_dir: Path, parsed: ParsedDossier, date: str) -> None:
@@ -190,17 +194,22 @@ def _seed_overview(topic_dir: Path, parsed: ParsedDossier, date: str) -> None:
         for t in parsed.payload.themes
     )
 
-    questions = _load_json_array(topic_dir / "open_questions.json")
-    sorted_questions = sorted(
-        questions,
-        key=lambda q: _PRIORITY_ORDER.get(q.get("priority", "medium"), 1),
+    hypotheses = _load_json_array(topic_dir / "hypotheses.json")
+    sorted_hypotheses = sorted(
+        hypotheses,
+        key=lambda h: (
+            _evidence_mass(h),
+            _ACTION_POSTURE_ORDER.get(h.get("action_posture", "monitor"), 2),
+        ),
     )
-    top_n = sorted_questions[:_TOP_QUESTIONS_N]
-    question_lines = "\n".join(f"{i + 1}. {q['question']}" for i, q in enumerate(top_n))
+    top_n = sorted_hypotheses[:_TOP_HYPOTHESES_N]
+    hypothesis_lines = "\n".join(
+        f"{i + 1}. {h['statement']}" for i, h in enumerate(top_n)
+    )
 
     intro = parsed.intro.strip()
     body = (f"{intro}\n\n" if intro else "") + (
-        f"## Themes\n\n{theme_lines}\n\n## Top Open Questions\n\n{question_lines}\n"
+        f"## Themes\n\n{theme_lines}\n\n## Top Open Hypotheses\n\n{hypothesis_lines}\n"
     )
 
     write_with_frontmatter(dest, fm.model_dump(), body)
@@ -225,6 +234,34 @@ def _infer_topic_id(topic_dir: Path) -> str:
         if "topic_id" in fm:
             return str(fm["topic_id"])
     return topic_dir.name
+
+
+def _hypothesis_record(hypothesis: dict, date: str) -> dict:
+    """Return a durable uniform-prior hypothesis record for initial seeding."""
+    record = {
+        "id": hypothesis["id"],
+        "statement": hypothesis["statement"],
+        "theme_ids": hypothesis.get("theme_ids", []),
+        "status": "active",
+        "belief": {"alpha": 1.0, "beta": 1.0},
+        "action_posture": hypothesis.get("action_posture", "monitor"),
+        "why_it_matters": hypothesis.get("why_it_matters", ""),
+        "depends_on": hypothesis.get("depends_on", []),
+        "created_at": date,
+        "last_updated_at": date,
+    }
+    for optional_field in ("resolution_criterion", "comparison"):
+        if optional_field in hypothesis:
+            record[optional_field] = hypothesis[optional_field]
+    return record
+
+
+def _evidence_mass(hypothesis: dict) -> float:
+    """Return the total Beta evidence mass for overview ordering."""
+    belief = hypothesis.get("belief", {})
+    alpha = float(belief.get("alpha", 1.0))
+    beta = float(belief.get("beta", 1.0))
+    return alpha + beta
 
 
 # ---------------------------------------------------------------------------

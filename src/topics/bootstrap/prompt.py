@@ -61,12 +61,21 @@ _JSON_SCHEMA = """\
       "body": "<1-2 sentences: what happened and why it mattered>"
     }
   ],
-  "open_questions": [
+  "hypotheses": [
     {
       "id": "<kebab-case-stable-id>",
-      "question": "<full question text>",
+      "statement": "<single directional, resolvable bet>",
       "theme_ids": ["<theme-id>"],
-      "priority": "<high|medium|low>"
+      "action_posture": "<ignore|monitor|prototype|invest>",
+      "why_it_matters": "<one sentence explaining the strategic implication>",
+      "resolution_criterion": {
+        "metric": "<what would be measured, or null if implicit>",
+        "threshold": "<yes/no cut, or null if implicit>",
+        "scope": "<population/domain this claim ranges over>",
+        "horizon": "<YYYY-MM-DD resolution horizon>"
+      },
+      "comparison": null,
+      "depends_on": []
     }
   ]
 }"""
@@ -106,7 +115,7 @@ signals arrive, so structural consistency matters more than exhaustiveness.
 3. What are the most significant dated milestones across the full date horizon?
    Anchor the timeline at the start of the deep learning era and trace the arc
    forward; do not restrict the timeline to recent years.
-4. What open questions or uncertainties is the field actively debating?
+4. What unresolved, strategically relevant hypotheses is the field actively debating?
 
 ## Output format
 
@@ -121,8 +130,12 @@ block** that follows the schema below precisely. The JSON block must:
 - be valid JSON (no trailing commas, no comments)
 - use stable kebab-case IDs for all `id` fields (e.g. `synthetic-data-generation`,
   not `Synthetic Data Generation`)
-- include at least 3 themes, 5 entities, 3 timeline entries, and 3 open questions
+- include at least 3 themes, 5 entities, 3 timeline entries, and 3 hypotheses
 - have every `themes[*].id` in the JSON match a `## Theme: {{id}}` heading in the prose
+- write each hypothesis as one directional, resolvable bet: two reviewers should be
+  able to settle it the same way once enough evidence arrives
+- use `resolution_criterion` wherever the statement is not already unambiguous;
+  for comparative bets, populate `comparison` with `subject_a` and `subject_b`
 
 ### Required JSON schema
 

@@ -212,7 +212,6 @@ data/research_topics/{topic_id}/
 ├── evidence.json
 ├── entities.json
 ├── timeline.json
-├── open_questions.json
 ├── themes/
 │   └── {theme_id}.md
 ├── signals/
@@ -232,12 +231,11 @@ Intermediate pipeline artifacts (`normalized/` as daily JSON bundles, etc.) can 
 | File or directory | Purpose |
 | --- | --- |
 | `topic.md` | Topic metadata and configuration in frontmatter (id, thesis, audience ref, scope, scoring hooks, enabled source adapters, taxonomy with `theme_ref` links); body optional |
-| `overview.md` | Landing view for the topic; rendered from dossier intro prose + theme summary list + top open questions from `open_questions.json` |
+| `overview.md` | Landing view for the topic; rendered from dossier intro prose, theme summary list, and low-evidence hypotheses from `hypotheses.json` |
 | `hypotheses.json` | Flat JSON array of strategic belief records; stores prior/posterior belief, rationale, implications, dependencies, and linked evidence ids |
 | `evidence.json` | Flat JSON array of evidence records linking signals to hypotheses with stance (`for`, `against`, `mixed`, `neutral`), strength, provenance, and update notes |
 | `entities.json` | Flat JSON array of entity records (id, name, entity_type, description); merged by stable id across dossiers |
 | `timeline.json` | Flat JSON array of notable dated events; merged by stable id; frozen after creation |
-| `open_questions.json` | Flat JSON array of open questions with `theme_ids` and `priority`; merged by stable id; surfaced through `overview.md` |
 | `themes/` | One file per theme; YAML frontmatter (id, name, description, taxonomy_ref, key_entity_ids, origin, timestamps) + full prose body from the dossier; body grows as signals land (see §11, §12) |
 | `signals/` | One file per scored signal (linked from themes and briefs) |
 | `raw/` | Original fetched source payloads for traceability and reprocessing |
@@ -657,9 +655,9 @@ It is a living editorial memory layer.
 
 ### Suggested wiki surfaces
 
-- `overview.md` (rendered landing page: intro prose + theme list + top open questions from `open_questions.json`)
+- `overview.md` (rendered landing page: intro prose + theme list + top open hypotheses from `hypotheses.json`)
 - `themes/{theme_id}.md` (full prose body + YAML frontmatter; anchor-stable; grows as signals land)
-- `entities.json`, `timeline.json`, `open_questions.json` (flat reference stores; machine-cross-referenced; open questions surfaced through `overview.md` and optionally per-theme footers)
+- `entities.json`, `timeline.json`, `hypotheses.json`, `evidence.json` (flat reference stores; machine-cross-referenced; open hypotheses surfaced through `overview.md` and optionally per-theme footers)
 
 ### What the wiki is for
 
@@ -767,7 +765,7 @@ The human can request targeted edits before merging by commenting on the PR. A G
 
 The agent operates in a single round-trip — it sees what it is given, nothing more. Context assembly follows two rules:
 
-- **Reference files are always included:** `entities.json`, `open_questions.json`, and `timeline.json` are small and stable. They are passed on every invocation regardless of what the comment asks. The agent always has the full reference picture.
+- **Reference files are always included:** `entities.json`, `timeline.json`, `hypotheses.json`, and `evidence.json` are small and stable. They are passed on every invocation regardless of what the comment asks. The agent always has the full reference picture.
 - **Theme files are routed by naming convention:** theme files can be large and only one or two are usually relevant. The comment itself carries the routing: `@agent reconcile with the filtering claim — see themes/filtering-and-curation.md`. The workflow fetches the named file; no guessing, no passing the entire wiki.
 
 This keeps the context window bounded and flat as the wiki grows, while giving the agent everything it needs for cross-file edits. The convention is not extra cognitive work — the reviewer already knows which theme contains the contradicting claim because they just read it.
@@ -868,7 +866,7 @@ Some questions are **resolved at the architecture level** (below). Others remain
 
 ### Resolved
 
-**3. Knowledge layer: Markdown-first, JSON-first, or hybrid?** → **Hybrid.** Markdown-first for narrative content that humans read and edit (`themes/*.md`, `overview.md`): YAML frontmatter for machine fields, prose body for humans, stable in-document anchors for adjacent updates within a theme (§12). JSON-first for reference data that is purely machine-cross-referenced (`entities.json`, `timeline.json`, `open_questions.json`): flat arrays, merged by stable id, loaded and queried by code. Forward-only links still apply: themes declare `key_entity_ids`; entities do not store back-references. Optional derived indexes are allowed — they must be regenerable from the canonical store, not a second source of truth.
+**3. Knowledge layer: Markdown-first, JSON-first, or hybrid?** → **Hybrid.** Markdown-first for narrative content that humans read and edit (`themes/*.md`, `overview.md`): YAML frontmatter for machine fields, prose body for humans, stable in-document anchors for adjacent updates within a theme (§12). JSON-first for reference data and belief state that is machine-cross-referenced (`entities.json`, `timeline.json`, `hypotheses.json`, `evidence.json`): flat arrays, merged by stable id, loaded and queried by code. Open questions are low-evidence hypotheses, not a separate store. Forward-only links still apply: themes declare `key_entity_ids`; entities do not store back-references. Optional derived indexes are allowed — they must be regenerable from the canonical store, not a second source of truth.
 
 **5. Freshness and novelty over time?**
 

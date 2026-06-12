@@ -23,7 +23,7 @@ Both the research topic and the audience are configuration, not code. The first 
 **Storage:** File-based. Topics live under `data/research_topics/{topic_id}/`. No database.
 
 **Key architectural choices:**
-- Hybrid storage: Markdown for narrative (themes, overview), JSON for reference data (entities, timeline, open questions)
+- Hybrid storage: Markdown for narrative (themes, overview), JSON for reference data and belief state (entities, timeline, hypotheses, evidence)
 - Forward-only links: themes declare `key_entity_ids`; entities don't back-reference themes
 - Stable `<a id="...">` anchors inside theme files for precise adjacent updates
 
@@ -74,10 +74,11 @@ data/
   research_topics/            ← Topic knowledge stores
     {topic_id}/
       topic.md                ← Topic config (frontmatter: id, thesis, scoring dims)
-      overview.md             ← Landing page (themes + top open questions)
+      overview.md             ← Landing page (themes + top open hypotheses)
       entities.json           ← Flat array of entity records
       timeline.json           ← Flat array of dated events
-      open_questions.json     ← Flat array of open research questions
+      hypotheses.json         ← Flat array of resolvable bets (Beta belief state)
+      evidence.json           ← Flat array of evidence linked to hypotheses
       source_credibility.json ← Institution credibility scores
       themes/                 ← One .md file per theme
       dossiers/               ← Archived deep-research bootstrap inputs

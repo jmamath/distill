@@ -28,7 +28,7 @@ script: tests/test_bootstrap_parser.py
 
 3. **Parser returns a typed ParsedDossier from a valid fixture**
    - Run `pytest research_briefing/tests/test_bootstrap_parser.py::test_parse_dossier_valid`
-   - Expect: test passes; returned `ParsedDossier` contains the expected themes, entities, timeline entries, open questions, and prose sections
+   - Expect: test passes; returned `ParsedDossier` contains the expected themes, entities, timeline entries, hypotheses, and prose sections
    > **Why:** A payload with missing or mistyped fields will silently produce an incomplete wiki — themes or entities will be absent without any error, leaving the knowledge base incomplete before the first live ingestion run.
 
 4. **Parser raises a clear error on invalid JSON**
@@ -53,7 +53,7 @@ script: tests/test_bootstrap_parser.py
 
 8. **Seeder writes all expected files from a fixture payload**
    - Run `pytest research_briefing/tests/test_bootstrap_parser.py::test_seeder_creates_files`
-   - Expect: test passes; `themes/*.md`, `entities.json`, `timeline.json`, `open_questions.json`, `overview.md`, and `dossiers/` entries all exist; `entities/` and `timeline/` per-file directories and `watchlist.md` do not exist
+   - Expect: test passes; `themes/*.md`, `entities.json`, `timeline.json`, `hypotheses.json`, `overview.md`, and `dossiers/` entries all exist; `open_questions.json`, `entities/` and `timeline/` per-file directories, and `watchlist.md` do not exist
    > **Why:** A seeder that writes the old per-file layout instead of flat JSON arrays will break downstream consumers that expect the new format, and the reverse — old consumers reading new layout — will produce empty results with no error.
 
 9. **Seeded theme file has correct frontmatter and prose body from the dossier**
@@ -68,15 +68,25 @@ script: tests/test_bootstrap_parser.py
 
 11. **Seeder merges a second dossier into JSON arrays by stable id without duplicating records**
     - Run `pytest research_briefing/tests/test_bootstrap_parser.py::test_seeder_merges_second_dossier`
-    - Expect: test passes; entities from both dossiers are present in `entities.json`; shared `anthropic` id appears exactly once; shared open question appears exactly once; new question from dossier 2 is present
-    > **Why:** A seeder that appends duplicates creates inconsistent arrays — downstream consumers pick up two conflicting records for the same entity or question, making the wiki incoherent.
+    - Expect: test passes; entities from both dossiers are present in `entities.json`; shared `anthropic` id appears exactly once; shared hypothesis id appears exactly once; new hypothesis from dossier 2 is present
+    > **Why:** A seeder that appends duplicates creates inconsistent arrays — downstream consumers pick up two conflicting records for the same entity or hypothesis, making the wiki incoherent.
 
-12. **overview.md contains a link to each theme and the top open questions**
-    - Run `pytest research_briefing/tests/test_bootstrap_parser.py::test_overview_contains_theme_links_and_top_questions`
-    - Expect: test passes; `overview.md` body contains `themes/{id}.md` links for every seeded theme and at least one open question text
-    > **Why:** An overview that does not render theme links or surface open questions provides no value as a landing page — the operator has no single place to understand what the wiki contains or what needs investigation.
+12. **overview.md contains a link to each theme and the top open hypotheses**
+    - Run `pytest research_briefing/tests/test_bootstrap_parser.py::test_overview_contains_theme_links_and_top_hypotheses`
+    - Expect: test passes; `overview.md` body contains `themes/{id}.md` links for every seeded theme and at least one hypothesis statement under "Top Open Hypotheses"
+    > **Why:** An overview that does not render theme links or surface open hypotheses provides no value as a landing page — the operator has no single place to understand what the wiki contains or what needs investigation.
 
-13. **Seeder writes no files if the parser has already rejected the input**
+13. **Seeded hypothesis records carry the durable belief shape**
+    - Run `pytest research_briefing/tests/test_bootstrap_parser.py::test_seeder_hypothesis_record_shape`
+    - Expect: test passes; each seeded hypothesis has a uniform prior (`belief.alpha == belief.beta == 1.0`), `status: active`, `created_at`/`last_updated_at` timestamps, the authored `statement`/`theme_ids`/`action_posture` carried through, and the optional `resolution_criterion` preserved with all four sub-fields when present
+    > **Why:** If bootstrap seeds the wrong belief shape — a non-uniform prior, a missing status, or a dropped resolution criterion — every downstream Bayesian update starts from corrupted state, and the betting-market resolvability guarantee silently breaks before the first ingestion run.
+
+14. **Comparative hypotheses survive parse and seed as pairwise edges**
+    - Run `pytest research_briefing/tests/test_bootstrap_parser.py::test_parse_comparative_hypothesis research_briefing/tests/test_bootstrap_parser.py::test_seeder_preserves_comparison`
+    - Expect: tests pass; a hypothesis with a populated `comparison` parses into a typed `{subject_a, subject_b}` and the seeded record carries that comparison through unchanged, with no empty `resolution_criterion` synthesized
+    > **Why:** A non-null `comparison` is the *only* marker that distinguishes a pairwise-edge bet from a standalone one (Plan 8 stores no type tag). If it is dropped or coerced on the way to disk, the belief graph silently loses every head-to-head edge and "who leads" views can never be derived.
+
+15. **Seeder writes no files if the parser has already rejected the input**
     - Run `pytest research_briefing/tests/test_bootstrap_parser.py::test_no_partial_writes_on_parse_failure`
     - Expect: test passes; the topic directory contains no new files after a failed parse attempt
     > **Why:** A partial write leaves the wiki in an undefined state — some themes seeded, others not — with no way to tell which data is trustworthy without manually inspecting every file.

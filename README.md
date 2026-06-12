@@ -13,7 +13,7 @@ The first example covers **emerging data advantages in AI**, briefed for **techn
 3. **Wiki updater** classifies signals as replication, adjacent, or new; writes to theme files, entities, and timeline accordingly
 4. **Briefing generator** produces a structured briefing for a target audience profile
 
-Storage is file-based: Markdown for narrative (themes, overview), JSON for structured data (entities, timeline, open questions). No database.
+Storage is file-based: Markdown for narrative (themes, overview), JSON for structured data and belief state (entities, timeline, hypotheses, evidence). No database.
 
 ## Setup
 

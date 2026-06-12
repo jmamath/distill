@@ -91,7 +91,6 @@ def _valid_score_payload(affiliations: list[str] | None = None) -> dict:
                 "rationale": "Core contribution is a scalable synthetic pipeline.",
             }
         ],
-        "new_open_questions": [{"text": "How does this scale beyond 70B parameters?"}],
         "new_evidences": [{"claim": "Self-play achieves parity with human data.", "stance": "for"}],
         "affiliations": affiliations if affiliations is not None else ["MIT"],
         "rationale": "This paper is highly relevant to the data advantage topic.",
@@ -213,7 +212,7 @@ class TestPass2ScoreHappyPath:
             "applicability_score", "applicability_rationale",
             "strategic_significance", "strategic_significance_rationale",
             "paper_audience", "source_credibility", "temporal_freshness",
-            "candidate_themes", "new_open_questions", "new_evidences",
+            "candidate_themes", "new_evidences",
         ):
             assert field in fm, f"missing frontmatter field: {field}"
 

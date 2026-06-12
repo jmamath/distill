@@ -34,10 +34,6 @@ class CandidateTheme(BaseModel):
     rationale: str
 
 
-class OpenQuestion(BaseModel):
-    text: str
-
-
 class Evidence(BaseModel):
     claim: str
     stance: str  # for | against | mixed | neutral
@@ -52,7 +48,6 @@ class Pass2Score(BaseModel):
     strategic_significance_rationale: str
     paper_audience: str
     candidate_themes: list[CandidateTheme] = Field(default_factory=list)
-    new_open_questions: list[OpenQuestion] = Field(default_factory=list)
     new_evidences: list[Evidence] = Field(default_factory=list)
     affiliations: list[str] = Field(default_factory=list)
     rationale: str
