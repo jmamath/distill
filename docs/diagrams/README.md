@@ -8,4 +8,5 @@ Diagrams for the research briefing incubation. Follows the repo-wide conventions
 |---|---|
 | `bootstrap_operator_flow.md` | Task 15.0 — human-in-the-loop journey from a new topic to a seeded wiki |
 | `bootstrap_parser_pipeline.md` | Task 15.0 — internal parse/validate/seed pipeline once a dossier is pasted |
+| `evidence_to_hypothesis_boundary.md` | Task 15.3b (Plan 7) — why pass-2 signals emit evidence only; hypothesis synthesis is Plan 9's `hypothesis_updater` |
 | `wiki_forward_links.md` | Forward-only link rule between topic, themes, entities, and timeline entries |
