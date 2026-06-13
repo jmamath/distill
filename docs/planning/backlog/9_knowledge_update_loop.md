@@ -40,6 +40,17 @@ Build the mechanism that turns newly scored signals into updated topic beliefs a
 
 The updater should treat `depends_on` as the canonical first-pass edge field.
 
+### Hypothesis granularity under backfill
+
+When Plan 14 backfill replays the dossier's references, the updater receives a large batch at once — ~200–300 `new_evidences` across ~100 papers — against a dossier that seeded only ~10 hypotheses. The updater's create-vs-attach decision is what sets the resulting granularity, and it can fail in two opposite directions:
+
+- **Under-capture:** every claim matches loosely onto the same ~10 seeded bets as evidence; specific resolvable sub-bets the dossier never framed (e.g. "per-dump dedup beats global dedup", "DPO matches PPO on capability but not robustness") get flattened into "more mass on hypothesis X." Well-evidenced, low-resolution.
+- **Over-capture:** a hypothesis is minted on every unmatched claim; `hypotheses.json` floods with paper-level findings ("method X beats Y on benchmark Z") that fail the betting-market test (Plan 8) and make the low-confidence "open questions" view unreadable.
+
+The updater must sit between these, but **how** is an open design question — not yet decided. One candidate direction, recorded so it is not lost: gate new-hypothesis creation by the same resolvability + strategic-significance bar that governs bootstrap authoring (Plan 8), so a claim mints a new bet only when it is **both** unmatched against the existing store **and** clears that bar — otherwise it attaches as evidence to the nearest matching hypothesis, or is dropped as non-strategic. Under this direction backfill claims would *mostly thicken* the seeded hypotheses, minting new ones sparingly. Other directions are possible (e.g. a clustering/merge pass that mints freely then consolidates, or a human-review queue for borderline mints); the choice is deferred until this plan moves into `doing/`.
+
+A bootstrap-side lever owned by Plan 1 is complementary to whatever is chosen here: seeding more hypotheses up front (including claims the literature treats as largely *settled*, all at uniform `Beta(1,1)`) gives backfill richer scaffolding to attach to, and accumulated mass then differentiates them — settled claims acquire high one-sided mass, genuinely open ones stay near 50/50. Richer seeds reduce how often the updater must mint at all, which lowers the stakes of the gating decision above.
+
 ### Landscape fit and technical novelty axes
 
 The `replication / adjacent / wholly_new` classification produced by `wiki_updater.py` is the operational form of two scoring concepts:
