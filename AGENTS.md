@@ -4,6 +4,16 @@
 
 ---
 
+## How to work with me
+
+**I work on this project part-time.** I am not in the code every day, and I lose the low-level details between sessions. Pitch things at the level of concepts and consequences, not implementation mechanics. Assume I have forgotten the wiring and need the shape of the situation rebuilt before any detail lands.
+
+**Lead with the bottom line (BLUF — Bottom Line Up Front).** Open every answer with the conclusion or recommendation in one or two sentences — the "so what" — before any supporting detail. I should be able to stop reading after the first lines and still have the answer. Caveats, evidence, and specifics go *below* the bottom line, and only as deep as the decision in front of me needs.
+
+**Stay high level by default.** When you analyse something — dependencies, trade-offs, unclear points — give me the shape and a recommended path, not an exhaustive low-level inventory. Name files and line numbers only when I ask to go deeper, or when I need them to act. If you find yourself producing a long list of fine-grained items, stop and collapse it into the two or three decisions that actually matter; that is what I can act on part-time.
+
+---
+
 ## What is Distill?
 
 A modular research knowledge and briefing engine. Distill monitors sources (arXiv, research lab blogs), scores incoming signals against a durable topic wiki, updates the wiki with relevant findings, and generates strategic briefings tailored to a target audience — all without a dashboard or app.
@@ -116,6 +126,12 @@ Not all docs carry equal authority. When they disagree, trust them in this order
 
 Plans flow `backlog/ → doing/ → done/`. Refinement happens at the `doing/` boundary: that is when coarse intent becomes concrete schema. Expect — and surface — inconsistencies between the architecture doc and the plans, and between backlog plans and the implemented system.
 
+### Done plans are immutable — never reopen them
+
+A plan in `done/` is a record of what shipped. **Do not edit or reopen it when scope changes.** If new work touches an area a done plan covered, write a **new plan** for the remaining work and place it in `doing/`. Reference the older plan from the new one — never the reverse.
+
+This exists because reopening done plans creates **circular dependencies**. We hit exactly this: Plan 8 depended on Plans 1 and 7, while reopened revisions *inside* Plans 1 and 7 depended back on Plan 8 — an unresolvable cycle that made the whole chain hard to reason about. Keep dependencies **one-directional**: a newer plan may depend on an older, shipped one, never the other way around. If you ever spot a cycle, it means a done plan was reopened — split the new work out into its own plan instead.
+
 ## Specs System
 
 Task specs live in `docs/specs/` as `.test.md` files. Each spec:
@@ -147,8 +163,3 @@ Read `CODING_PRINCIPLES.md` for the full set. The highlights:
 - **Logging:** entry points call `logging.basicConfig` with `%(asctime)s - %(name)s - %(levelname)s - %(message)s`; all other modules use `logging.getLogger(__name__)` only
 - **Commits:** never commit without explicit instruction from the human; never add agent attribution lines
 
----
-
-## Discussion Style
-
-When discussing ideas (as opposed to listing concrete changes), work in concept space at a high level and use clear, plain language. Build an argument as connected reasoning — each point should follow from the last, so the thread can be read top to bottom and understood as one line of thought. Prefer prose that draws the logical links explicitly over a stack of bullet points whose relationship the reader has to reconstruct. Bullets are for genuinely parallel, independent items; do not use them to fragment a single argument into disconnected shards that cost extra effort to reassemble.
