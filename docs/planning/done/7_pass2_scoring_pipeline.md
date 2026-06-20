@@ -2,26 +2,8 @@
 
 **Original task ids:** 15.3b-ii (Full-Text Adapter Extension), 15.3b-iii (Pass-2 Prompt And Signal Schema), 15.3b-iv (Pass-2 Orchestration And Signal Writing)
 **Depends on:** Plan 4 source adapter contract; Plan 3 seeded `themes/`; Plan 6 credibility functions.
-**Reopened: 2026-06-06** — see "Revision — remove `new_open_questions`" below. Moved back to `doing/` because the signal schema's `new_open_questions` field is now superseded.
 
----
-
-## Revision (2026-06-06) — remove `new_open_questions`
-
-**Status of this revision: implemented.** Sub-tasks A–D shipped and passed; this section reopens the signal schema only. Open questions are now hypotheses (see Plan 8), so the signal no longer emits free-text open questions.
-
-**Depends on:** Plan 8 (hypothesis/evidence schema). The consumer of the new shape is Plan 9 (`hypothesis_updater`).
-
-### What changes
-
-- `src/topics/models.py` — remove `new_open_questions` and the `OpenQuestion` model from `Pass2Score`.
-- `src/topics/prompts.py` — drop the `new_open_questions` instruction from `build_pass2_prompt`.
-- `src/topics/scoring.py` — stop writing `new_open_questions` into signal frontmatter (~line 358).
-- `tests/test_pass2_schema.py`, `tests/test_topic_scoring_pass2.py` — remove `new_open_questions` assertions.
-
-### One detail to settle inside this revision
-
-When a signal surfaces something the store has no hypothesis for, it emits `new_evidences` only. Plan 9 owns the synthesis of a new resolvable hypothesis from unmatched evidence, because that step needs access to the current hypothesis store rather than just the signal text. This boundary is diagrammed in `docs/diagrams/evidence_to_hypothesis_boundary.md`.
+> **Superseded scope:** The signal schema originally emitted a `new_open_questions` field. That field was later removed (open questions are now hypotheses). The removal shipped and is recorded as its own plan — **Plan 16** — so this file is left as the immutable record of the original pass-2 pipeline.
 
 ---
 

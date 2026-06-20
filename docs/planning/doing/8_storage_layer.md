@@ -141,7 +141,7 @@ There is **no** separate open-question *claim* schema. Per the authoring constra
 
 Consequences left for downstream plans (out of scope here):
 
-- The legacy `open_questions.json` seeded by Plan 1 bootstrap is removed; bootstrap seeds `hypotheses.json` directly.
+- The legacy `open_questions.json` is removed and bootstrap seeds `hypotheses.json` directly. The bootstrap *code* already does this; migrating the live `data_advantage` data is tracked in **Plan 15**.
 - Whether a thin, **non-authoritative rendering** of low-confidence, high-priority hypotheses survives in `overview.md` as an "open questions" view is a rendering decision, not a storage one.
 
 **Explicitly out of scope:** `overview.md`, `themes/`, `entities.json`, `timeline.json` — those come from Plan 1 (bootstrap). There is **no** `wiki/` subdirectory; the wiki is the flat human-readable tree.
