@@ -10,6 +10,14 @@ Build the mechanism that turns newly scored signals into updated topic beliefs a
 
 ---
 
+## Storage boundary (Plan 8)
+
+Plan 8 owns the belief-graph **storage mechanics** — load/save and merge-by-id for `hypotheses.json` and `evidence.json`, the credibility-weighted `strength` increment with provenance append, the Beta `alpha`/`beta` belief update, and the `NEUTRAL_CREDIBILITY_WEIGHT` constant. This plan owns the **decisions** that drive them: which hypothesis a signal's evidence attaches to, stance resolution, dedup, and when to mint a new hypothesis. `hypothesis_updater.py` and `wiki_updater.py` call Plan 8's helpers rather than reimplementing the mutation logic.
+
+This plan also owns all **signal-specific storage**, which was deliberately kept out of Plan 8 so that plan stays focused on the belief graph: the `SignalFrontmatter` model, the signal read helper, and writing the resolved `classification` and `theme_id_assigned` back to the signal frontmatter (see `wiki_updater.py` below).
+
+---
+
 ## Sub-task A — Hypothesis And Wiki Update Loop
 
 ### Changes

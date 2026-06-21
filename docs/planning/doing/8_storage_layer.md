@@ -5,25 +5,79 @@
 
 ---
 
+## Responsibility (this plan)
+
+```mermaid
+flowchart TB
+    seeder["bootstrap seeder — seed_topic()"]
+    scorer["pass-2 pipeline — pass2_score()"]
+
+    subgraph storage["storage.py — canonical front door (THIS PLAN)"]
+        direction TB
+        subgraph l2["Layer 2 — belief-graph accessors (new)"]
+            hyp["hypotheses<br/>load / save / merge"]
+            ev["evidence<br/>strength + provenance"]
+            bel["belief<br/>update α/β"]
+        end
+        subgraph l1["Layer 1 — file primitives"]
+            fm["frontmatter read/write<br/>(re-exported)"]
+            js["JSON array + merge-by-id<br/>(lifted from seeder)"]
+        end
+    end
+
+    data[("data files on disk<br/>hypotheses.json, evidence.json, raw/<br/>themes/*.md, entities.json, timeline.json")]
+    plan9["Plan 9 — signal storage<br/>SignalFrontmatter, signal read,<br/>classification / theme_id write-back"]
+
+    seeder --> storage
+    scorer --> storage
+    storage --> data
+    scorer -. "writes signals/ directly" .-> data
+    storage -. "signals deferred" .-> plan9
+
+    style hyp fill:#d9f2e6,stroke:#1a7f52,color:#0b3d26
+    style ev fill:#d9f2e6,stroke:#1a7f52,color:#0b3d26
+    style bel fill:#d9f2e6,stroke:#1a7f52,color:#0b3d26
+    style js fill:#d9f2e6,stroke:#1a7f52,color:#0b3d26
+    style fm fill:#dbe9fb,stroke:#2b6cb0,color:#0b2d52
+    style seeder fill:#eeeeec,stroke:#9a9a96,color:#333333
+    style scorer fill:#eeeeec,stroke:#9a9a96,color:#333333
+    style data fill:#eeeeec,stroke:#9a9a96,color:#333333
+    style plan9 fill:#fdeecf,stroke:#b9821f,color:#5c3d00
+```
+
+*Green = new in this plan · blue = existing module, reused · grey = callers and on-disk data (not part of the API) · amber = deferred to Plan 9.*
+
 Add the read/merge helpers that make topic files safely accessible to downstream stages, seed the initial `hypotheses.json` and `evidence.json`, and document the full flat layout.
 
 **Why this matters:** A strategic briefing product cannot rely on per-run summaries alone. It needs durable topic memory that persists across runs. The signal schema is already defined by the pass-2 pipeline plan; this task adds the read/merge helpers and documents the complete on-disk contract so every downstream stage builds against a stable foundation.
+
+## Scope and design
+
+`storage.py` is the **canonical storage front door**: downstream stages import their storage operations from here, not from helpers scattered across the codebase. It is organised in three layers:
+
+- **File primitives** — frontmatter read/write/update (re-exported from the existing `frontmatter.py`, not relocated) and JSON-array load + merge-by-id (lifted out of the bootstrap seeder so there is one copy).
+- **Belief-graph accessors** — load/save and merge-by-id for `hypotheses.json` and `evidence.json`, the credibility-weighted `strength` increment with provenance append, and the Beta `alpha`/`beta` belief update. These are pure storage *mechanics*; the *decision* of which hypothesis a signal touches belongs to Plan 9.
+- **Raw payloads** — a helper to persist original fetched payloads under `raw/`.
+
+This is a **consolidation, not a refactor**: the bootstrap seeder and the pass-2 scorer keep working as they do, calling down into these helpers. No `storage/` package is introduced — a single module is enough until it demonstrably outgrows one file.
+
+**Signals are out of scope here.** They are already written by the Plan 7 scorer and read through the frontmatter primitive. All signal-specific storage — a `SignalFrontmatter` model, a signal read helper, and the `classification` / `theme_id_assigned` write-back — lives with its consumer, the wiki updater, in **Plan 9**. The seam: Plan 8 owns *how the belief graph is stored and safely mutated*; Plan 9 owns *what changes when a signal arrives*.
 
 ## Changes
 
 | File | Action | Description |
 |---|---|---|
-| `src/topics/storage.py` | **NEW** | Save/load helpers for topic files and run outputs (frontmatter-aware read/write, list/merge by stable id); signal helpers conform to the pass-2 schema and support partial updates so the wiki updater can write back `classification` and `theme_id_assigned`; evidence helpers expose a credibility-weighted `strength` increment with provenance append |
+| `src/topics/storage.py` | **NEW** | The canonical storage front door. Re-exports the frontmatter read/write/update primitives and absorbs the JSON-array load + merge-by-id helper lifted out of the bootstrap seeder (one copy). Adds belief-graph accessors for `hypotheses.json` and `evidence.json` — load/save, merge by stable id, the credibility-weighted `strength` increment with provenance append, and the Beta `alpha`/`beta` belief update — plus a `raw/` payload save helper. **Signal-specific storage (a `SignalFrontmatter` model, signal read, and the `classification`/`theme_id_assigned` write-back) is out of scope here — it lives with its consumer in Plan 9.** |
 | `data/research_topics/README.md` | **UPDATE** | Document the flat layout from architecture §6, including signal schema reference |
 | `data/research_topics/data_advantage/hypotheses.json` | **NEW** | Durable belief store for strategic topic hypotheses; belief state is a Beta distribution parameterised by `(alpha, beta)` — a weighted accumulator over evidence strength. Each record is a single directional, resolvable bet (resolvability is required; the `resolution_criterion` 4-tuple is optional scaffolding); open questions are represented here as uniform-prior records (there is no separate open-questions claim store) |
 | `data/research_topics/data_advantage/evidence.json` | **NEW** | Evidence records linking claims to hypotheses; `strength` is a weighted accumulator (sum of `weight_applied` across contributing signals, where `weight_applied = source_credibility / 10`); `provenance` is an append-only list of `{signal_id, weight_applied}` |
-| `data/research_topics/data_advantage/raw/` | **NEW** | Original fetched payloads, partitioned `{yyyy-mm-dd}/{source_name}{.xml/.html}` (native format, not coerced to JSON) |
-| `tests/test_topic_storage.py` | **NEW** | Round-trip read/write for each file type; frontmatter preserved on update |
+| `data/research_topics/data_advantage/raw/` | **NEW** | Original fetched payloads, partitioned `{yyyy-mm-dd}/{source_name}{.xml/.html}` (native format, not coerced to JSON); a `.gitkeep` tracks the otherwise-empty directory |
+| `tests/test_topic_storage.py` | **NEW** | Round-trip read/write for the belief-graph stores (`hypotheses.json`, `evidence.json`) and the wiki JSON stores; merge-by-id is idempotent; YAML frontmatter preserved on partial updates of themes/overview |
 
 ## Storage layout must support
 
 - raw ingested items (`raw/`)
-- scored signals (`signals/`)
+- scored signals (`signals/`) — written by the Plan 7 scorer; signal-specific read/update helpers live in Plan 9, not here
 - durable belief graph state (`hypotheses.json`, `evidence.json`)
 - wiki state (flat: `themes/*.md`, `entities.json`, `timeline.json`, `overview.md`); storage helpers do JSON load/merge by id (in addition to YAML frontmatter for themes/overview)
 - generated briefings (`briefings/`)
@@ -131,7 +185,7 @@ Field notes:
 Field notes:
 
 - `stance`: `for | against | mixed | neutral`
-- `strength`: weighted accumulator on a 0–1-per-signal scale. Each contributing signal normalises its `source_credibility` (0–10, see Plan 6/7) to `weight_applied = source_credibility / 10`, appends `{signal_id, weight_applied}` to `provenance`, and adds `weight_applied` to `strength`. `null` credibility (no affiliation matched the table) falls back to a neutral `weight_applied = 0.5` (the neutral-weight constant is defined in Plan 9). Thus a single maximally-credible signal contributes `1.0`; `strength` reads as an effective count of fully-credible confirmations and never recomputes from scratch.
+- `strength`: weighted accumulator on a 0–1-per-signal scale. Each contributing signal normalises its `source_credibility` (0–10, see Plan 6/7) to `weight_applied = source_credibility / 10`, appends `{signal_id, weight_applied}` to `provenance`, and adds `weight_applied` to `strength`. `null` credibility (no affiliation matched the table) falls back to a neutral `weight_applied = 0.5`, defined here as a named constant `NEUTRAL_CREDIBILITY_WEIGHT = 0.5` (Plan 9 references it and may re-home it). Thus a single maximally-credible signal contributes `1.0`; `strength` reads as an effective count of fully-credible confirmations and never recomputes from scratch.
 - `provenance`: append-only list of `{signal_id, weight_applied}`; grows as new signals support the same claim. `weight_applied` is stored per entry so the contribution of each signal stays auditable even if the credibility table changes later
 - `summary`: human-readable description of the current evidence state; updated by the wiki updater as new signals arrive
 
