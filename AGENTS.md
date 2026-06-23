@@ -146,7 +146,7 @@ Task specs live in `docs/specs/` as `.test.md` files. Each spec:
 Read `CODING_PRINCIPLES.md` for the full set. The highlights:
 
 1. **KISS** — Simplicity and readability over cleverness
-2. **Design by Contract** — Every function has a docstring with inputs, outputs, exceptions
+2. **Design by Contract** — Every function has a docstring stating its *contract*, not its mechanics. Keep what a caller needs to use it correctly without reading the body: intent, preconditions (inputs + constraints), postconditions (observable guarantees like "returns a new object, input not mutated"), invariants, caller responsibilities, and exceptions. Cut prose that re-narrates the steps — the body is the only honest description of *how*, and narration drifts out of sync. Enumerating control-flow branches counts as mechanics even when phrased as behaviour (e.g. listing what each `if/elif` arm does just transcribes the ladder); branch *rationale* the code can't reveal goes as a terse inline comment at that branch. Don't hardcode a constant's literal value in prose — reference the named constant.
 3. **Strict Type Hinting** — Full annotations everywhere; no `Any`
 4. **Fail Fast** — Raise on contract breach, never swallow errors silently
 5. **Isolate Side-Effects** — Separate pure logic from I/O
