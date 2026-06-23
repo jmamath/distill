@@ -48,7 +48,6 @@ Usage (Python API):
 
 import argparse
 import datetime
-import json
 import logging
 import sys
 from pathlib import Path
@@ -60,6 +59,7 @@ from topics.frontmatter import (
     load_frontmatter,
     write_with_frontmatter,
 )
+from topics.storage import load_json_array, merge_by_id, save_json_array
 
 logger = logging.getLogger(__name__)
 
@@ -153,36 +153,26 @@ def _seed_themes(topic_dir: Path, parsed: ParsedDossier, date: str) -> None:
 
 def _seed_entities_json(topic_dir: Path, payload: DossierPayload) -> None:
     dest = topic_dir / "entities.json"
-    existing = _load_json_array(dest)
-    existing_ids = {e["id"] for e in existing}
-    new_entries = [e.model_dump() for e in payload.entities if e.id not in existing_ids]
-    merged = existing + new_entries
-    dest.write_text(json.dumps(merged, indent=2, ensure_ascii=False), encoding="utf-8")
-    logger.debug("Wrote entities.json (%d total, %d new)", len(merged), len(new_entries))
+    merged = merge_by_id(load_json_array(dest), [e.model_dump() for e in payload.entities])
+    save_json_array(dest, merged)
+    logger.debug("Wrote entities.json (%d total)", len(merged))
 
 
 def _seed_timeline_json(topic_dir: Path, payload: DossierPayload) -> None:
     dest = topic_dir / "timeline.json"
-    existing = _load_json_array(dest)
-    existing_ids = {e["id"] for e in existing}
-    new_entries = [e.model_dump() for e in payload.timeline if e.id not in existing_ids]
-    merged = existing + new_entries
-    dest.write_text(json.dumps(merged, indent=2, ensure_ascii=False), encoding="utf-8")
-    logger.debug("Wrote timeline.json (%d total, %d new)", len(merged), len(new_entries))
+    merged = merge_by_id(load_json_array(dest), [e.model_dump() for e in payload.timeline])
+    save_json_array(dest, merged)
+    logger.debug("Wrote timeline.json (%d total)", len(merged))
 
 
 def _seed_hypotheses_json(topic_dir: Path, payload: DossierPayload, date: str) -> None:
     dest = topic_dir / "hypotheses.json"
-    existing = _load_json_array(dest)
-    existing_ids = {h["id"] for h in existing}
-    new_entries = [
-        _hypothesis_record(h.model_dump(exclude_none=True), date)
-        for h in payload.hypotheses
-        if h.id not in existing_ids
+    incoming = [
+        _hypothesis_record(h.model_dump(exclude_none=True), date) for h in payload.hypotheses
     ]
-    merged = existing + new_entries
-    dest.write_text(json.dumps(merged, indent=2, ensure_ascii=False), encoding="utf-8")
-    logger.debug("Wrote hypotheses.json (%d total, %d new)", len(merged), len(new_entries))
+    merged = merge_by_id(load_json_array(dest), incoming)
+    save_json_array(dest, merged)
+    logger.debug("Wrote hypotheses.json (%d total)", len(merged))
 
 
 def _seed_overview(topic_dir: Path, parsed: ParsedDossier, date: str) -> None:
@@ -194,7 +184,7 @@ def _seed_overview(topic_dir: Path, parsed: ParsedDossier, date: str) -> None:
         for t in parsed.payload.themes
     )
 
-    hypotheses = _load_json_array(topic_dir / "hypotheses.json")
+    hypotheses = load_json_array(topic_dir / "hypotheses.json")
     sorted_hypotheses = sorted(
         hypotheses,
         key=lambda h: (
@@ -214,16 +204,6 @@ def _seed_overview(topic_dir: Path, parsed: ParsedDossier, date: str) -> None:
 
     write_with_frontmatter(dest, fm.model_dump(), body)
     logger.debug("Wrote overview.md")
-
-
-def _load_json_array(path: Path) -> list[dict]:
-    if not path.exists():
-        return []
-    try:
-        data = json.loads(path.read_text(encoding="utf-8"))
-        return data if isinstance(data, list) else []
-    except (json.JSONDecodeError, OSError):
-        return []
 
 
 def _infer_topic_id(topic_dir: Path) -> str:

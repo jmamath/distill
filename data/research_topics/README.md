@@ -80,6 +80,60 @@ topics. A profile is a Markdown file with YAML frontmatter:
 
 ---
 
+## Storage access: `src/topics/storage.py`
+
+`storage.py` is the **canonical storage front door**. Downstream stages import
+their storage operations from there rather than re-deriving file logic, so the
+on-disk contract has one owner. It layers:
+
+- **File primitives** — frontmatter read/write/update (re-exported from
+  `frontmatter.py`) and flat JSON-array `load` / `save` / `merge_by_id`.
+- **Belief-graph accessors** — `load`/`save` for `hypotheses.json` and
+  `evidence.json`, the credibility-weighted `strength` increment with provenance
+  append, and the Beta `alpha`/`beta` belief update. These are pure storage
+  *mechanics*; *which* hypothesis a signal touches is decided by the updater
+  (Plan 9), not here.
+- **Raw payloads** — `save_raw_payload` persists fetched bytes under `raw/` in
+  native format.
+
+`merge_by_id` keeps existing records unchanged and appends only unseen ids, so
+re-running the seeder or replaying a batch is idempotent — it never duplicates or
+silently rewrites a row. Updating an existing record is a deliberate load → edit
+→ save, not a side effect of merging.
+
+## Belief graph: `hypotheses.json` and `evidence.json`
+
+The belief graph is stored as two flat JSON arrays (no graph database):
+
+- **`hypotheses.json`** — node state. Each record is a single *directional,
+  resolvable bet*; belief is a Beta distribution `(alpha, beta)` initialised at
+  the uniform prior `(1.0, 1.0)`. All rendering derivatives (mean, confidence,
+  convergence) are computed at read time, never stored. Read belief as **both**
+  its mean and its evidence mass (`alpha + beta`) — a `(1,1)` tie means
+  ignorance, a `(40,40)` tie means entrenched conflict. Dependency edges live on
+  the record under `depends_on`.
+- **`evidence.json`** — evidence updates linked to hypotheses. `stance` is
+  `for | against | mixed` (a `neutral` verdict is filtered at link time and never
+  stored — belief-irrelevant facts route to `entities.json`/`timeline.json`).
+  `strength` is a weighted accumulator (sum of `weight_applied = source_credibility / 10`
+  across contributing signals; null credibility falls back to a fixed neutral
+  weight, `storage.NEUTRAL_CREDIBILITY_WEIGHT`); `provenance` is an append-only
+  list of `{signal_id, weight_applied}`.
+
+Open questions are **not** a separate store: an open question is simply a
+low-evidence hypothesis sitting near its uniform prior. The full field-level
+schema and authoring rules live in the storage plan
+(`docs/planning/.../8_storage_layer.md`).
+
+## Signal files: `signals/{yyyy}/{mm}/{dd}/{signal_id}.md`
+
+Scored signals are Markdown with YAML frontmatter, written by the pass-2 scorer
+(`src/topics/scoring.py`). Frontmatter carries the scoring outputs the belief
+graph consumes — `source_credibility`, `new_evidences` (each `{claim, stance}`),
+`candidate_themes`, and applicability/significance scores. Signal-specific
+read/update helpers (the `classification` and `theme_id_assigned` write-back)
+live with the wiki updater in Plan 9, not in `storage.py`.
+
 ## Reference rule: forward-only links
 
 Files only list what they point to, not what points to them. A theme declares
