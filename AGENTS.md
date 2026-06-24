@@ -132,6 +132,10 @@ A plan in `done/` is a record of what shipped. **Do not edit or reopen it when s
 
 This exists because reopening done plans creates **circular dependencies**. We hit exactly this: Plan 8 depended on Plans 1 and 7, while reopened revisions *inside* Plans 1 and 7 depended back on Plan 8 — an unresolvable cycle that made the whole chain hard to reason about. Keep dependencies **one-directional**: a newer plan may depend on an older, shipped one, never the other way around. If you ever spot a cycle, it means a done plan was reopened — split the new work out into its own plan instead.
 
+### Structure plans as pyramids, not feature lists
+
+A plan is read by a part-time human rebuilding context, so its shape carries as much weight as its content. Open a non-trivial plan with a short "what this plan does" framing and a **responsibility diagram** that maps each branch of the work to the part of the system it changes — the reader should grasp the whole from the top before descending into any one branch. Below that, organise by the **pyramid principle**: every section leads with its single governing claim, and the supporting detail hangs underneath it grouped by what it is *about*. Never leave a flat list of co-equal features (a "must support: …" bullet pile is the warning sign); collapse it into the two or three ideas that actually govern it. Prefer plain language over insider shorthand — write what a newcomer would recognise ("create a new hypothesis", not "mint a node") and reach for a domain term only where it earns its precision (`Beta(α, β)` is worth keeping; "mint threshold" is not). Restructuring this way also surfaces gaps: the moment conceptually similar steps sit together, a missing decision among them becomes visible — fix it in place.
+
 ## Specs System
 
 Task specs live in `docs/specs/` as `.test.md` files. Each spec:
