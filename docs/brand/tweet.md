@@ -80,3 +80,17 @@ Reading more wasn't my problem. Remembering and compounding insight was.
 I wrote about why I kept restarting—and why I'm building Distill: a system that continuously tracks papers, remembers what matters, and updates conclusions as new evidence arrives.
 This is the first post on why I'm building it in public.
 LINK
+
+---
+date: 2026-06-24
+type: decision
+---
+In your agentic coding workflow, have you ever opened a plan written by your agent or a colleague's agent and felt this was written in robot language?
+
+The usual output is a long bullet list. "Must support: A, B, C." It looks complete. But read it cold and you have no idea what's going on.
+
+Two things helped me fix this.
+
+A responsibility diagram at the top: each branch of the work mapped to the part of the system it touches. You understand the whole before reading any detail.
+
+The pyramid structure: each section opens with its main claim, details underneath. When you apply this, long bullet lists collapse into 2-3 ideas and the missing decisions become visible.

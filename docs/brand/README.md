@@ -47,3 +47,33 @@ A design question being sat with, a tradeoff with no clean answer, something not
 Matches the blog: introspective, intellectually honest about uncertainty. Prefer "here's what I was wrong about" over "I solved X." The commit is proof of the work, not the point of the tweet.
 
 Post when there is something genuinely interesting to share, not on a fixed cadence.
+
+---
+
+## My voice
+
+Raw writing samples — use these to calibrate tone, not the LLM-drafted tweets in tweet.md.
+
+**Business retrospective (2021)**
+
+> During the first half of 2021 I developed an app in partnership with a preschool in Dakar. The app train children to better write graphism and letters.
+>
+> During the second half of the year I sold a subscription (7.5 euro / month) during 4 months to Mr.Aly to use the app with his 4 years old daughter.
+>
+> The good point was to validate the existence of a market and the possibility of a subscription revenue model.
+>
+> Yet, I think that M.Aly is at the periphery of the market. Indeed, his daughter was already good, and he wanted her to skip a class.
+>
+> The bad point was that my channel hypothesis was wrong. I started a website where I focused on producing content for parents. Unfortunately the page views and number of subscribers to my mailing list did not grew as I expected.
+>
+> This last trimester I have pivoted my customer hypothesis and how to reach them. I will focus on producing content for parents with dyslexic children. I will do it on YouTube.
+
+**Book summary**
+
+> First let's consider luck not as a mystical superpower but as a psychological state of mind. The state of mind of people qualifying themselves as lucky people. Do these people have certain personality traits? It turns out yes.
+>
+> They maximize their chances by having a strong network providing them with information and opportunities beyond their reach. They are calm, relaxed and open to new experiences.
+>
+> They trust their gut or intuition about people and events.
+>
+> They expect success in their future and try to reach their goal even if the chances are slim. When they meet new people, they expect good attitude toward them.
