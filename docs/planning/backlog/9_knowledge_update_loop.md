@@ -10,7 +10,7 @@ Build the mechanism that turns newly scored signals into updated topic beliefs a
 
 ---
 
-## What this plan does
+## §1 · What this plan does
 
 Every update runs through **one decision**, made once per claim: which existing hypothesis does this claim speak to, does it support or oppose it, and should it be added as evidence to that hypothesis or become a new one? That decision then fans into four branches, each writing a specific part of the store. The diagram maps each branch (and the section that details it) to the files it touches. The belief and propagation branches don't write files themselves — they call the shared `storage` module, which owns the load/save, merge, and Beta-update mechanics. This plan owns the decisions; `storage` owns the mechanics.
 
@@ -20,7 +20,7 @@ flowchart TB
 
     subgraph p9["Plan 9 — turn scored signals into updated belief + wiki"]
         direction TB
-        decide{{"§2 · The decision (per claim)<br/>which hypothesis it speaks to · supports or opposes it ·<br/>add as evidence, or open a new hypothesis<br/>(how freely to open new ones → §7)"}}:::llm
+        decide{{"§2 · The decision (per claim)<br/>which hypothesis it speaks to · supports or opposes it ·<br/>add as evidence, or open a new hypothesis<br/>(how freely to open new ones → §6)"}}:::llm
 
         belief["§3 · Update belief<br/>add up evidence strength · update Beta(α, β) ·<br/>drop neutral claims · recompute convergence"]:::det
         route["§3 · File the non-evidence<br/>new dataset / benchmark / model release"]:::llm
@@ -54,74 +54,88 @@ flowchart TB
 
 ---
 
-## Storage boundary (Plan 8)
-
-Plan 8 owns the belief-graph **storage mechanics** — load/save and merge-by-id for `hypotheses.json` and `evidence.json`, the credibility-weighted `strength` increment with provenance append, the Beta `alpha`/`beta` belief update, and the `NEUTRAL_CREDIBILITY_WEIGHT` constant. This plan owns the **decisions** that drive them: which hypothesis a signal's evidence attaches to, stance resolution, dedup, and when to mint a new hypothesis. `hypothesis_updater.py` and `wiki_updater.py` call Plan 8's helpers rather than reimplementing the mutation logic.
-
-This plan also owns all **signal-specific storage**, which was deliberately kept out of Plan 8 so that plan stays focused on the belief graph: the `SignalFrontmatter` model, the signal read helper, and writing the resolved `classification` and `theme_id_assigned` back to the signal frontmatter (see `wiki_updater.py` below).
-
----
-
 ## Sub-task A — Hypothesis And Wiki Update Loop
 
-### Changes
+Two entry-point modules drive the loop in the diagram. `hypothesis_updater.py` reads pass-2 signals and runs each claim through the decision (§2), then the belief and propagation branches (§3, §5); `wiki_updater.py` grows the themes and writes the verdict back to the signal (§4). They own the **decisions**; the shared `storage` module owns the **mechanics** — load/save and merge-by-id for `hypotheses.json` and `evidence.json`, the credibility-weighted `strength` increment with provenance append, the Beta `alpha`/`beta` update, and the `NEUTRAL_CREDIBILITY_WEIGHT` constant — which the updaters call rather than reimplement. The **signal-specific storage** that Plan 8 deliberately left out also lives here: the `SignalFrontmatter` model, the signal read helper, and the `classification` / `theme_id_assigned` write-back (all alongside `wiki_updater.py`, their consumer). Each branch below opens with the new files it introduces, so a file's responsibility is read in the context that explains it.
 
-| File | Action | Description |
-|---|---|---|
-| `src/topics/wiki_updater.py` | **NEW** | Reads pass-2 signals; for each top-confidence `candidate_theme`, classifies the contribution as `replication` / `adjacent` / `wholly_new` against the theme body; appends to themes (Markdown, anchor-stable); writes the resolved `classification` and `theme_id_assigned` back to the signal frontmatter |
-| `src/topics/hypothesis_updater.py` | **NEW** | Reads pass-2 signals; dedups `new_evidences` against `evidence.json` and increments `strength` (weighted by signal `source_credibility`; `null` credibility uses a configured neutral weight); attaches evidence to existing hypotheses, or creates a new uniform-prior hypothesis when no match exists (this is also how a genuinely new uncertainty — formerly an "open question" — enters the store); updates posterior belief state and per-hypothesis `convergence` from recent provenance |
-| `src/topics/entities.py` | **NEW** | Entity extraction or normalization helpers |
-| `src/topics/timeline.py` | **NEW** | Append/update notable changes over time (substantive shifts only; replication does not append) |
-| `src/topics/propagation.py` | **NEW** | Re-evaluates dependent hypotheses when belief changes; dependency weight is derived at propagation time as the lower bound of the dependency hypothesis's credible interval — `scipy.stats.beta.ppf(DEPENDENCY_WEIGHT_PERCENTILE, α, β)` — where `DEPENDENCY_WEIGHT_PERCENTILE = 0.05` is a named constant; this discounts weakly evidenced dependencies automatically without any manually authored weight |
-| `src/topics/anchors.py` | **NEW** | Stable `<a id="..."></a>` generation and resolution for adjacent-block linking (architecture §12) |
-| `tests/test_wiki_updater.py` | **NEW** | Theme updates remain idempotent across replication, adjacent, and wholly_new cases; classification is written back to signal frontmatter |
-| `tests/test_hypothesis_updater.py` | **NEW** | Support, weakening, opposing, and new-hypothesis cases update durable belief state correctly; strength increments scale with source credibility; a signal raising a new uncertainty creates a uniform-prior hypothesis |
+### §2 · The decision: match, resolve stance, attach or open
 
-### Update logic must support
+**Every claim runs through one decision before anything is written.** Pass-2 hands over each claim as `{claim, stance}` with **no hypothesis attached** (see Plan 7's `Pass2Score`), so the updater must decide where the claim belongs in three steps.
 
-- recurring themes (continuous update): appends to `themes/*.md` (Markdown, anchor-stable)
-- classification of signal-to-theme contribution: `replication` (no body growth), `adjacent` (append block + Markdown link to prior block's stable anchor), or `wholly_new` (standalone section + fresh anchor); write the resolved `classification` and `theme_id_assigned` back to the signal frontmatter
-- evidence integration: dedup by stable id (claim hash + hypothesis_id); increment `strength` weighted by signal `source_credibility` (null → configured neutral weight); append `{signal_id, weight_applied}` to provenance
-- stance filtering at link time: pass-2's `Evidence` model lists `stance` as `for | against | mixed | neutral`, but a `neutral` verdict is **not** stored as inert evidence. Surfacing a claim as evidence against a *specific* hypothesis already implies a direction — every candidate "neutral" claim is really one of: directional once the bet is named (`for`/`against`), a null/"no difference" result (`against` a directional bet), conflicting (`mixed`), or genuinely belief-irrelevant. Genuinely belief-irrelevant facts (a new dataset, benchmark, or model release) are **not evidence** — they route to `entities.json` / `timeline.json`. So this plan filters `neutral` at link time: it never creates a `neutral` row in `evidence.json` (effective stored stance is `for | against | mixed`), and it does not call Plan 8's belief-update helper for it. Plan 8 keeps a `neutral` → no-op branch purely as defensive insurance against a stray value reaching the helper (see Plan 8 discussion). The pass-2 `Evidence` enum is a shipped contract and is left unchanged; the filtering lives here, in the linker, where the hypothesis is known
-- hypothesis maintenance: attach new evidences to existing hypotheses; create new hypotheses when no match exists; update priors/posteriors; revise action posture based on accumulated evidence
-- comparative hypotheses (pairwise edges): a hypothesis that names two subjects (`comparison: {subject_a, subject_b}`, see Plan 8) is a pairwise edge — each comparison accumulates its own Beta over observed head-to-heads. A new contender adds new edges; it does not rebuild anything. **No global ranking is stored** — a "who leads" view is *derived* at read time (via the aggregation pass), never persisted as durable state. Cycles among comparisons (A>B, B>C, C>A) are valid data — conditional/contextual dominance — not contradictions to resolve
-- open questions are hypotheses: there is no separate open-question record or `open_questions.json` maintenance. A signal raising a genuinely new uncertainty creates a uniform-prior hypothesis (handled by "hypothesis maintenance" above); rendering low-confidence (near-uniform) hypotheses as an "open questions" view in `overview.md` is a rendering concern (see Plan 8), out of scope for the updater
-- convergence computation: derive `convergence` from recent supporting-signal density and stance alignment in evidence provenance
-- entity and timeline updates: appends new entries by id (timeline only on substantive shifts; replication does not append)
-- bounded Bayesian-style updates: stronger credible evidence moves posterior more; negative evidence lowers belief rather than spawning a separate contradiction object
-- propagation rules: when a hypothesis changes meaningfully, re-evaluate dependent hypotheses; the weight applied to each `depends_on` edge is `scipy.stats.beta.ppf(DEPENDENCY_WEIGHT_PERCENTILE, α, β)` — the lower bound of the dependency hypothesis's credible interval; a hypothesis with mean 0.71 but only 3.5 units of accumulated evidence yields a weight of ≈ 0.30 rather than 0.71, correctly discounting fragile beliefs; `DEPENDENCY_WEIGHT_PERCENTILE = 0.05` is a named constant — raising it makes propagation more conservative, lowering it more aggressive
+**Files:** `src/topics/hypothesis_updater.py` (NEW) — the updater entry point; it reads pass-2 signals and runs this decision, then the belief and routing branches (§3) and triggers propagation (§5). `tests/test_hypothesis_updater.py` (NEW) — support, weakening, opposing, and new-hypothesis cases; `strength` scales with source credibility; a new uncertainty creates a uniform-prior hypothesis.
 
-The updater should treat `depends_on` as the canonical first-pass edge field.
+1. **Match the claim to a hypothesis.** Compare the claim against the existing `hypotheses.json` and pick the one it bears on, if any. The signal's `candidate_themes` are a natural prefilter — a claim most plausibly bears on hypotheses sharing its theme.
+   - **Open —** the matching mechanism is undecided (LLM judgment over candidate hypotheses, embedding similarity, or theme-prefiltered LLM). This is the hinge the rest of §2 hangs on, because the dedup id below is keyed on the matched `hypothesis_id`. Decide at the `doing/` boundary.
+2. **Resolve the stance against *that* hypothesis.** The pass-2 `stance` describes the claim's own framing, not its bearing on the matched hypothesis, so it must be re-read once the hypothesis is named — a claim emitted `for` its own framing can be `against` the bet it attaches to. A `neutral` verdict is **never stored as inert evidence**: surfacing a claim against a *specific* hypothesis already implies a direction, so each "neutral" candidate is really one of — directional once the bet is named (`for`/`against`), a null/"no difference" result (`against` a directional bet), conflicting (`mixed`), or genuinely belief-irrelevant. Belief-irrelevant facts are not evidence and route out to §3; the rest collapse to `for | against | mixed`. The updater therefore never writes a `neutral` row in `evidence.json` and never calls the belief-update helper for one. (Plan 8 keeps a `neutral` → no-op branch only as defensive insurance against a stray value; the pass-2 `Evidence` enum is a shipped contract and stays unchanged — the filtering lives here, where the hypothesis is known.)
+   - **Open —** re-resolution is a model judgment with no specified prompt/model contract (see "The model-judgment surface" below).
+3. **Attach, or open a new hypothesis.** Dedup by stable id (`claim hash + hypothesis_id`); on a match, attach by incrementing `strength` (the belief update, §3). When nothing matches, open a new uniform-prior `Beta(1, 1)` hypothesis — **this is also how a genuinely new uncertainty enters the store.** There is no separate open-question record or `open_questions.json`: an "open question" is just a low-evidence hypothesis near its uniform prior, and rendering those as an "open questions" view in `overview.md` is a downstream rendering concern, not the updater's. *How freely* to open new hypotheses versus attaching to existing ones is the granularity question (§6).
 
-### Hypothesis granularity under backfill
+### §3 · Update belief, and file what isn't evidence
 
-When Plan 14 backfill replays the dossier's references, the updater receives a large batch at once — ~200–300 `new_evidences` across ~100 papers — against a dossier that seeded only ~10 hypotheses. The updater's create-vs-attach decision is what sets the resulting granularity, and it can fail in two opposite directions:
+**A matched, stance-resolved claim moves belief; a belief-irrelevant fact is filed rather than dropped.**
 
-- **Under-capture:** every claim matches loosely onto the same ~10 seeded bets as evidence; specific resolvable sub-bets the dossier never framed (e.g. "per-dump dedup beats global dedup", "DPO matches PPO on capability but not robustness") get flattened into "more mass on hypothesis X." Well-evidenced, low-resolution.
-- **Over-capture:** a hypothesis is minted on every unmatched claim; `hypotheses.json` floods with paper-level findings ("method X beats Y on benchmark Z") that fail the betting-market test (Plan 8) and make the low-confidence "open questions" view unreadable.
+**Files:** the belief update and routing run inside `hypothesis_updater.py` (introduced in §2). `src/topics/entities.py` (NEW) — entity extraction / normalization for routed facts. `src/topics/timeline.py` (NEW) — appends notable shifts (substantive only; replication never appends).
 
-The updater must sit between these, but **how** is an open design question — not yet decided. One candidate direction, recorded so it is not lost: gate new-hypothesis creation by the same resolvability + strategic-significance bar that governs bootstrap authoring (Plan 8), so a claim mints a new bet only when it is **both** unmatched against the existing store **and** clears that bar — otherwise it attaches as evidence to the nearest matching hypothesis, or is dropped as non-strategic. Under this direction backfill claims would *mostly thicken* the seeded hypotheses, minting new ones sparingly. Other directions are possible (e.g. a clustering/merge pass that mints freely then consolidates, or a human-review queue for borderline mints); the choice is deferred until this plan moves into `doing/`.
+- **Update belief.** Increment `strength` weighted by the signal's `source_credibility` (`weight_applied = source_credibility / 10`; `null` credibility → `NEUTRAL_CREDIBILITY_WEIGHT`), append `{signal_id, weight_applied}` to provenance, and apply the Beta update through `storage` (`alpha += strength` for `for`, `beta += strength` for `against`, split for `mixed`). Updates are bounded and Bayesian-style: stronger credible evidence moves the posterior more, and negative evidence lowers belief rather than spawning a separate contradiction object.
+  - **Open —** the plan says to "revise action posture based on accumulated evidence" but gives no belief→`action_posture` mapping. Decide whether posture is recomputed here or is a read-time rendering, and on what rule.
+- **Convergence.** Reflect whether recent evidence agrees (high convergence) or conflicts (low), from supporting-signal density and stance alignment in provenance.
+  - **Open —** this contradicts Plan 8, which treats the convergence *label* as a read-time derivative of `alpha`/`beta` and stores nothing. Reconcile three axes before building: is convergence **stored on the hypothesis or derived at read time**, and is it computed **from `alpha`/`beta` or from provenance**, and over what "recent" window?
+- **File the non-evidence.** A genuinely belief-irrelevant fact (a new dataset, benchmark, or model release) is not evidence — it appends to `entities.json` (by id) or `timeline.json`. Timeline appends only on substantive shifts; replication never appends.
+  - **Open —** `entities.json` is seeded by Plan 1 and its record schema is not restated anywhere this plan can build against; confirm the schema, and the rule that decides "belief-irrelevant fact" vs. "drop entirely."
 
-A bootstrap-side lever owned by Plan 1 is complementary to whatever is chosen here: seeding more hypotheses up front (including claims the literature treats as largely *settled*, all at uniform `Beta(1,1)`) gives backfill richer scaffolding to attach to, and accumulated mass then differentiates them — settled claims acquire high one-sided mass, genuinely open ones stay near 50/50. Richer seeds reduce how often the updater must mint at all, which lowers the stakes of the gating decision above.
+### §4 · Grow the wiki
 
-### Landscape fit and technical novelty axes
+**Each signal's top-confidence theme contribution is classified against the theme body, grows the theme accordingly, and the verdict is written back to the signal.**
 
-The `replication / adjacent / wholly_new` classification produced by `wiki_updater.py` is the operational form of two scoring concepts:
+**Files:** `src/topics/wiki_updater.py` (NEW) — classifies the contribution, grows the theme, writes `classification` / `theme_id_assigned` back, and owns the `SignalFrontmatter` model and signal read/write helpers. `src/topics/anchors.py` (NEW) — stable `<a id="…"></a>` generation and resolution for adjacent-block links. `tests/test_wiki_updater.py` (NEW) — idempotency across replication / adjacent / wholly-new; classification written back.
 
-**Landscape fit** answers "how does this signal relate to what we already know?" Replication confirms an existing theme body with no new information; adjacent extends it in a direction already framed by the topic; wholly new represents something the topic has no prior frame for. This classification is written back to the signal frontmatter as `classification` and drives both theme growth rules (replication → no body growth; adjacent → append block with stable anchor; wholly_new → standalone section) and the output filter in Plan 10 (replication signals are not surfaced as tweet candidates).
+The `replication / adjacent / wholly_new` classification is the operational form of two scoring concepts and drives the theme growth rules:
 
-**Technical novelty** answers "is this genuinely new — a new method, corpus, or result — or is it incremental over prior work?" This judgment requires the full theme body as context and cannot be made reliably from the abstract alone or without knowing what the topic already knows. The wiki updater is therefore the right place to assess it: the `replication / adjacent / wholly_new` classification already encodes this — replication is incremental, adjacent is a meaningful extension, wholly_new is a genuine advance. Incremental signals may still be worth monitoring but should rank lower in the output filter than genuine advances.
+- **replication** — confirms the existing theme body with no new information → **no body growth**.
+- **adjacent** — extends the theme in a direction it already frames → **append a block + Markdown link to the prior block's stable anchor**.
+- **wholly-new** — something the topic has no prior frame for → **standalone section + fresh anchor**.
+
+The verdict and the assigned theme are written back to the signal frontmatter as `classification` and `theme_id_assigned`, because a later stage reads them: Plan 10's output filter does not surface a replication as a tweet candidate, and ranks incremental signals below genuine advances.
+
+The classification simultaneously encodes both axes. **Landscape fit** answers "how does this relate to what we already know?" — the replication/adjacent/wholly-new gradient itself. **Technical novelty** answers "is this genuinely new, or incremental over prior work?" — replication is incremental, adjacent a meaningful extension, wholly-new a genuine advance. Technical novelty is why this judgment lives in the wiki updater and not in pass-2: it requires the full theme body as context and cannot be made reliably from the abstract alone.
+
+- **Open —** "top-confidence `candidate_theme`" (singular): confirm whether only the #1 theme grows, or every candidate above a confidence bar — a signal can legitimately bear on two themes. And the *adjacent* rule must pick *which* prior block to link to, itself a similarity judgment that is not yet specified.
+
+### §5 · Propagate the change
+
+**When a hypothesis moves meaningfully, its dependents are re-evaluated, with weak dependencies discounted automatically.** `depends_on` is the canonical first-pass edge field.
+
+**Files:** `src/topics/propagation.py` (NEW) — re-evaluates dependents when belief moves and derives each edge weight as the credible-interval lower bound. Its multi-step tests live in Sub-task B (`tests/test_hypothesis_propagation.py`).
+
+The weight applied to each `depends_on` edge is derived at propagation time as the lower bound of the dependency hypothesis's credible interval — `scipy.stats.beta.ppf(DEPENDENCY_WEIGHT_PERCENTILE, α, β)`, where `DEPENDENCY_WEIGHT_PERCENTILE = 0.05` is a named constant (raise it for more conservative propagation, lower it for more aggressive). A dependency with mean 0.71 but only 3.5 units of accumulated evidence yields a weight of ≈ 0.30 rather than 0.71 — fragile beliefs are discounted without any manually authored weight.
+
+Comparative hypotheses are handled as **pairwise edges**: a hypothesis naming two subjects (`comparison: {subject_a, subject_b}`, see Plan 8) accumulates its own Beta over observed head-to-heads. A new contender adds new edges rather than rebuilding anything, and **no global ranking is stored** — a "who leads" view is *derived* at read time. Cycles among comparisons (A>B, B>C, C>A) are valid data (conditional dominance), not contradictions to resolve.
+
+- **Open —** the edge *weight* is fully specified but the *operation* is not: how the parent's change, the `supports`/`weakens` sign, and that weight actually modify the dependent's `alpha`/`beta`; what counts as a "meaningful" change worth propagating; and whether propagation recurses transitively (and if so, how it terminates, since `depends_on` can cycle). Pin these down before building §5.
+
+### §6 · How freely to open new hypotheses (granularity under backfill)
+
+The §2 attach-vs-open decision sets the granularity of the whole store, and it can fail in two opposite directions — most visibly when Plan 14 backfill replays a dossier's references as one large batch (~200–300 `new_evidences` across ~100 papers against a dossier that seeded only ~10 hypotheses):
+
+- **Under-capture:** every claim attaches loosely onto the same ~10 seeded bets; specific resolvable sub-bets the dossier never framed (e.g. "per-dump dedup beats global dedup") flatten into "more mass on hypothesis X." Well-evidenced, low-resolution.
+- **Over-capture:** a hypothesis is opened on every unmatched claim; `hypotheses.json` floods with paper-level findings ("method X beats Y on benchmark Z") that fail the betting-market test (Plan 8) and make the "open questions" view unreadable.
+
+**Open — the rule that sits between these is not yet decided.** One candidate, recorded so it is not lost: gate new-hypothesis creation by the same resolvability + strategic-significance bar that governs bootstrap authoring (Plan 8), so a claim opens a new bet only when it is **both** unmatched **and** clears that bar — otherwise it attaches to the nearest match, or is dropped as non-strategic. Other directions are possible (a clustering/merge pass that opens freely then consolidates; a human-review queue for borderline cases). The choice is deferred until this plan moves into `doing/`. A complementary, Plan 1-side lever: seeding more hypotheses up front (including claims the literature treats as *settled*, all at `Beta(1,1)`) gives backfill richer scaffolding to attach to — accumulated mass then differentiates them, and the updater has to open new bets less often, lowering the stakes of this decision.
+
+### The model-judgment surface (cross-cutting)
+
+Four steps above are model calls, not deterministic code — the amber nodes in the diagram: matching (§2), stance re-resolution (§2), the replication/adjacent/wholly-new classification (§4), and the evidence-vs-non-evidence routing (§3). **Unlike Plan 7, this plan does not yet specify their model machinery** — prompt contract, model + fallback selection, and the parse/validation path — for any of them. That is the single largest gap to close at the `doing/` boundary; treat it as a prerequisite for the §2–§4 sections above, not an afterthought.
 
 ### Verification
 
-- A second run updates existing belief and wiki state instead of recreating it from scratch
-- New items can extend an existing theme (`adjacent`) or create a new one (`wholly_new`); replication is reflected as no theme growth
-- The resolved `classification` and `theme_id_assigned` are written back to the signal frontmatter
-- A signal raising a genuinely new uncertainty creates a uniform-prior hypothesis rather than a separate open-questions record
-- An evidence increment from a high-credibility paper moves posterior more than the same claim from a low-credibility paper
-- Evidence against an existing hypothesis lowers posterior belief instead of only being mentioned in prose
-- A changed hypothesis can update at least one dependent hypothesis or briefing-facing conclusion
-- Timeline and watchlist are updated automatically and remain legible
+- A second run updates existing belief and wiki state instead of recreating it from scratch — and re-processing a signal already recorded in provenance does **not** double-count it (provenance is keyed by `signal_id`). The plan must also state which signals each run consumes (e.g. all un-`classification`-stamped signals) — **open**.
+- New items can extend an existing theme (`adjacent`) or create a new one (`wholly_new`); replication is reflected as no theme growth.
+- The resolved `classification` and `theme_id_assigned` are written back to the signal frontmatter.
+- A signal raising a genuinely new uncertainty creates a uniform-prior hypothesis rather than a separate open-questions record.
+- An evidence increment from a high-credibility paper moves the posterior more than the same claim from a low-credibility paper.
+- Evidence against an existing hypothesis lowers posterior belief instead of only being mentioned in prose.
+- A changed hypothesis updates at least one dependent hypothesis or briefing-facing conclusion.
+- Timeline and watchlist are updated automatically and remain legible.
 
 ---
 
