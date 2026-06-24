@@ -10,6 +10,50 @@ Build the mechanism that turns newly scored signals into updated topic beliefs a
 
 ---
 
+## What this plan does
+
+Every update runs through **one decision**, made once per claim: which existing hypothesis does this claim speak to, does it support or oppose it, and should it be added as evidence to that hypothesis or become a new one? That decision then fans into four branches, each writing a specific part of the store. The diagram maps each branch (and the section that details it) to the files it touches. The belief and propagation branches don't write files themselves — they call the shared `storage` module, which owns the load/save, merge, and Beta-update mechanics. This plan owns the decisions; `storage` owns the mechanics.
+
+```mermaid
+flowchart TB
+    sig[("signals/*.md<br/>(pass-2 output)")]:::data
+
+    subgraph p9["Plan 9 — turn scored signals into updated belief + wiki"]
+        direction TB
+        decide{{"§2 · The decision (per claim)<br/>which hypothesis it speaks to · supports or opposes it ·<br/>add as evidence, or open a new hypothesis<br/>(how freely to open new ones → §7)"}}:::llm
+
+        belief["§3 · Update belief<br/>add up evidence strength · update Beta(α, β) ·<br/>drop neutral claims · recompute convergence"]:::det
+        route["§3 · File the non-evidence<br/>new dataset / benchmark / model release"]:::llm
+        wiki["§4 · Grow the wiki<br/>replication / adjacent / wholly-new ·<br/>landscape fit · technical novelty"]:::llm
+        prop["§5 · Propagate the change<br/>dependency + comparison edges ·<br/>credible-interval weight"]:::det
+    end
+
+    store["calls the shared storage module<br/>load / save · merge by id · add evidence strength · update Beta · neutral fallback weight"]:::store
+
+    sig --> decide
+    decide --> belief & wiki & route
+    belief --> prop
+
+    belief --> store
+    prop --> store
+    store --> hyp[("hypotheses.json")]:::data
+    store --> ev[("evidence.json")]:::data
+
+    wiki --> themes[("themes/*.md")]:::data
+    wiki -. "records the verdict on the signal:<br/>classification + theme it was filed under" .-> sig
+    route --> ent[("entities.json")]:::data
+    route --> tl[("timeline.json")]:::data
+
+    classDef llm fill:#fdeecf,stroke:#b9821f,color:#5c3d00;
+    classDef det fill:#d9f2e6,stroke:#1a7f52,color:#0b3d26;
+    classDef store fill:#dbe9fb,stroke:#2b6cb0,color:#0b2d52;
+    classDef data fill:#eeeeec,stroke:#9a9a96,color:#333333;
+```
+
+*Amber = needs a model call (a judgment) · green = deterministic logic this plan owns · blue = calls into the shared `storage` module · grey = files on disk.*
+
+---
+
 ## Storage boundary (Plan 8)
 
 Plan 8 owns the belief-graph **storage mechanics** — load/save and merge-by-id for `hypotheses.json` and `evidence.json`, the credibility-weighted `strength` increment with provenance append, the Beta `alpha`/`beta` belief update, and the `NEUTRAL_CREDIBILITY_WEIGHT` constant. This plan owns the **decisions** that drive them: which hypothesis a signal's evidence attaches to, stance resolution, dedup, and when to mint a new hypothesis. `hypothesis_updater.py` and `wiki_updater.py` call Plan 8's helpers rather than reimplementing the mutation logic.
