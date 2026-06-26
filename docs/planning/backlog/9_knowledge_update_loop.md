@@ -62,7 +62,10 @@ Two entry-point modules drive the loop in the diagram. `hypothesis_updater.py` r
 
 **Every claim runs through one decision before anything is written.** Pass-2 hands over each claim as `{claim, stance}` with **no hypothesis attached** (see Plan 7's `Pass2Score`), so the updater must decide where the claim belongs in three steps.
 
-**Files:** `src/topics/hypothesis_updater.py` (NEW) — the updater entry point; it reads pass-2 signals and runs this decision, then the belief and routing branches (§3) and triggers propagation (§5). `tests/test_hypothesis_updater.py` (NEW) — support, weakening, opposing, and new-hypothesis cases; `strength` scales with source credibility; a new uncertainty creates a uniform-prior hypothesis.
+| File | Action | Description |
+|---|---|---|
+| `src/topics/hypothesis_updater.py` | **NEW** | The updater entry point; reads pass-2 signals and runs this decision, then the belief and routing branches (§3) and triggers propagation (§5) |
+| `tests/test_hypothesis_updater.py` | **NEW** | Support, weakening, opposing, and new-hypothesis cases; `strength` scales with source credibility; a new uncertainty creates a uniform-prior hypothesis |
 
 1. **Match the claim to a hypothesis.** Compare the claim against the existing `hypotheses.json` and pick the one it bears on, if any. The signal's `candidate_themes` are a natural prefilter — a claim most plausibly bears on hypotheses sharing its theme.
    - **Open —** the matching mechanism is undecided (LLM judgment over candidate hypotheses, embedding similarity, or theme-prefiltered LLM). This is the hinge the rest of §2 hangs on, because the dedup id below is keyed on the matched `hypothesis_id`. Decide at the `doing/` boundary.
@@ -74,7 +77,12 @@ Two entry-point modules drive the loop in the diagram. `hypothesis_updater.py` r
 
 **A matched, stance-resolved claim moves belief; a belief-irrelevant fact is filed rather than dropped.**
 
-**Files:** the belief update and routing run inside `hypothesis_updater.py` (introduced in §2). `src/topics/entities.py` (NEW) — entity extraction / normalization for routed facts. `src/topics/timeline.py` (NEW) — appends notable shifts (substantive only; replication never appends).
+The belief update and routing run inside `hypothesis_updater.py` (introduced in §2); the new files here are the routing targets.
+
+| File | Action | Description |
+|---|---|---|
+| `src/topics/entities.py` | **NEW** | Entity extraction / normalization for routed facts |
+| `src/topics/timeline.py` | **NEW** | Appends notable shifts (substantive only; replication never appends) |
 
 - **Update belief.** Increment `strength` weighted by the signal's `source_credibility` (`weight_applied = source_credibility / 10`; `null` credibility → `NEUTRAL_CREDIBILITY_WEIGHT`), append `{signal_id, weight_applied}` to provenance, and apply the Beta update through `storage` (`alpha += strength` for `for`, `beta += strength` for `against`, split for `mixed`). Updates are bounded and Bayesian-style: stronger credible evidence moves the posterior more, and negative evidence lowers belief rather than spawning a separate contradiction object.
   - **Open —** the plan says to "revise action posture based on accumulated evidence" but gives no belief→`action_posture` mapping. Decide whether posture is recomputed here or is a read-time rendering, and on what rule.
@@ -87,7 +95,11 @@ Two entry-point modules drive the loop in the diagram. `hypothesis_updater.py` r
 
 **Each signal's top-confidence theme contribution is classified against the theme body, grows the theme accordingly, and the verdict is written back to the signal.**
 
-**Files:** `src/topics/wiki_updater.py` (NEW) — classifies the contribution, grows the theme, writes `classification` / `theme_id_assigned` back, and owns the `SignalFrontmatter` model and signal read/write helpers. `src/topics/anchors.py` (NEW) — stable `<a id="…"></a>` generation and resolution for adjacent-block links. `tests/test_wiki_updater.py` (NEW) — idempotency across replication / adjacent / wholly-new; classification written back.
+| File | Action | Description |
+|---|---|---|
+| `src/topics/wiki_updater.py` | **NEW** | Classifies the contribution, grows the theme, writes `classification` / `theme_id_assigned` back, and owns the `SignalFrontmatter` model and signal read/write helpers |
+| `src/topics/anchors.py` | **NEW** | Stable `<a id="…"></a>` generation and resolution for adjacent-block links |
+| `tests/test_wiki_updater.py` | **NEW** | Idempotency across replication / adjacent / wholly-new; classification written back |
 
 The `replication / adjacent / wholly_new` classification is the operational form of two scoring concepts and drives the theme growth rules:
 
@@ -105,7 +117,9 @@ The classification simultaneously encodes both axes. **Landscape fit** answers "
 
 **When a hypothesis moves meaningfully, its dependents are re-evaluated, with weak dependencies discounted automatically.** `depends_on` is the canonical first-pass edge field.
 
-**Files:** `src/topics/propagation.py` (NEW) — re-evaluates dependents when belief moves and derives each edge weight as the credible-interval lower bound. Its multi-step tests live in Sub-task B (`tests/test_hypothesis_propagation.py`).
+| File | Action | Description |
+|---|---|---|
+| `src/topics/propagation.py` | **NEW** | Re-evaluates dependents when belief moves; derives each edge weight as the credible-interval lower bound (multi-step tests live in Sub-task B, `tests/test_hypothesis_propagation.py`) |
 
 The weight applied to each `depends_on` edge is derived at propagation time as the lower bound of the dependency hypothesis's credible interval — `scipy.stats.beta.ppf(DEPENDENCY_WEIGHT_PERCENTILE, α, β)`, where `DEPENDENCY_WEIGHT_PERCENTILE = 0.05` is a named constant (raise it for more conservative propagation, lower it for more aggressive). A dependency with mean 0.71 but only 3.5 units of accumulated evidence yields a weight of ≈ 0.30 rather than 0.71 — fragile beliefs are discounted without any manually authored weight.
 
