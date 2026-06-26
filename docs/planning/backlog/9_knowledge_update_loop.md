@@ -40,7 +40,8 @@ flowchart TB
     store --> ev[("evidence.json")]:::data
 
     wiki --> themes[("themes/*.md")]:::data
-    wiki -. "records the verdict on the signal:<br/>classification + theme it was filed under" .-> sig
+    wiki --> dlog[("decisions.jsonl<br/>(append-only:<br/>verdict + reasoning,<br/>one row per signal)")]:::data
+    wiki -. "stamps the current verdict on the signal:<br/>classification + theme it was filed under" .-> sig
     route --> ent[("entities.json")]:::data
     route --> tl[("timeline.json")]:::data
 
@@ -104,13 +105,13 @@ The belief update and routing run inside `hypothesis_updater.py` (introduced in 
 
 ### §4 · Grow the wiki
 
-**Each signal's top-confidence theme contribution is classified against the theme body, grows the theme accordingly, and the verdict is written back to the signal.**
+**Each signal's top-confidence theme contribution is classified against the theme body and grows the theme accordingly. The current verdict is stamped on the signal; the full decision — verdict plus reasoning — is appended to a central log.**
 
 | File | Action | Description |
 |---|---|---|
-| `src/topics/wiki_updater.py` | **NEW** | Classifies the contribution, grows the theme, writes `classification` / `theme_id_assigned` back, and owns the `SignalFrontmatter` model and signal read/write helpers |
+| `src/topics/wiki_updater.py` | **NEW** | Classifies the contribution, grows the theme, stamps `classification` / `theme_id_assigned` on the signal, appends the full decision to `decisions.jsonl`, and owns the `SignalFrontmatter` model and signal read/write helpers |
 | `src/topics/anchors.py` | **NEW** | Stable `<a id="…"></a>` generation and resolution for adjacent-block links |
-| `tests/test_wiki_updater.py` | **NEW** | Idempotency across replication / adjacent / wholly-new; classification written back |
+| `tests/test_wiki_updater.py` | **NEW** | Idempotency across replication / adjacent / wholly-new; classification written back; decision logged with reasoning |
 
 The `replication / adjacent / wholly_new` classification is the operational form of two scoring concepts and drives the theme growth rules:
 
@@ -118,7 +119,13 @@ The `replication / adjacent / wholly_new` classification is the operational form
 - **adjacent** — extends the theme in a direction it already frames → **append a block + Markdown link to the prior block's stable anchor**.
 - **wholly-new** — something the topic has no prior frame for → **standalone section + fresh anchor**.
 
-The verdict and the assigned theme are written back to the signal frontmatter as `classification` and `theme_id_assigned`, because a later stage reads them: Plan 10's output filter does not surface a replication as a tweet candidate, and ranks incremental signals below genuine advances.
+The decision is recorded in two places, each answering a different question.
+
+The signal frontmatter gets a minimal **stamp**: `classification` and `theme_id_assigned`. This is the current verdict, and it doubles as the "already processed" marker. A later stage reads it — Plan 10's output filter drops a replication as a tweet candidate and ranks incremental signals below genuine advances.
+
+The full decision is also appended as one row to a per-topic append-only log (`decisions.jsonl`): the verdict, the model's **reasoning**, the theme touched, and a timestamp. It is JSONL — one decision per line — so each new decision is appended without rewriting the file; that is a deliberate break from the project's flat-array JSON, because a log only ever grows. The stamp says what a signal's verdict is now. The log says what we decided about everything, and why. Both are written in the same step, so the stamp always matches the signal's row in the log; a disagreement is a bug. A signal is classified once: the stamp keeps later runs from re-touching it, so the log holds exactly one row per signal, not a version history.
+
+The log is what makes the classifier auditable. Classification is an LLM judgment, so the reasoning trail is the only way to debug a bad call or watch the verdict mix drift over time. Frontmatter is the wrong home for that reasoning: it would bloat every signal file, and you could only read decisions one signal at a time. The log keeps the reasoning out of the signal and puts every decision in one place you can scan. It does not duplicate the belief provenance in §3: provenance records which evidence moved which belief; this log records the novelty call and where each signal was filed.
 
 The classification simultaneously encodes both axes. **Landscape fit** answers "how does this relate to what we already know?" — the replication/adjacent/wholly-new gradient itself. **Technical novelty** answers "is this genuinely new, or incremental over prior work?" — replication is incremental, adjacent a meaningful extension, wholly-new a genuine advance. Technical novelty is why this judgment lives in the wiki updater and not in pass-2: it requires the full theme body as context and cannot be made reliably from the abstract alone.
 
@@ -128,6 +135,7 @@ The classification simultaneously encodes both axes. **Landscape fit** answers "
 - **`[llm]`** Each classification grows the theme correctly: `replication` adds no body; `adjacent` appends a block plus a Markdown link to the prior block's stable anchor; `wholly_new` opens a standalone section with a fresh anchor.
 - **`[det]`** The resolved `classification` and `theme_id_assigned` are written back to the signal frontmatter — the verdict Plan 10's output filter later reads.
 - **`[det]`** Re-applying an already-classified signal is idempotent: the `adjacent` block is not appended a second time.
+- **`[det]`** Each classification appends exactly one row to `decisions.jsonl` (verdict, reasoning, theme, timestamp); a stamped signal is skipped by later runs, so there is one row per signal and the stamp matches it.
 
 ### §5 · Propagate the change
 
