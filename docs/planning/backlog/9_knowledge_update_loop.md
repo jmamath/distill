@@ -73,6 +73,11 @@ Two entry-point modules drive the loop in the diagram. `hypothesis_updater.py` r
    - **Open —** re-resolution is a model judgment with no specified prompt/model contract (see "The model-judgment surface" below).
 3. **Attach, or open a new hypothesis.** Dedup by stable id (`claim hash + hypothesis_id`); on a match, attach by incrementing `strength` (the belief update, §3). When nothing matches, open a new uniform-prior `Beta(1, 1)` hypothesis — **this is also how a genuinely new uncertainty enters the store.** There is no separate open-question record or `open_questions.json`: an "open question" is just a low-evidence hypothesis near its uniform prior, and rendering those as an "open questions" view in `overview.md` is a downstream rendering concern, not the updater's. *How freely* to open new hypotheses versus attaching to existing ones is the granularity question (§6).
 
+**Verify.** *(`[det]` = deterministic, asserts exact behavior — the green nodes; `[llm]` = model judgment, verified by eval cases — the amber nodes; every `[llm]` check is blocked until the model-judgment surface gate is closed.)*
+- **`[llm]`** Stance is re-resolved against the *matched* hypothesis, not copied from pass-2: a claim emitted `for` its own framing can resolve `against` the bet it attaches to, and a `neutral` candidate collapses to `for`/`against`/`mixed` or routes to §3 — no `neutral` row is ever written to `evidence.json`.
+- **`[det]`** An unmatched claim opens a uniform-prior `Beta(1, 1)` hypothesis rather than a separate open-questions record — the same path by which a genuinely new uncertainty enters the store.
+- **`[det]`** Claim-level dedup is keyed on `claim hash + hypothesis_id`: the same claim re-matched to the same hypothesis attaches once, not twice (signal-level no-double-count is a loop invariant — see the end).
+
 ### §3 · Update belief, and file what isn't evidence
 
 **A matched, stance-resolved claim moves belief; a belief-irrelevant fact is filed rather than dropped.**
@@ -90,6 +95,12 @@ The belief update and routing run inside `hypothesis_updater.py` (introduced in 
   - **Open —** this contradicts Plan 8, which treats the convergence *label* as a read-time derivative of `alpha`/`beta` and stores nothing. Reconcile three axes before building: is convergence **stored on the hypothesis or derived at read time**, and is it computed **from `alpha`/`beta` or from provenance**, and over what "recent" window?
 - **File the non-evidence.** A genuinely belief-irrelevant fact (a new dataset, benchmark, or model release) is not evidence — it appends to `entities.json` (by id) or `timeline.json`. Timeline appends only on substantive shifts; replication never appends.
   - **Open —** `entities.json` is seeded by Plan 1 and its record schema is not restated anywhere this plan can build against; confirm the schema, and the rule that decides "belief-irrelevant fact" vs. "drop entirely."
+
+**Verify.**
+- **`[det]`** A high-`source_credibility` increment moves the posterior more than the same claim from a low-credibility paper (`weight_applied = source_credibility / 10`; `null` → `NEUTRAL_CREDIBILITY_WEIGHT`).
+- **`[det]`** An `against` claim lowers posterior belief (raises `beta`) rather than only being mentioned in prose.
+- **`[det]`** A belief-irrelevant fact routes to `entities.json` (by id) or `timeline.json` instead of being dropped; the timeline appends only on a substantive shift (replication never appends).
+- **`[det]`** Convergence reflects agreement vs conflict in recent evidence — but it is **blocked** on the stored-vs-derived decision (Open, above); its behavioral case lives in Sub-task B.
 
 ### §4 · Grow the wiki
 
@@ -113,6 +124,11 @@ The classification simultaneously encodes both axes. **Landscape fit** answers "
 
 - **Open —** "top-confidence `candidate_theme`" (singular): confirm whether only the #1 theme grows, or every candidate above a confidence bar — a signal can legitimately bear on two themes. And the *adjacent* rule must pick *which* prior block to link to, itself a similarity judgment that is not yet specified.
 
+**Verify.**
+- **`[llm]`** Each classification grows the theme correctly: `replication` adds no body; `adjacent` appends a block plus a Markdown link to the prior block's stable anchor; `wholly_new` opens a standalone section with a fresh anchor.
+- **`[det]`** The resolved `classification` and `theme_id_assigned` are written back to the signal frontmatter — the verdict Plan 10's output filter later reads.
+- **`[det]`** Re-applying an already-classified signal is idempotent: the `adjacent` block is not appended a second time.
+
 ### §5 · Propagate the change
 
 **When a hypothesis moves meaningfully, its dependents are re-evaluated, with weak dependencies discounted automatically.** `depends_on` is the canonical first-pass edge field.
@@ -127,6 +143,10 @@ Comparative hypotheses are handled as **pairwise edges**: a hypothesis naming tw
 
 - **Open —** the edge *weight* is fully specified but the *operation* is not: how the parent's change, the `supports`/`weakens` sign, and that weight actually modify the dependent's `alpha`/`beta`; what counts as a "meaningful" change worth propagating; and whether propagation recurses transitively (and if so, how it terminates, since `depends_on` can cycle). Pin these down before building §5.
 
+**Verify.**
+- **`[det]`** A meaningful belief move updates at least one dependent hypothesis or briefing-facing conclusion. Multi-step ripple, convergence, and comparative (pairwise-edge) cases live in Sub-task B (`tests/test_hypothesis_propagation.py`), not restated here.
+- **`[det]`** The edge weight is the credible-interval lower bound: a dependency at mean 0.71 with only 3.5 units of evidence yields ≈0.30, not 0.71, so a fragile dependency propagates less (`scipy.stats.beta.ppf(DEPENDENCY_WEIGHT_PERCENTILE, α, β)`).
+
 ### §6 · How freely to open new hypotheses (granularity under backfill)
 
 The §2 attach-vs-open decision sets the granularity of the whole store, and it can fail in two opposite directions — most visibly when Plan 14 backfill replays a dossier's references as one large batch (~200–300 `new_evidences` across ~100 papers against a dossier that seeded only ~10 hypotheses):
@@ -136,20 +156,22 @@ The §2 attach-vs-open decision sets the granularity of the whole store, and it 
 
 **Open — the rule that sits between these is not yet decided.** One candidate, recorded so it is not lost: gate new-hypothesis creation by the same resolvability + strategic-significance bar that governs bootstrap authoring (Plan 8), so a claim opens a new bet only when it is **both** unmatched **and** clears that bar — otherwise it attaches to the nearest match, or is dropped as non-strategic. Other directions are possible (a clustering/merge pass that opens freely then consolidates; a human-review queue for borderline cases). The choice is deferred until this plan moves into `doing/`. A complementary, Plan 1-side lever: seeding more hypotheses up front (including claims the literature treats as *settled*, all at `Beta(1,1)`) gives backfill richer scaffolding to attach to — accumulated mass then differentiates them, and the updater has to open new bets less often, lowering the stakes of this decision.
 
+**Acceptance gate (not a test).** The attach-vs-open rule is an open design decision; nothing in §6 is testable until it is made. Gate: the chosen rule is recorded in this plan (or its `doing/` spec) before implementation, and demonstrably avoids both failure modes on the Plan 14 backfill batch — sub-bets must not flatten onto the seeded hypotheses (under-capture), and `hypotheses.json` must not flood with paper-level findings that fail the betting-market test (over-capture).
+
 ### The model-judgment surface (cross-cutting)
 
 Four steps above are model calls, not deterministic code — the amber nodes in the diagram: matching (§2), stance re-resolution (§2), the replication/adjacent/wholly-new classification (§4), and the evidence-vs-non-evidence routing (§3). **Unlike Plan 7, this plan does not yet specify their model machinery** — prompt contract, model + fallback selection, and the parse/validation path — for any of them. That is the single largest gap to close at the `doing/` boundary; treat it as a prerequisite for the §2–§4 sections above, not an afterthought.
 
-### Verification
+**Acceptance gate (not a test).** Before `doing/`, each of the four model calls — matching (§2), stance re-resolution (§2), the replication/adjacent/wholly-new classification (§4), and evidence-vs-non-evidence routing (§3) — needs a recorded prompt contract, model + fallback selection, and parse/validation path. This gate blocks every `[llm]` check above: until it closes, the amber behaviors have no harness to verify against.
 
-- A second run updates existing belief and wiki state instead of recreating it from scratch — and re-processing a signal already recorded in provenance does **not** double-count it (provenance is keyed by `signal_id`). The plan must also state which signals each run consumes (e.g. all un-`classification`-stamped signals) — **open**.
-- New items can extend an existing theme (`adjacent`) or create a new one (`wholly_new`); replication is reflected as no theme growth.
-- The resolved `classification` and `theme_id_assigned` are written back to the signal frontmatter.
-- A signal raising a genuinely new uncertainty creates a uniform-prior hypothesis rather than a separate open-questions record.
-- An evidence increment from a high-credibility paper moves the posterior more than the same claim from a low-credibility paper.
-- Evidence against an existing hypothesis lowers posterior belief instead of only being mentioned in prose.
-- A changed hypothesis updates at least one dependent hypothesis or briefing-facing conclusion.
-- Timeline and watchlist are updated automatically and remain legible.
+### Verification — loop-level invariants
+
+Per-branch checks now sit with the mechanism they test (§2–§5, each a **Verify** block). What remains here is what no single branch owns — the whole-loop invariants.
+
+- A second run updates existing belief and wiki state instead of recreating it from scratch.
+- Re-processing a signal already recorded in provenance does **not** double-count it (provenance is keyed by `signal_id` — distinct from §2's claim-level dedup).
+- The plan states which signals each run consumes (e.g. all un-`classification`-stamped signals) — **open**.
+- Auto-updated human surfaces (timeline, watchlist, themes) remain legible after a run.
 
 ---
 
