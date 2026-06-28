@@ -52,7 +52,7 @@ flowchart TB
 
     sig --> d3
     d3 --> themes[("themes/*.md")]:::data
-    d3 --> dlog[("decisions.jsonl<br/>(append-only:<br/>verdict + reasoning,<br/>one row per signal)")]:::data
+    d3 --> dlog[("decisions.jsonl<br/>(append-only:<br/>verdict + reasoning,<br/>one row per claim)")]:::data
     d3 -. "rolls up claims,<br/>stamps signal processed" .-> sig
 
     classDef llm fill:#fdeecf,stroke:#b9821f,color:#5c3d00;
@@ -84,12 +84,12 @@ The branches:
 - **Open a new hypothesis** — nothing matches, but the claim is worth its own bet. Open a uniform-prior `Beta(1, 1)` hypothesis. **This is also how a genuinely new uncertainty enters the store** — there is no separate `open_questions.json`; an "open question" is just a low-evidence hypothesis near its prior, and rendering one as such in `overview.md` is a downstream concern. → resolve stance (§3), then the belief update (§4).
 - **Route out** — nothing matches and the claim is not worth a bet, but it is a fact worth keeping: a new dataset, benchmark, or model release. It is not evidence. → the routed-fact write (§4). If it is not even that, drop it.
 
-*How freely* to open new hypotheses versus attaching to existing ones is the granularity question — the knob on this decision, detailed in **§6**.
+*How finely* to split the questions the system tracks — open a new hypothesis, or attach to an existing one — is the granularity question, resolved in **§6**.
 
 - **Open —** the **matching mechanism** is the hinge of the whole loop and is undecided (LLM judgment over candidate hypotheses, embedding similarity, or theme-prefiltered LLM). The dedup id depends on the matched `hypothesis_id`, so this must be settled first. The rule that separates a "belief-irrelevant fact worth keeping" from a "drop," and the `entities.json` record schema (seeded by Plan 1, not restated anywhere this plan can build against), are open alongside it. Decide at the `doing/` boundary. The model-contract side of this judgment lives in "The model-judgment surface" below.
 
 **Verify.** *(`[det]` = deterministic, asserts exact behavior; `[llm]` = model judgment, verified by eval cases and blocked until the model-judgment gate closes.)*
-- **`[det]`** An unmatched, bet-worthy claim opens a uniform-prior `Beta(1, 1)` hypothesis rather than a separate open-questions record — the same path by which a genuinely new uncertainty enters the store.
+- **`[det]`** An unmatched, bet-worthy claim opens a uniform-prior `Beta(1, 1)` hypothesis — the same path by which a genuinely new uncertainty enters the store.
 - **`[det]`** Claim-level dedup is keyed on `claim hash + hypothesis_id`: the same claim re-matched to the same hypothesis attaches once, not twice (signal-level no-double-count is a loop invariant — see the end).
 - **`[llm]`** A non-evidence fact (dataset / benchmark / model release) is routed out, not attached as evidence; a bet-worthy unmatched claim opens a hypothesis rather than being routed or dropped.
 
@@ -172,16 +172,33 @@ The stamp says what a signal is worth *now*; the log says what we decided about 
 - **`[det]`** Re-applying an already-stamped signal is idempotent: no claim is re-classified and no `adjacent` block is appended a second time.
 - **`[det]`** Each claim appends exactly one row to `decisions.jsonl` (verdict, reasoning, theme, `signal_id`, timestamp); a stamped signal is skipped by later runs, so there is one row per claim and the stamp's rollup is consistent with them.
 
-### §6 · The granularity knob (how freely to open new hypotheses)
+### §6 · Granularity — how finely to split the questions the system tracks
 
-§6 tunes one thing: the **attach-vs-open branch point in Decision 1 (§2)**. It sets the granularity of the whole store, and it can fail in two opposite directions — most visibly when Plan 14 backfill replays a dossier's references as one large batch (~200–300 `new_evidences` across ~100 papers against a dossier that seeded only ~10 hypotheses):
+§6 settles one thing: **how finely the system splits the questions it keeps an opinion on.** A topic is never one question. For deduplication, "does dedup help at all?" is one bet; "is fuzzy matching better than exact?" is a different bet; "is per-dump dedup better than global?" is a third. Every question the system opens as a hypothesis is one it can hold an opinion on. Every question it never opens is one it can never answer — even after reading the paper that settles it.
 
-- **Under-capture:** every claim attaches loosely onto the same ~10 seeded bets; specific resolvable sub-bets the dossier never framed (e.g. "per-dump dedup beats global dedup") flatten into "more mass on hypothesis X." Well-evidenced, low-resolution.
-- **Over-capture:** a hypothesis is opened on every unmatched claim; `hypotheses.json` floods with paper-level claims ("method X beats Y on benchmark Z") that fail the betting-market test (Plan 8) and make the "open questions" view unreadable.
+**The resolution: separate a result from a question, then open freely and link.** Setting aside the non-evidence facts that route out (§2 — a dataset or benchmark release), each *evidential* claim is one of two things.
 
-**Open — the rule between these is not decided.** One candidate, recorded so it is not lost: gate new-hypothesis creation by the same resolvability + strategic-significance bar that governs bootstrap authoring (Plan 8), so a claim opens a new bet only when it is **both** unmatched **and** clears that bar — otherwise it attaches to the nearest match, or is routed/dropped as non-strategic. Other directions are possible (a clustering/merge pass that opens freely then consolidates; a human-review queue for borderline cases). The choice is deferred until this plan moves into `doing/`. A complementary, Plan 1-side lever: seeding more hypotheses up front (including claims the literature treats as *settled*, all at `Beta(1,1)`) gives backfill richer scaffolding to attach to — accumulated mass then differentiates them, and the updater opens new bets less often, lowering the stakes of this decision.
+- A **result** — a measurement the paper reports, e.g. "exact dedup of C4 raised accuracy 2%". A result is *evidence*: it attaches to the hypothesis whose question it speaks to and moves that opinion. It does not become a hypothesis of its own. A hypothesis named after a single measurement is a dead end — nothing else will ever attach to it.
+- A **standing question** — something the field genuinely disagrees on, e.g. "is fuzzy better than exact?". This is worth its own hypothesis, even when only one claim speaks to it so far. "A standing question the field disagrees on" is the plain-language form of Plan 8's **betting-market test** (resolvable + strategically significant); the per-claim call below applies that same bar at ingestion time that Plan 8 applies when authoring the seed hypotheses.
 
-**Acceptance gate (not a test).** Nothing in §6 is testable until the rule is made. Gate: the chosen rule is recorded in this plan (or its `doing/` spec) before implementation, and demonstrably avoids both failure modes on the Plan 14 backfill batch — sub-bets must not flatten onto the seeded hypotheses (under-capture), and `hypotheses.json` must not flood with paper-level claims that fail the betting-market test (over-capture).
+Two rules stop this from spiralling:
+
+- **A thinly-evidenced hypothesis is fine.** A bet with one piece of evidence is just a weakly-held opinion sitting near its starting point — which is exactly what §2 already calls an "open question." A store full of many weakly-held opinions is honest, not broken. Sparsity is expected here, not a failure.
+- **A narrow hypothesis links to the broader one it sits under** (`depends_on`). "Fuzzy beats exact" sits under "dedup helps." That link does real work: if the broad premise ever collapses — strong evidence that dedup actually hurts — §4 propagation discounts the narrow bets automatically, instead of leaving them standing as live questions about a dead premise. The link is also what keeps a narrow hypothesis from being an orphan: it hangs off a parent.
+
+The rule, in one line: open a hypothesis whenever a claim names a real question, keep results as evidence, let the store be sparse, and link narrow bets to the broad ones above them. A complementary lever from Plan 1: seeding more parent hypotheses up front gives narrow claims something to attach to, so the updater opens fewer brand-new bets.
+
+**The two failure modes this avoids** — most visible when Plan 14 backfill replays a dossier's references as one large batch (~200–300 claims across ~100 papers against ~10 seeded hypotheses):
+
+- **Too coarse:** every claim piles onto the same few broad hypotheses. "Does dedup help" climbs, but "fuzzy vs exact" and "per-dump vs global" — the specific questions — vanish into it. Well-evidenced, but unable to answer anything specific. *Avoided by* giving a real question its own hypothesis.
+- **Too fine:** a hypothesis is opened for every measurement. The store fills with dead one-liners ("exact dedup of C4 gives 2%") that no later claim will ever join. *Avoided by* keeping results as evidence, not bets.
+
+**Still open — two judgments to specify before building.**
+
+1. **The per-claim call.** For each claim: is this a result (evidence) or a standing question (a new bet)? And if it bears on a bet that already exists, which one? This is the matching judgment §2 and the model-judgment surface below already flag — the loop's largest gap to close.
+2. **Cleaning up duplicates.** Opening freely will sometimes open two hypotheses for the same question under different wording ("fuzzy beats exact" and "shard-local beats corpus-wide"). The plan accepts this on the way in and folds duplicates together in a later batch pass, rather than trying to prevent it on every claim. That pass is not yet specified: what flags two hypotheses as candidates to merge, how a merge is confirmed, and its safety rules — never merge two hypotheses that *disagree* (same subjects, opposite finding), and keep every merge reversible.
+
+**Acceptance gate (not a test).** Both judgments above are recorded in this plan (or its `doing/` spec) before implementation, and the result demonstrably avoids both failure modes on the Plan 14 backfill batch: specific questions keep their own hypotheses (no flattening), and the store does not fill with one-measurement hypotheses (no dead one-liners).
 
 ### The model-judgment surface (cross-cutting)
 
