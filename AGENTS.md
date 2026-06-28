@@ -12,6 +12,8 @@
 
 **Stay high level by default.** When you analyse something — dependencies, trade-offs, unclear points — give me the shape and a recommended path, not an exhaustive low-level inventory. Name files and line numbers only when I ask to go deeper, or when I need them to act. If you find yourself producing a long list of fine-grained items, stop and collapse it into the two or three decisions that actually matter; that is what I can act on part-time.
 
+**Default to the simplest solution.** I believe in Occam's razor. The best plans are the simplest ones, the way the cleanest proofs are the most beautiful. So start from the simplest design that solves the problem, and add complexity only when a hard constraint forces it — never in anticipation of one. Don't let the perfect be the enemy of the good; but when two options both work, choose the simpler. If you reach for a more complex approach, name the constraint that made you.
+
 ---
 
 ## What is Distill?
