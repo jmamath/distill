@@ -4,6 +4,8 @@
 
 **Split note (2026-06-29):** Split out of Plan 9, which originally covered both the belief graph and the wiki renderer. This plan owns the **renderer**: the old Plan 9 §5 wiki-novelty decision, the theme-growth rules, and anchors. Plan 9 now owns the belief graph. The two are parallel siblings — they consume the same pass-2 signals and never call each other. **This plan never reads `hypotheses.json`:** a claim finds its theme through the signal's own `candidate_themes` (§2), which is what keeps the renderer independent of the belief graph.
 
+**Timeline note (2026-07-05):** `timeline.json` is written here, not in Plan 9. A dated fact (a dataset, benchmark, or model release) earns a timeline entry only when it grows a theme — a rule this plan enforces structurally, because theme growth is its own verdict. Replication never appends: no growth, no entry.
+
 **Depends on:** Plan 7 (pass-2 signals carry `new_evidences` claims and `candidate_themes`); Plan 8 (the shared `storage` module and signal frontmatter I/O — see Plan 9 Sub-task A for the shared-ownership note); Plan 13 (the LLM-as-judge helper, reused by Sub-task B).
 
 ---
@@ -20,7 +22,7 @@ The renderer makes **one decision per claim**, plus deterministic growth mechani
 
 The decision (**wiki novelty**, §2) asks *is this claim replication, adjacent, or wholly new* against the theme body it touches. It runs over **every** claim a signal carries, whatever role the belief graph gave it — an evidential claim that moved a belief, *and* a claim the belief graph routed out as a non-evidence fact (a new dataset or benchmark is often the most novel thing a paper brings to a theme, even though it is evidence for no bet).
 
-Everything else is **mechanics, not a decision** (§3): the verdict deterministically drives whether and how the theme body grows. The renderer also writes an append-only decision log and stamps the signal done.
+Everything else is **mechanics, not a decision** (§3): the verdict deterministically drives whether and how the theme body grows, and whether a dated fact earns a `timeline.json` entry. The renderer also writes an append-only decision log and stamps the signal done.
 
 Whether the *paper* is worth surfacing is not this plan's decision — it is a **rollup** over its claims that Plan 10's tweet filter composes from the stamp this plan writes.
 
@@ -37,6 +39,7 @@ flowchart TB
     sig -. "same signals,<br/>read independently" .-> bg
     novelty --> grow
     grow --> themes[("themes/*.md")]:::data
+    grow --> tl[("timeline.json<br/>(dated facts that grew a theme)")]:::data
     novelty --> dlog[("decisions.jsonl<br/>append-only · one row per claim")]:::data
     novelty --> stamp["writes back to the signal:<br/>classification + theme_ids<br/>(rollup → Plan 10)"]:::data
 
@@ -62,6 +65,7 @@ One entry-point module drives the renderer. `wiki_updater.py` runs the novelty d
 |---|---|---|
 | `src/topics/wiki_updater.py` | **NEW** | Classifies the contribution, grows the theme, stamps `classification` / `theme_id_assigned` on the signal, and appends the full decision to `decisions.jsonl` |
 | `src/topics/anchors.py` | **NEW** | Stable `<a id="…"></a>` generation and resolution for adjacent-block links |
+| `src/topics/timeline.py` | **NEW** | Appends a dated fact that grew a theme to `timeline.json` (merge by id — the same release never appends twice) |
 | `tests/test_wiki_updater.py` | **NEW** | Idempotency across replication / adjacent / wholly-new; classification written back; decision logged with reasoning; multi-theme non-redundancy |
 
 **Which theme a claim touches.** A claim finds its theme through the signal's own `candidate_themes` (set by pass-2), **not** through the hypothesis the belief graph matched. This is deliberate: it is what lets the renderer run without reading `hypotheses.json`, keeping it independent of the belief graph. It also means the quality of theme placement is already covered by an eval we build elsewhere — Plan 13 D.2 grades `candidate_themes` (top-1 theme match + recall@3).
@@ -86,6 +90,7 @@ The stamp says what a signal is worth *now*; the log says what we decided about 
 - **`[det]`** The signal frontmatter rollup (headline `classification` + the `theme_id`s touched) is written back — the values Plan 10's output filter later ranks on.
 - **`[det]`** Re-applying an already-stamped signal is idempotent: no claim is re-classified and no `adjacent` block is appended a second time.
 - **`[det]`** Each claim appends exactly one row to `decisions.jsonl` (verdict, reasoning, theme, `signal_id`, timestamp); a stamped signal is skipped by later runs, so there is one row per claim and the stamp's rollup is consistent with them.
+- **`[det]`** A dated fact that grows a theme appends exactly one `timeline.json` entry (merge by id — re-applying a stamped signal never duplicates it); a replication appends none.
 
 ### §3 · Mechanics — grow the theme (deterministic)
 
@@ -94,6 +99,10 @@ The stamp says what a signal is worth *now*; the log says what we decided about 
 - **replication** — confirms the existing theme body with no new information → **no body growth**.
 - **adjacent** — extends the theme in a direction it already frames → **append a block + Markdown link to the prior block's stable anchor** (`anchors.py` generates and resolves the anchor).
 - **wholly-new** — something the topic has no prior frame for → **standalone section + fresh anchor**.
+
+**And the timeline.** When the claim that grew a theme is a dated fact — a dataset, benchmark, or model release — it also appends to `timeline.json` (merge by id, so the same release never appends twice). Replication appends nothing, structurally: no growth, no entry.
+
+- **Open —** the predicate for "dated fact" (a release clearly is; an ordinary result usually is not) — pinned at the `doing/` boundary.
 
 ### The model-judgment surface
 
@@ -106,7 +115,7 @@ The novelty decision (§2) is a model call, not deterministic code — the singl
 - A second run grows existing themes instead of recreating them from scratch.
 - A run consumes the signals missing the `classification` stamp; the stamp is written **last**, after all of a signal's claims are classified.
 - Re-applying a stamped signal is idempotent (covered per-step in §2).
-- Themes remain legible after a run.
+- Themes and the timeline remain legible after a run.
 
 ---
 

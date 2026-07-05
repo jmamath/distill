@@ -25,4 +25,4 @@ The quality of the generated bets is validated by Plan 13's hypothesis-generatio
 
 - `data/research_topics/data_advantage/open_questions.json` no longer exists.
 - `hypotheses.json` is populated with resolvable, uniform-prior hypotheses covering the strategic questions the topic tracks.
-- `overview.md` renders its "top open hypotheses" view from the low-evidence hypotheses, with no reference to a separate question store.
+- An "open question" surfaces only as a low-evidence hypothesis in `hypotheses.json` — no separate question store anywhere. (`overview.md` is retired; Plan 10 composes the "top open hypotheses" view at read time.)

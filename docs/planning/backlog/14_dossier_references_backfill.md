@@ -94,10 +94,10 @@ backfill → signals/{yyyy}/{mm}/{dd}/*.md   (claims already scored into `new_ev
    → hypothesis_updater (Plan 9): for each claim, dedup against evidence.json, increment
      strength + append provenance (via the Plan 8 storage helpers), attach to a matching
      hypothesis and move its Beta — or mint a new uniform-prior hypothesis when nothing
-     matches; routes non-evidence facts to entities.json / timeline.json
+     matches; routes non-evidence facts to entities.json
      → writes evidence.json AND hypotheses.json in one pass
-   → wiki_updater (Plan 17, parallel sibling): folds the same signals into themes
-     (with an append-only decision log)
+   → wiki_updater (Plan 17, parallel sibling): folds the same signals into themes and
+     the timeline (with an append-only decision log)
 ```
 
 Note this is two conceptual stages, not three: the storage layer (Plan 8) is **not** a separate step that produces `evidence.json` on its own. It is the frontmatter-aware read/merge/write helper library the updater *calls*; the updater is what reads signals and writes both `evidence.json` and `hypotheses.json`.
