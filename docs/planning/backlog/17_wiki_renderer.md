@@ -24,7 +24,7 @@ Everything else is **mechanics, not a decision** (§3): the verdict deterministi
 
 Whether the *paper* is worth surfacing is not this plan's decision — it is a **rollup** over its claims that Plan 10's tweet filter composes from the stamp this plan writes.
 
-**The split decoupled the renderer from the belief graph.** Because each subsystem now writes its own stamp, the renderer no longer has to run after the belief graph (the old §5 ran last because a single stamp marked the whole signal done). It reads the same signals and can run independently — before, after, or alongside the belief graph.
+**The split decoupled the renderer from the belief graph.** Because each subsystem now writes its own stamp, the renderer no longer has to run after the belief graph (the old §5 ran last because a single stamp marked the whole signal done). It reads the same signals and can run independently — before or after the belief graph, in either order, but never concurrently: both subsystems read-modify-write the same signal frontmatter for their stamps, so interleaved runs could silently drop each other's stamp.
 
 ```mermaid
 flowchart TB
