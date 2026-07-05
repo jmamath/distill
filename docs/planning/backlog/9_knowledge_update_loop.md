@@ -1,23 +1,27 @@
-# Plan 9 — Hypothesis And Wiki Update Loop
+# Plan 9 — Hypothesis Update Loop (Belief Graph)
 
-**Original task ids:** 15.5 (Hypothesis And Wiki Update Loop), 15.5b (Hypothesis Revision And Propagation Evaluation)
+**Original task ids:** 15.5 (Hypothesis Update Loop — belief half), 15.5b (Hypothesis Revision And Propagation Evaluation)
+
+**Split note (2026-06-29):** This plan was originally "Hypothesis And Wiki Update Loop" and covered both the belief graph and the wiki renderer. It was split so each subsystem can be built and proven on its own. This plan owns the **belief graph**. The **wiki renderer** — the old §5 wiki-novelty decision, theme growth, and anchors — is now **Plan 17**. The two are parallel siblings: they consume the same pass-2 signals through the shared signal contract and never call each other.
 
 ---
 
-Build the mechanism that turns newly scored signals into updated topic beliefs and an evolving thematic wiki, then prove that knowledge updates actually propagate coherently.
+Build the mechanism that turns newly scored signals into updated topic beliefs, then prove that those updates propagate coherently.
 
-**Why this matters:** The wiki is the human-readable product surface, but it should not be the only place the system stores what it believes. Without a hypothesis update loop, the system stays a feed summarizer with nicer prose. A system has not really updated its knowledge if it can store new evidence but still briefs as though the old world is true — so this plan tests ripple effects directly, to keep the product from quietly degrading into a prose append-only log.
+**Why this matters:** The system should not only store new evidence — it must let that evidence move what it believes. Without a hypothesis update loop, the system stays a feed summarizer: it can file a new result but still reasons as though the old world holds. So this plan tests ripple effects directly — that a new claim moves the right belief, and that the move propagates to everything depending on it — to keep the product from quietly degrading into an append-only log of unconnected results.
 
 ---
 
 ## §1 · What this plan does
 
-Each signal is exploded into the pieces it carries — claims, and the non-evidence facts (a new dataset, benchmark, model release). The loop is **three decisions plus the mechanics they trigger**, and all three work *below* the paper level:
+Each signal is exploded into the claims it carries. The belief graph makes **two decisions per claim, plus the mechanics they trigger** — all *below* the paper level:
 
-- **Two decisions per claim.** Decision 1 (**triage**, §2) asks *where does this claim go?* — attach to an existing hypothesis, open a new one, or route out as a non-evidence fact. Decision 2 (**resolve stance**, §3) asks *which way does it cut?* — support, oppose, or mixed — and runs only when Decision 1 said attach or open.
-- **One decision per claim.** Decision 3 (**wiki novelty**, §5) asks *is this replication, adjacent, or wholly new?* of each claim against the theme body — **every** claim, including the ones triage routed out as non-evidence (a routed-out "dataset X released" is often the most novel thing for a theme). The theme grows only from the novel claims; whether the *paper* is worth surfacing is a rollup over them, not a verdict on the paper. It runs **after** the signal's claims are processed, and the stamp it writes marks the signal done.
+- Decision 1 (**triage**, §2) asks *where does this claim go?* — attach to an existing hypothesis, open a new one, or route out as a non-evidence fact (a dataset, benchmark, or model release).
+- Decision 2 (**resolve stance**, §3) asks *which way does it cut?* — support, oppose, or mixed — and runs only when Decision 1 said attach or open.
 
 Everything else is **mechanics, not decisions** — deterministic logic that fires on its own once a decision is made: the belief update, the routed-fact writes, and propagation (§4). The mechanics call the shared `storage` module, which owns load/save, merge-by-id, the credibility-weighted `strength` increment, and the Beta update. **This plan owns the decisions and orchestrates the mechanics; `storage` owns the merge/Beta machinery.** That split is stated here once and not repeated below.
+
+A signal carries one further decision — *is each claim new to the theme it touches?* — but that is the **wiki renderer's** job, now **Plan 17**. The renderer reads the same signals independently and never reads this plan's `hypotheses.json`; the two stay decoupled through the signal contract.
 
 ```mermaid
 flowchart TB
@@ -32,12 +36,8 @@ flowchart TB
         route["§4 · Route non-evidence (mechanics)<br/>dataset / benchmark / model release"]:::det
     end
 
-    subgraph persignal["Novelty — per claim, stamped per signal"]
-        direction TB
-        d3{{"§5 · Decision 3 — Wiki novelty<br/>replication · adjacent · wholly-new"}}:::llm
-    end
-
     store["shared storage module<br/>load / save · merge by id · strength increment · Beta update · neutral fallback weight"]:::store
+    done["write belief_processed_at<br/>(once all the signal's claims are done)"]:::det
 
     sig --> d1
     d1 -->|attach / open| d2
@@ -49,25 +49,30 @@ flowchart TB
     store --> ev[("evidence.json")]:::data
     route --> ent[("entities.json")]:::data
     route --> tl[("timeline.json")]:::data
+    perclaim --> done
+    done -. "stamps signal done<br/>for this subsystem" .-> sig
 
-    sig --> d3
-    d3 --> themes[("themes/*.md")]:::data
-    d3 --> dlog[("decisions.jsonl<br/>(append-only:<br/>verdict + reasoning,<br/>one row per claim)")]:::data
-    d3 -. "rolls up claims,<br/>stamps signal processed" .-> sig
+    renderer["Plan 17 · wiki renderer<br/>(parallel sibling — reads the same signals,<br/>never reads hypotheses.json)"]:::ext
+    sig -.-> renderer
 
     classDef llm fill:#fdeecf,stroke:#b9821f,color:#5c3d00;
     classDef det fill:#d9f2e6,stroke:#1a7f52,color:#0b3d26;
     classDef store fill:#dbe9fb,stroke:#2b6cb0,color:#0b2d52;
     classDef data fill:#eeeeec,stroke:#9a9a96,color:#333333;
+    classDef ext fill:#f3e8fd,stroke:#7c3aed,color:#3b0764;
 ```
 
-*Amber = a model call (a judgment) · green = deterministic mechanics this plan owns · blue = the shared `storage` module · grey = files on disk.*
+*Amber = a model call (a judgment) · green = deterministic mechanics this plan owns · blue = the shared `storage` module · grey = files on disk · purple = the parallel renderer (Plan 17).*
 
 ---
 
-## Sub-task A — Hypothesis And Wiki Update Loop
+## Sub-task A — Hypothesis Update Loop
 
-Two entry-point modules drive the loop. `hypothesis_updater.py` reads pass-2 signals and runs the two per-claim decisions (§2, §3), then the mechanics they trigger (§4). `wiki_updater.py` runs the wiki novelty decision (§5) per claim: it grows the theme from the novel claims, logs each one, and stamps the signal processed once they are all classified. The shared `storage` module owns the merge/Beta mechanics that §4 calls. The **signal-specific storage** Plan 8 deliberately left out lives with its consumer, `wiki_updater.py`: the `SignalFrontmatter` model, the signal read helper, and the `classification` / `theme_id_assigned` write-back. Each section below opens with the new files it introduces, so a file's responsibility is read where it is explained.
+One entry-point module drives the loop. `hypothesis_updater.py` reads pass-2 signals and runs the two per-claim decisions (§2, §3), then the mechanics they trigger (§4). The shared `storage` module owns the merge/Beta mechanics that §4 calls.
+
+**Reading and stamping signals is shared with the renderer.** Both this plan and Plan 17 read pass-2 signals and write a small "done" stamp back to the signal frontmatter — this plan writes `belief_processed_at`, the renderer writes `classification`. So the `SignalFrontmatter` model and the signal read/write helper are **shared infrastructure**, owned by neither subsystem: they live in a neutral module both import (the Plan 8 `storage` module, or a small new `signals.py` — pinned at the `doing/` boundary), and each subsystem writes only its own stamp field. A run of this plan consumes the signals missing `belief_processed_at`; writing that stamp is the **last** step for a signal, so a crash mid-signal leaves it unstamped and the next run safely re-opens it. The per-claim dedup keyed on `claim hash + hypothesis_id` is what stops an already-attached claim from counting twice on that re-open — so the stamp can stay one mark for the whole signal rather than one per claim.
+
+Each section below opens with the new files it introduces, so a file's responsibility is read where it is explained.
 
 ### §2 · Decision 1 — Triage: where does this claim go? (per claim)
 
@@ -136,42 +141,6 @@ Comparative hypotheses are handled as **pairwise edges**: a hypothesis naming tw
 - **`[det]`** A meaningful belief move updates at least one dependent hypothesis or briefing-facing conclusion; the edge weight is the credible-interval lower bound (mean 0.71 with 3.5 units of evidence → ≈0.30, not 0.71). Multi-step ripple, convergence, and comparative cases live in Sub-task B (`tests/test_hypothesis_propagation.py`).
 - **`[det]`** Convergence reflects agreement vs conflict in recent evidence — **blocked** on the stored-vs-derived decision (Open, above).
 
-### §5 · Decision 3 — Wiki novelty (per claim, after the belief work)
-
-**Once a signal's claims have been processed, classify each one against the theme body and grow the theme accordingly.** The unit is the *claim* — the same `new_evidences` entry belief uses, not the paper: a paper with one novel result among three replications should grow the theme from the one claim and leave the rest alone, which a single paper-level verdict cannot express. Novelty runs over **every** claim, whatever role triage gave it — an evidential claim that moved a belief, *and* a claim triage routed out as a non-evidence fact (a new dataset, benchmark, or model release is often the most novel thing a paper brings to a theme even though it is evidence for no bet). Belief and novelty read the same claims; belief just acts only on the evidential subset.
-
-Whether the *paper* is worth surfacing is not this decision — it is a **rollup** over its claims (e.g. surface a paper if it has at least one wholly-new claim, ranked by its best one), which Plan 10's output filter composes. This decision runs **after** the signal's belief work, and the stamp it writes marks the signal processed once all its claims are classified — write it earlier and a crash leaves a signal marked done with belief unmoved.
-
-| File | Action | Description |
-|---|---|---|
-| `src/topics/wiki_updater.py` | **NEW** | Classifies the contribution, grows the theme, stamps `classification` / `theme_id_assigned` on the signal, appends the full decision to `decisions.jsonl`, and owns the `SignalFrontmatter` model and signal read/write helpers |
-| `src/topics/anchors.py` | **NEW** | Stable `<a id="…"></a>` generation and resolution for adjacent-block links |
-| `tests/test_wiki_updater.py` | **NEW** | Idempotency across replication / adjacent / wholly-new; classification written back; decision logged with reasoning |
-
-The `replication / adjacent / wholly_new` verdict drives the theme growth rules:
-
-- **replication** — confirms the existing theme body with no new information → **no body growth**.
-- **adjacent** — extends the theme in a direction it already frames → **append a block + Markdown link to the prior block's stable anchor**.
-- **wholly-new** — something the topic has no prior frame for → **standalone section + fresh anchor**.
-
-The verdict encodes both scoring axes at once. **Landscape fit** answers "how does this relate to what we already know?" — the replication/adjacent/wholly-new gradient itself. **Technical novelty** answers "is this genuinely new, or incremental?" — replication is incremental, adjacent a meaningful extension, wholly-new a genuine advance. Technical novelty is why this judgment lives in the wiki updater and not in pass-2: it needs the full theme body as context and cannot be made reliably from the abstract alone.
-
-The decisions are recorded in **two places**, each answering a different question:
-
-- The **log** (`decisions.jsonl`, per topic, append-only) holds one row **per claim**: verdict, the model's **reasoning**, the theme touched, the source `signal_id`, and a timestamp. It is JSONL — one decision per line — so each row is appended without rewriting the file; a deliberate break from the project's flat-array JSON, because a log only grows.
-- The **stamp** on the signal frontmatter is a **rollup**, not a per-claim verdict: the signal's headline `classification` (its best claim, what Plan 10 ranks on), the set of `theme_id`s its claims touched, and the "already processed" marker. Plan 10's output filter reads it to drop a pure-replication signal as a tweet candidate and rank incremental signals below genuine advances, without reopening the log.
-
-The stamp says what a signal is worth *now*; the log says what we decided about *every claim*, and why. The stamp's rollup is derived from the same step that writes the log rows, so it always agrees with them — a disagreement is a bug. Each claim is classified once, so the log holds exactly one row per claim, not a version history. The log is what makes an LLM classifier auditable: the reasoning trail is the only way to debug a bad call or watch the verdict mix drift. It does not duplicate the §4 belief provenance — provenance records which evidence moved which belief; this log records the novelty call and where each claim was filed.
-
-- **Open —** how each claim maps to a theme: via the hypothesis it matched in Decision 1 (which already carries a theme), or via the signal's `candidate_themes`, and whether one claim can legitimately grow more than one theme. And the *adjacent* rule must pick *which* prior block to link to, itself an unspecified similarity judgment.
-
-**Verify.**
-- **`[llm]`** Each claim's verdict grows the theme correctly: `replication` adds no body; `adjacent` appends a block plus a Markdown link to the prior block's stable anchor; `wholly_new` opens a standalone section with a fresh anchor.
-- **`[llm]`** A mixed paper grows the theme only from its novel claims: one wholly-new claim among replications appends one block, not a whole section, and contributes one wholly-new entry to the rollup.
-- **`[det]`** The signal frontmatter rollup (headline `classification` + the `theme_id`s touched) is written back — the values Plan 10's output filter later ranks on.
-- **`[det]`** Re-applying an already-stamped signal is idempotent: no claim is re-classified and no `adjacent` block is appended a second time.
-- **`[det]`** Each claim appends exactly one row to `decisions.jsonl` (verdict, reasoning, theme, `signal_id`, timestamp); a stamped signal is skipped by later runs, so there is one row per claim and the stamp's rollup is consistent with them.
-
 ### §6 · Granularity — how finely to split the questions the system tracks
 
 §6 settles one thing: **how finely the system splits the questions it keeps an opinion on.** A topic is never one question. For deduplication, "does dedup help at all?" is one bet; "is fuzzy matching better than exact?" is a different bet; "is per-dump dedup better than global?" is a third. Every question the system opens as a hypothesis is one it can hold an opinion on. Every question it never opens is one it can never answer — even after reading the paper that settles it.
@@ -198,34 +167,35 @@ The rule, in one line: open a hypothesis whenever a claim names a real question,
 1. **The per-claim call.** For each claim: is this a result (evidence) or a standing question (a new bet)? And if it bears on a bet that already exists, which one? This is the matching judgment §2 and the model-judgment surface below already flag — the loop's largest gap to close.
 2. **Cleaning up duplicates.** Opening freely will sometimes open two hypotheses for the same question under different wording ("fuzzy beats exact" and "shard-local beats corpus-wide"). The plan accepts this on the way in and folds duplicates together in a later batch pass, rather than trying to prevent it on every claim. That pass is not yet specified: what flags two hypotheses as candidates to merge, how a merge is confirmed, and its safety rules — never merge two hypotheses that *disagree* (same subjects, opposite finding), and keep every merge reversible.
 
-**Acceptance gate (not a test).** Both judgments above are recorded in this plan (or its `doing/` spec) before implementation, and the result demonstrably avoids both failure modes on the Plan 14 backfill batch: specific questions keep their own hypotheses (no flattening), and the store does not fill with one-measurement hypotheses (no dead one-liners).
+**Acceptance gate (not a test).** Both judgments above are recorded in this plan (or its `doing/` spec) before implementation, and the result demonstrably avoids both failure modes on the Plan 14 backfill batch — checked by Sub-task D: specific questions keep their own hypotheses (no flattening), and the store does not fill with one-measurement hypotheses (no dead one-liners).
 
 ### The model-judgment surface (cross-cutting)
 
-Three of the loop's steps are model calls, not deterministic code — the amber nodes:
+Two of the loop's steps are model calls, not deterministic code — the amber nodes:
 
 1. **Triage / matching** (§2) — which hypothesis a claim bears on, or whether it routes out. (Whether matching and route-out are one model call or two is itself an implementation detail to settle.)
 2. **Stance re-resolution** (§3) — the claim's bearing on the named hypothesis.
-3. **Wiki novelty** (§5) — replication / adjacent / wholly-new for each claim against the theme body.
 
-**Unlike Plan 7, this plan does not yet specify their model machinery** — prompt contract, model + fallback selection, and the parse/validation path — for any of them. That is the single largest gap to close at the `doing/` boundary; treat it as a prerequisite for §2–§5, not an afterthought.
+(The wiki-novelty judgment that used to be the third call now lives in Plan 17, with its own model-judgment surface.)
 
-**Acceptance gate (not a test).** Before `doing/`, each of the three model calls needs a recorded prompt contract, model + fallback selection, and parse/validation path. This gate blocks every `[llm]` check above: until it closes, the amber behaviors have no harness to verify against.
+**Unlike Plan 7, this plan does not yet specify their model machinery** — prompt contract, model + fallback selection, and the parse/validation path — for either of them. That is the single largest gap to close at the `doing/` boundary; treat it as a prerequisite for §2–§3, not an afterthought. Its quality gate is Sub-task C.
+
+**Acceptance gate (not a test).** Before `doing/`, each of the two model calls needs a recorded prompt contract, model + fallback selection, and parse/validation path. This gate blocks every `[llm]` check above: until it closes, the amber behaviors have no harness to verify against.
 
 ### Verification — loop-level invariants
 
-Per-step checks sit with the step they test (§2–§5). What remains here is what no single step owns — the whole-loop invariants.
+Per-step checks sit with the step they test (§2–§4). What remains here is what no single step owns — the whole-loop invariants.
 
-- A second run updates existing belief and wiki state instead of recreating it from scratch.
+- A second run updates existing belief state instead of recreating it from scratch.
 - Re-processing a signal already recorded in provenance does **not** double-count it (provenance is keyed by `signal_id` — distinct from §2's claim-level dedup).
-- The plan states which signals each run consumes (e.g. all un-`classification`-stamped signals) — **open**.
-- Auto-updated human surfaces (timeline, watchlist, themes) remain legible after a run.
+- A run consumes the signals missing this plan's `belief_processed_at` stamp; the stamp is written **last**, after all of a signal's claims are processed (resolves the previously-open "which signals does a run consume?" question, now answered per subsystem).
+- Auto-updated surfaces this plan writes — the timeline and the entity records from routed facts — remain legible after a run. (Theme legibility is Plan 17's concern.)
 
 ---
 
 ## Sub-task B — Hypothesis Revision And Propagation Evaluation
 
-Build a focused evaluation suite for the hardest part of the system: whether knowledge updates actually propagate coherently.
+Build a focused evaluation suite for the hardest part of the system: whether knowledge updates actually propagate coherently. This is the **per-mechanic** eval — multi-step fixtures over the deterministic §4 machinery. The **per-judgment** eval (the §2–§3 model calls) is Sub-task C; the **at-scale** eval (the whole loop over a large batch) is Sub-task D.
 
 ### Changes
 
@@ -249,3 +219,40 @@ Build a focused evaluation suite for the hardest part of the system: whether kno
 - downstream derived outputs change when upstream beliefs change
 - opposing evidence remains visible in the hypothesis history and affects posterior belief
 - head-to-head evidence moves the belief on the correct pairwise edge; a new contender adds edges rather than rebuilding, and cycles are not "resolved" away into a fabricated global ranking
+
+---
+
+## Sub-task C — Triage And Stance Judgment Evaluation
+
+**Depends on:** Plan 13 (reuses its LLM-as-judge helper, `eval_judge.py`).
+
+The two model calls in §2–§3 are judgments, not deterministic code, so the shape tests in Sub-task A cannot tell whether they are *correct*. This sub-task is their quality gate, built the way Plan 13 gates pass-1/pass-2: a small golden set scored with an LLM-as-judge. It is the belief-graph analogue of Plan 13's scoring eval — and the tie to Plan 13 is narrow, just the judge helper, so this needs that one module to exist, not all of Plan 13.
+
+### Changes
+
+| File | Action | Description |
+|---|---|---|
+| `evals/golden/update_loop.yaml` | **NEW** | A handful of claims, each paired with a human judgment: which hypothesis it should attach to (or `open new` / `route out`), and its resolved stance against that hypothesis, against a fixed seed hypothesis store |
+| `evals/eval_update_loop.py` | **NEW** | Runs triage + stance over the golden claims against the fixed store and judges each call with the rubric; writes a markdown report. Reuses Plan 13's `eval_judge.py`; does not modify Plan 13 |
+
+### Verification
+
+- **Matching is the call to prioritise** — §6 names it the loop's largest gap.
+- A claim attached to the wrong hypothesis, routed when it should have opened a bet, or whose stance was copied from pass-2 instead of re-resolved against the matched hypothesis, scores low and is named in the report.
+- Re-running on the same predictions is near-identical (±1 judge drift), matching Plan 13's eval contract.
+
+---
+
+## Sub-task D — At-Scale Belief Health (after backfill)
+
+**Depends on:** Plan 14 (produces the backfilled signal batch) and Sub-task A (moves beliefs over it).
+
+The evals above check one mechanic or one judgment at a time. They cannot see the property that only emerges when the whole loop runs over a large batch: does the **store keep its shape?** This sub-task checks that on the Plan 14 backfill (~200–300 claims across ~100 papers against ~10 seeded hypotheses) — the same batch §6's acceptance gate calls out.
+
+What it must demonstrate, measured on the real backfilled store:
+
+- Specific questions keep their own hypotheses — no flattening into a few broad ones (the §6 "too coarse" failure).
+- The store does not fill with one-evidence dead-ends (the §6 "too fine" failure).
+- Hypotheses the literature supports carry visibly more evidence mass than genuinely open ones, with every unit of mass traceable to a `signal_id` in provenance. *(Moved here from Plan 14, where it could not be verified without this plan's updater.)*
+
+**How is left open.** Whether this is a deterministic measurement over `hypotheses.json` (mass distribution, count of one-evidence bets), an LLM-as-judge over the resulting store, or a human read — and what threshold counts as "flattening" or "dead-end" — is pinned at the `doing/` boundary. This sub-task names *what* it checks and *why*; the method is a later decision.

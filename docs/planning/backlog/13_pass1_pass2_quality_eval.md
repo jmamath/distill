@@ -703,6 +703,8 @@ authoring constraint defined in Plan 8.
 - **Cross-run diff tooling.** Two reports diffed in `git diff` is good
   enough at 10 papers. A dedicated diff script is a follow-up if we scale up.
 - **Eval for the wiki-update or briefing stages.** Those are separate plans on
-  separate pipeline stages. (Bootstrap *hypothesis-generation* quality is now
+  separate pipeline stages — the wiki-renderer evals now live in Plan 17, and the
+  belief-graph evals in Plan 9 (Sub-tasks C and D), both reusing this plan's judge
+  helper rather than extending it. (Bootstrap *hypothesis-generation* quality is now
   in scope — see Sub-task E — because it shares the judge infrastructure and
   gates the betting-market authoring constraint.)

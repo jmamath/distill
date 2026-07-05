@@ -14,7 +14,7 @@ Build the `output/` package and implement the first renderer: daily tweet candid
 |---|---|---|
 | `src/output/__init__.py` | **NEW** | Output package |
 | `src/output/base.py` | **NEW** | `OutputRenderer` interface: `render(signals, wiki_state, topic_config) → OutputArtifact`; defines the contract all renderers must satisfy |
-| `src/output/daily_tweet.py` | **NEW** | First renderer: generates tweet candidates from signals classified by Plan 3 (`adjacent` / `wholly_new` only); derives `strategic_significance` from current wiki state; derives `action` from audience match between `paper_audience` and `topic.md.audience`; applies `daily_tweet_limit` top-N filter; writes `tweets/{yyyy-mm-dd}.json` |
+| `src/output/daily_tweet.py` | **NEW** | First renderer: generates tweet candidates from signals classified by Plan 17 (`adjacent` / `wholly_new` only); derives `strategic_significance` from current wiki state; derives `action` from audience match between `paper_audience` and `topic.md.audience`; applies `daily_tweet_limit` top-N filter; writes `tweets/{yyyy-mm-dd}.json` |
 | `data/research_topics/data_advantage/tweets/` | **NEW** | Per-day tweet candidate files |
 | `tests/test_output_daily_tweet.py` | **NEW** | Fixture scored signals → expected tweet JSON shape; only `adjacent` and `wholly_new` signals produce candidates; `replication` signals are skipped; idempotent on re-run |
 
@@ -36,7 +36,7 @@ Build the `output/` package and implement the first renderer: daily tweet candid
 
 ## Generation rules
 
-- Only signals with `classification: adjacent` or `classification: wholly_new` (written back by Plan 3) generate candidates — replication is not worth surfacing
+- Only signals with `classification: adjacent` or `classification: wholly_new` (written back by Plan 17) generate candidates — replication is not worth surfacing
 - Daily top-N filter: at most `daily_tweet_limit` candidates per day (configurable in `topic.md`, default `1`); ranked by `applicability_score` × `source_credibility` × audience match between `paper_audience` and `topic.md.audience`
 - One candidate per signal at most; the renderer may skip a signal if the underlying hypothesis update is not independently worth a tweet
 - `strategic_significance` is derived at render time from current wiki state (e.g., did the signal flip a hypothesis posterior, retire an open question, or extend a high-priority theme)

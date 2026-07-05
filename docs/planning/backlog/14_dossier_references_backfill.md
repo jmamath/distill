@@ -94,13 +94,15 @@ backfill → signals/{yyyy}/{mm}/{dd}/*.md   (claims already scored into `new_ev
    → hypothesis_updater (Plan 9): for each claim, dedup against evidence.json, increment
      strength + append provenance (via the Plan 8 storage helpers), attach to a matching
      hypothesis and move its Beta — or mint a new uniform-prior hypothesis when nothing
-     matches → writes evidence.json AND hypotheses.json in one pass
-   → wiki_updater (Plan 9, parallel sibling): folds the same signals into themes / entities / timeline
+     matches; routes non-evidence facts to entities.json / timeline.json
+     → writes evidence.json AND hypotheses.json in one pass
+   → wiki_updater (Plan 17, parallel sibling): folds the same signals into themes
+     (with an append-only decision log)
 ```
 
 Note this is two conceptual stages, not three: the storage layer (Plan 8) is **not** a separate step that produces `evidence.json` on its own. It is the frontmatter-aware read/merge/write helper library the updater *calls*; the updater is what reads signals and writes both `evidence.json` and `hypotheses.json`.
 
-Backfill produces *evidence claims*, not hypotheses — ~200–300 `new_evidences` across 100 papers, not 200 hypotheses. Whether a backfilled claim thickens an existing bet or spawns a new one is the updater's call; the resulting hypothesis granularity is governed in Plan 9 (see "Hypothesis granularity under backfill" there), not here.
+Backfill produces *evidence claims*, not hypotheses — ~200–300 `new_evidences` across 100 papers, not 200 hypotheses. Whether a backfilled claim thickens an existing bet or spawns a new one is the updater's call; the resulting hypothesis granularity is governed in Plan 9 (see §6 · Granularity there), not here.
 
 ## Verification (plan-level)
 
@@ -108,5 +110,5 @@ Backfill produces *evidence claims*, not hypotheses — ~200–300 `new_evidence
 - Running the backfill driver on a dossier with N fetchable references writes up to N signal files under the correct `published_at` partitions, with no pass-1 calls made.
 - A reference whose fetched title does not match the listed title is flagged and not written; non-document references are reported as skipped — neither is silently dropped.
 - Re-running the driver is a no-op (same `signal_id` → same path → skip); subsequently ingesting one of the same papers live creates no duplicate signal.
-- After Plan 9's updater runs over backfilled signals, hypotheses supported by the literature carry visibly more evidence mass than genuinely open ones, with every unit of mass traceable to a `signal_id` in `evidence.json` provenance.
+- *(The post-backfill belief-health check — that hypotheses supported by the literature carry visibly more evidence mass than genuinely open ones, every unit traceable to a `signal_id` in provenance — moved to Plan 9 Sub-task D, which owns the belief-graph evals. It cannot be verified without Plan 9's updater, so it does not belong here.)*
 - `hypotheses.json` and `evidence.json` schemas are unchanged from Plan 8; bootstrap still seeds `Beta(1, 1)` and never writes evidence.
