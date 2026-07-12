@@ -108,8 +108,6 @@ A `neutral` verdict is **never stored as inert evidence**. Surfacing a claim aga
 
 **Wrinkle on the open branch.** When a claim *opens* a new hypothesis, the new bet is framed so its founding claim supports it, so stance here is almost always `for` by construction. The interesting re-resolution happens on the **attach** branch, where the claim meets a hypothesis it did not create.
 
-- **Open —** re-resolution is a model judgment; its prompt/model contract is specified in "The model-judgment surface" below.
-
 **Verify.**
 - **`[llm]`** Stance is re-resolved against the *matched* hypothesis, not copied from pass-2: a claim emitted `for` its own framing can resolve `against` the bet it attaches to, and a `neutral` candidate collapses to `for`/`against`/`mixed` — no `neutral` row is ever written to `evidence.json`.
 
@@ -124,8 +122,7 @@ A `neutral` verdict is **never stored as inert evidence**. Surfacing a claim aga
 
 **Update belief** (attach / open branches). Increment `strength` weighted by the signal's `source_credibility` (`weight_applied = source_credibility / 10`; `null` credibility → `NEUTRAL_CREDIBILITY_WEIGHT`), append `{signal_id, weight_applied}` to provenance, and apply the Beta update through `storage` (`alpha += strength` for `for`, `beta += strength` for `against`, split for `mixed`). Updates are bounded and Bayesian-style: stronger credible evidence moves the posterior more, and negative evidence lowers belief rather than spawning a separate contradiction object.
 
-- **Open —** the plan says to "revise action posture based on accumulated evidence" but gives no belief→`action_posture` mapping. Decide whether posture is recomputed here or is a read-time rendering, and on what rule.
-- **Open —** convergence (whether recent evidence agrees or conflicts) is unreconciled with Plan 8, which treats the convergence *label* as a read-time derivative of `alpha`/`beta` and stores nothing. Before building, settle three axes: is convergence **stored or derived at read time**, computed **from `alpha`/`beta` or from provenance**, and over what "recent" window? Its behavioral case lives in Sub-task B.
+- **Resolved —** `action_posture` is derived from `alpha`/`beta` at read time, not stored; §4 never writes it. The confidence→label threshold rule lives in the read-time renderer (Plan 10).
 
 **Route the non-evidence fact** (route branch; the entity write also co-fires for an attach/open claim whose central subject is a named artifact — see §2's keep-vs-drop resolution). Append to `entities.json` (by id). The timeline is not written here: a dated fact earns a `timeline.json` entry only when it grows a theme, and that verdict is the renderer's — timeline writes live in Plan 17 (see the timeline note at the top).
 
@@ -139,8 +136,7 @@ Comparative hypotheses are handled as **pairwise edges**: a hypothesis naming tw
 - **`[det]`** A high-`source_credibility` increment moves the posterior more than the same claim from a low-credibility paper (`weight_applied = source_credibility / 10`; `null` → `NEUTRAL_CREDIBILITY_WEIGHT`).
 - **`[det]`** An `against` claim lowers posterior belief (raises `beta`) rather than only being mentioned in prose.
 - **`[det]`** A routed fact lands in `entities.json` (by id) instead of being dropped. (Timeline appends are Plan 17's mechanics — a dated fact enters the timeline only by growing a theme.)
-- **`[det]`** A meaningful belief move updates at least one dependent hypothesis or briefing-facing conclusion; the edge weight is the credible-interval lower bound (mean 0.71 with 3.5 units of evidence → ≈0.30, not 0.71). Multi-step ripple, convergence, and comparative cases live in Sub-task B (`tests/test_hypothesis_propagation.py`).
-- **`[det]`** Convergence reflects agreement vs conflict in recent evidence — **blocked** on the stored-vs-derived decision (Open, above).
+- **`[det]`** A meaningful belief move updates at least one dependent hypothesis or briefing-facing conclusion; the edge weight is the credible-interval lower bound (mean 0.71 with 3.5 units of evidence → ≈0.30, not 0.71). Multi-step ripple, accumulation, and comparative cases live in Sub-task B (`tests/test_hypothesis_propagation.py`).
 
 ### §6 · Granularity — how finely to split the questions the system tracks
 
@@ -202,7 +198,7 @@ Build a focused evaluation suite for the hardest part of the system: whether kno
 
 | File | Action | Description |
 |---|---|---|
-| `tests/test_hypothesis_propagation.py` | **NEW** | Multi-step fixtures that verify support, weakening, opposition, convergence, downstream propagation, and comparative (pairwise-edge) updates |
+| `tests/test_hypothesis_propagation.py` | **NEW** | Multi-step fixtures that verify support, weakening, opposition, accumulation, downstream propagation, and comparative (pairwise-edge) updates |
 | `docs/specs/15_5b_hypothesis_revision_propagation.test.md` | **NEW** | Human-readable spec describing why ripple-effect failures matter to briefing quality |
 
 ### Evaluation cases
@@ -211,7 +207,7 @@ Build a focused evaluation suite for the hardest part of the system: whether kno
 - a weakening case where new evidence lowers confidence without full replacement
 - an opposition case where evidence against a current hypothesis lowers posterior belief
 - a propagation case where changing one hypothesis updates a dependent hypothesis or briefing conclusion
-- a convergence case where multiple weak signals together change belief state
+- an accumulation case where multiple weak signals together change belief state
 - a comparative-update case where head-to-head evidence moves the belief on the *correct* pairwise edge; a new contender adds a fresh edge without disturbing existing ones; and a cycle (A>B, B>C, C>A) is preserved as conditional dominance rather than forced into a total order
 
 ### Verification

@@ -50,6 +50,8 @@ Build the `output/` package and implement the first renderer: daily tweet candid
 
 The `action` field in each tweet candidate is the operational form of the **audience actionability** scoring concept: it answers "can a technical decision-maker take a concrete action based on this signal?" The four actions from `topic.md`'s `action_vocabulary` (ignore, monitor, prototype, invest) map directly to the phrasing of the tweet's call-to-action. `ignore` signals are filtered out before candidate generation. The choice of action is derived at render time from `paper_audience` × `topic.md.audience` match — not stored in the signal file — so it can be re-derived if the audience profile changes.
 
+**Hypothesis `action_posture`** is derived the same way — at read time — but from the *belief*, not audience match (handoff from Plan 9 §4): a confidence→label rule maps a bet's `alpha`/`beta` posterior onto the same `action_vocabulary` (crossing a high-confidence band moves `monitor` → `prototype`/`invest`). It is not stored — Plan 9's §4 never writes it — and the exact confidence bands are pinned at this plan's `doing/` boundary. This is distinct from the tweet's `action` above: posture reflects how strongly a bet is held; the tweet action reflects whether a given reader should act on a signal.
+
 ## Overview retirement (2026-07-05)
 
 `overview.md` was the topic's stored landing page — themes plus top open hypotheses. It held no information of its own: both halves copied stores that already exist (`themes/`, `hypotheses.json`), which is why it was the one file left without an owner after the Plan 9 / Plan 17 split — a stored derived view needs someone to re-render it whenever either source moves. It is retired instead of assigned.
