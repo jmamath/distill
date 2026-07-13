@@ -226,7 +226,6 @@ def _hypothesis_record(hypothesis: dict, date: str) -> dict:
         "belief": {"alpha": 1.0, "beta": 1.0},
         "action_posture": hypothesis.get("action_posture", "monitor"),
         "why_it_matters": hypothesis.get("why_it_matters", ""),
-        "depends_on": hypothesis.get("depends_on", []),
         "created_at": date,
         "last_updated_at": date,
     }

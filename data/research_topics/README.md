@@ -110,8 +110,7 @@ The belief graph is stored as two flat JSON arrays (no graph database):
   the uniform prior `(1.0, 1.0)`. All rendering derivatives (mean, confidence,
   convergence) are computed at read time, never stored. Read belief as **both**
   its mean and its evidence mass (`alpha + beta`) — a `(1,1)` tie means
-  ignorance, a `(40,40)` tie means entrenched conflict. Dependency edges live on
-  the record under `depends_on`.
+  ignorance, a `(40,40)` tie means entrenched conflict.
 - **`evidence.json`** — evidence updates linked to hypotheses. `stance` is
   `for | against | mixed` (a `neutral` verdict is filtered at link time and never
   stored — belief-irrelevant facts route to `entities.json`/`timeline.json`).

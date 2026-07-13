@@ -85,8 +85,7 @@ _VALID_JSON = """\
         "scope": "publicly documented instruction-tuning experiments",
         "horizon": "2027-12-31"
       },
-      "comparison": null,
-      "depends_on": []
+      "comparison": null
     },
     {
       "id": "rlhf_pipelines_avoid_synthetic_collapse",
@@ -100,8 +99,7 @@ _VALID_JSON = """\
         "scope": "public RLHF and preference-optimization studies",
         "horizon": "2027-12-31"
       },
-      "comparison": null,
-      "depends_on": []
+      "comparison": null
     }
   ]
 }"""
@@ -166,8 +164,7 @@ _SECOND_JSON = """\
         "scope": "publicly documented instruction-tuning experiments",
         "horizon": "2027-12-31"
       },
-      "comparison": null,
-      "depends_on": []
+      "comparison": null
     },
     {
       "id": "retrieval_training_cost_competitive",
@@ -181,8 +178,7 @@ _SECOND_JSON = """\
         "scope": "enterprise NLP training runs with public cost reporting",
         "horizon": "2027-12-31"
       },
-      "comparison": null,
-      "depends_on": []
+      "comparison": null
     }
   ]
 }"""
@@ -233,8 +229,7 @@ _COMPARATIVE_JSON = """\
       "comparison": {
         "subject_a": "synthetic instruction data",
         "subject_b": "human-curated instruction data"
-      },
-      "depends_on": []
+      }
     }
   ]
 }"""
@@ -461,7 +456,6 @@ def test_seeder_hypothesis_record_shape(tmp_path):
     assert record["theme_ids"] == ["synthetic-data-generation"]
     assert record["action_posture"] == "monitor"
     assert record["why_it_matters"]
-    assert record["depends_on"] == []
 
     # Optional scaffolding is preserved with all four sub-fields when present.
     assert record["resolution_criterion"]["horizon"] == "2027-12-31"

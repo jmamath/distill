@@ -248,13 +248,12 @@ The graph is represented in flat files rather than a dedicated graph database:
 
 - `hypotheses.json` stores node state
 - `evidence.json` stores evidence updates linked to nodes
-- dependency edges live on hypothesis records under `depends_on`
 
 This keeps the first implementation inspectable and easy to migrate later if the graph outgrows the file-based approach.
 
 ### First-pass schema: hypothesis node
 
-The first implementation should keep hypothesis nodes explicit and compact. A record like the following is enough to support scoring, updating, propagation, and rendering:
+The first implementation should keep hypothesis nodes explicit and compact. A record like the following is enough to support scoring, updating, and rendering:
 
 ```json
 {
@@ -271,18 +270,6 @@ The first implementation should keep hypothesis nodes explicit and compact. A re
   "why_it_matters": "If true, durable advantage shifts toward workflow integration, distribution, and proprietary usage loops rather than static dataset ownership.",
   "evidence_for_ids": ["ev_001", "ev_004"],
   "evidence_against_ids": ["ev_003"],
-  "depends_on": [
-    {
-      "hypothesis_id": "synthetic_data_quality_rising",
-      "relationship": "supports",
-      "weight": 0.7
-    },
-    {
-      "hypothesis_id": "benchmark_reproduction_spreading",
-      "relationship": "supports",
-      "weight": 0.6
-    }
-  ],
   "implication_ids": ["brief_market_structure_shift", "brief_moat_reassessment"],
   "last_updated_at": "2026-04-26"
 }
@@ -299,11 +286,8 @@ Recommended first-pass fields:
 - `action_posture` — current recommended posture for the audience
 - `why_it_matters` — strategic significance in plain language
 - `evidence_for_ids` / `evidence_against_ids` — directional evidence references for fast rendering
-- `depends_on` — the outgoing dependency edges for the belief graph
 - `implication_ids` — ids of briefing-level implications or action statements derived from this node
 - `last_updated_at` — operational trace for review
-
-The important design choice is that **dependency edges live on the hypothesis node**. That keeps the graph inspectable in plain JSON and supports local propagation without a separate edge store in the first version.
 
 ### First-pass schema: evidence record
 

@@ -8,9 +8,9 @@
 
 ---
 
-Build the mechanism that turns newly scored signals into updated topic beliefs, then prove that those updates propagate coherently.
+Build the mechanism that turns newly scored signals into updated topic beliefs, then prove those updates are coherent.
 
-**Why this matters:** The system should not only store new evidence — it must let that evidence move what it believes. Without a hypothesis update loop, the system stays a feed summarizer: it can file a new result but still reasons as though the old world holds. So this plan tests ripple effects directly — that a new claim moves the right belief, and that the move propagates to everything depending on it — to keep the product from quietly degrading into an append-only log of unconnected results.
+**Why this matters:** The system should not only store new evidence — it must let that evidence move what it believes. Without a hypothesis update loop, the system stays a feed summarizer: it can file a new result but still reasons as though the old world holds. So this plan tests that directly — that a new claim moves the right belief — to keep the product from quietly degrading into an append-only log of unconnected results.
 
 ---
 
@@ -21,7 +21,7 @@ Each signal is exploded into the claims it carries. The belief graph makes **two
 - Decision 1 (**triage**, §2) asks *where does this claim go?* — attach to an existing hypothesis, open a new one, or route out as a non-evidence fact (a dataset, benchmark, or model release).
 - Decision 2 (**resolve stance**, §3) asks *which way does it cut?* — support, oppose, or mixed — and runs only when Decision 1 said attach or open.
 
-Everything else is **mechanics, not decisions** — deterministic logic that fires on its own once a decision is made: the belief update, the routed-fact writes, and propagation (§4). The mechanics call the shared `storage` module, which owns load/save, merge-by-id, the credibility-weighted `strength` increment, and the Beta update. **This plan owns the decisions and orchestrates the mechanics; `storage` owns the merge/Beta machinery.** That split is stated here once and not repeated below.
+Everything else is **mechanics, not decisions** — deterministic logic that fires on its own once a decision is made: the belief update and the routed-fact writes (§4). The mechanics call the shared `storage` module, which owns load/save, merge-by-id, the credibility-weighted `strength` increment, and the Beta update. **This plan owns the decisions and orchestrates the mechanics; `storage` owns the merge/Beta machinery.** That split is stated here once and not repeated below.
 
 A signal carries one further decision — *is each claim new to the theme it touches?* — but that is the **wiki renderer's** job, now **Plan 17**. The renderer reads the same signals independently and never reads this plan's `hypotheses.json`; the two stay decoupled through the signal contract.
 
@@ -34,7 +34,6 @@ flowchart TB
         d1{{"§2 · Decision 1 — Triage<br/>where does this claim go?<br/>attach · open new · route out"}}:::llm
         d2{{"§3 · Decision 2 — Resolve stance<br/>support · oppose · mixed<br/>(attach / open only)"}}:::llm
         belief["§4 · Update belief (mechanics)<br/>strength × credibility · Beta(α,β)"]:::det
-        prop["§4 · Propagate (mechanics)<br/>re-evaluate dependents · CI-weight"]:::det
         route["§4 · Route non-evidence (mechanics)<br/>dataset / benchmark / model release"]:::det
     end
 
@@ -44,9 +43,8 @@ flowchart TB
     sig --> d1
     d1 -->|attach / open| d2
     d1 -->|route| route
-    d2 --> belief --> prop
+    d2 --> belief
     belief --> store
-    prop --> store
     store --> hyp[("hypotheses.json")]:::data
     store --> ev[("evidence.json")]:::data
     route --> ent[("entities.json")]:::data
@@ -111,14 +109,13 @@ A `neutral` verdict is **never stored as inert evidence**. Surfacing a claim aga
 **Verify.**
 - **`[llm]`** Stance is re-resolved against the *matched* hypothesis, not copied from pass-2: a claim emitted `for` its own framing can resolve `against` the bet it attaches to, and a `neutral` candidate collapses to `for`/`against`/`mixed` — no `neutral` row is ever written to `evidence.json`.
 
-### §4 · Mechanics — update belief, route the fact, propagate (deterministic)
+### §4 · Mechanics — update belief, route the fact (deterministic)
 
 **These are consequences, not decisions.** Once Decision 1 picks a branch and Decision 2 resolves stance, the following run as deterministic code — no model calls.
 
 | File | Action | Description |
 |---|---|---|
 | `src/topics/entities.py` | **NEW** | Entity extraction / normalization for routed facts |
-| `src/topics/propagation.py` | **NEW** | Re-evaluates dependents when belief moves; derives each edge weight as the credible-interval lower bound (multi-step tests live in Sub-task B) |
 
 **Update belief** (attach / open branches). Increment `strength` weighted by the signal's `source_credibility` (`weight_applied = source_credibility / 10`; `null` credibility → `NEUTRAL_CREDIBILITY_WEIGHT`), append `{signal_id, weight_applied}` to provenance, and apply the Beta update through `storage` (`alpha += strength` for `for`, `beta += strength` for `against`, split for `mixed`). Updates are bounded and Bayesian-style: stronger credible evidence moves the posterior more, and negative evidence lowers belief rather than spawning a separate contradiction object.
 
@@ -126,17 +123,13 @@ A `neutral` verdict is **never stored as inert evidence**. Surfacing a claim aga
 
 **Route the non-evidence fact** (route branch; the entity write also co-fires for an attach/open claim whose central subject is a named artifact — see §2's keep-vs-drop resolution). Append to `entities.json` (by id). The timeline is not written here: a dated fact earns a `timeline.json` entry only when it grows a theme, and that verdict is the renderer's — timeline writes live in Plan 17 (see the timeline note at the top).
 
-**Propagate** (after a belief move). When a hypothesis moves meaningfully, re-evaluate its dependents, discounting weak dependencies automatically. `depends_on` is the canonical first-pass edge field. The weight on each edge is derived at propagation time as the lower bound of the dependency's credible interval — `scipy.stats.beta.ppf(DEPENDENCY_WEIGHT_PERCENTILE, α, β)`, with `DEPENDENCY_WEIGHT_PERCENTILE = 0.05` a named constant (raise for more conservative propagation, lower for more aggressive). A dependency with mean 0.71 but only 3.5 units of accumulated evidence yields ≈0.30 rather than 0.71 — fragile beliefs are discounted without any hand-authored weight.
-
 Comparative hypotheses are handled as **pairwise edges**: a hypothesis naming two subjects (`comparison: {subject_a, subject_b}`, see Plan 8) accumulates its own Beta over observed head-to-heads. A new contender adds new edges rather than rebuilding anything, and **no global ranking is stored** — a "who leads" view is *derived* at read time. Cycles among comparisons (A>B, B>C, C>A) are valid data (conditional dominance), not contradictions to resolve.
-
-- **Open —** the edge *weight* is fully specified but the *operation* is not: how the parent's change, the `supports`/`weakens` sign, and that weight actually modify the dependent's `alpha`/`beta`; what counts as a "meaningful" change worth propagating; and whether propagation recurses transitively (and if so, how it terminates, since `depends_on` can cycle). Pin these down before building.
 
 **Verify.**
 - **`[det]`** A high-`source_credibility` increment moves the posterior more than the same claim from a low-credibility paper (`weight_applied = source_credibility / 10`; `null` → `NEUTRAL_CREDIBILITY_WEIGHT`).
 - **`[det]`** An `against` claim lowers posterior belief (raises `beta`) rather than only being mentioned in prose.
 - **`[det]`** A routed fact lands in `entities.json` (by id) instead of being dropped. (Timeline appends are Plan 17's mechanics — a dated fact enters the timeline only by growing a theme.)
-- **`[det]`** A meaningful belief move updates at least one dependent hypothesis or briefing-facing conclusion; the edge weight is the credible-interval lower bound (mean 0.71 with 3.5 units of evidence → ≈0.30, not 0.71). Multi-step ripple, accumulation, and comparative cases live in Sub-task B (`tests/test_hypothesis_propagation.py`).
+- **`[det]`** Accumulation and comparative (pairwise-edge) belief updates behave correctly; multi-step cases live in Sub-task B (`tests/test_hypothesis_revision.py`).
 
 ### §6 · Granularity — how finely to split the questions the system tracks
 
@@ -147,12 +140,13 @@ Comparative hypotheses are handled as **pairwise edges**: a hypothesis naming tw
 - A **result** — a measurement the paper reports, e.g. "exact dedup of C4 raised accuracy 2%". A result is *evidence*: it attaches to the hypothesis whose question it speaks to and moves that opinion. It does not become a hypothesis of its own. A hypothesis named after a single measurement is a dead end — nothing else will ever attach to it.
 - A **standing question** — something the field genuinely disagrees on, e.g. "is fuzzy better than exact?". This is worth its own hypothesis, even when only one claim speaks to it so far. "A standing question the field disagrees on" is the plain-language form of Plan 8's **betting-market test** (resolvable + strategically significant); the per-claim call below applies that same bar at ingestion time that Plan 8 applies when authoring the seed hypotheses.
 
-Two rules stop this from spiralling:
+One rule stops this from spiralling:
 
 - **A thinly-evidenced hypothesis is fine.** A bet with one piece of evidence is just a weakly-held opinion sitting near its starting point — which is exactly what §2 already calls an "open question." A store full of many weakly-held opinions is honest, not broken. Sparsity is expected here, not a failure.
-- **A narrow hypothesis links to the broader one it sits under** (`depends_on`). "Fuzzy beats exact" sits under "dedup helps." That link does real work: if the broad premise ever collapses — strong evidence that dedup actually hurts — §4 propagation discounts the narrow bets automatically, instead of leaving them standing as live questions about a dead premise. The link is also what keeps a narrow hypothesis from being an orphan: it hangs off a parent.
 
-The rule, in one line: open a hypothesis whenever a claim names a real question, keep results as evidence, let the store be sparse, and link narrow bets to the broad ones above them. A complementary lever from Plan 1: seeding more parent hypotheses up front gives narrow claims something to attach to, so the updater opens fewer brand-new bets.
+Narrow and broad bets that touch the same subject are grouped by their shared **theme**, not chained to each other — there is no cross-hypothesis dependency edge (`depends_on` and its propagation were removed; each bet accumulates only its own evidence).
+
+The rule, in one line: open a hypothesis whenever a claim names a real question, keep results as evidence, and let the store be sparse. A complementary lever from Plan 1: seeding more hypotheses up front gives incoming claims something to attach to, so the updater opens fewer brand-new bets.
 
 **The two failure modes this avoids** — most visible when Plan 14 backfill replays a dossier's references as one large batch (~200–300 claims across ~100 papers against ~10 seeded hypotheses):
 
@@ -190,30 +184,28 @@ Per-step checks sit with the step they test (§2–§4). What remains here is wh
 
 ---
 
-## Sub-task B — Hypothesis Revision And Propagation Evaluation
+## Sub-task B — Hypothesis Revision Evaluation
 
-Build a focused evaluation suite for the hardest part of the system: whether knowledge updates actually propagate coherently. This is the **per-mechanic** eval — multi-step fixtures over the deterministic §4 machinery. The **per-judgment** eval (the §2–§3 model calls) is Sub-task C; the **at-scale** eval (the whole loop over a large batch) is Sub-task D.
+Build a focused evaluation suite for the belief-update mechanics: whether new evidence revises beliefs coherently. This is the **per-mechanic** eval — multi-step fixtures over the deterministic §4 machinery. The **per-judgment** eval (the §2–§3 model calls) is Sub-task C; the **at-scale** eval (the whole loop over a large batch) is Sub-task D.
 
 ### Changes
 
 | File | Action | Description |
 |---|---|---|
-| `tests/test_hypothesis_propagation.py` | **NEW** | Multi-step fixtures that verify support, weakening, opposition, accumulation, downstream propagation, and comparative (pairwise-edge) updates |
-| `docs/specs/15_5b_hypothesis_revision_propagation.test.md` | **NEW** | Human-readable spec describing why ripple-effect failures matter to briefing quality |
+| `tests/test_hypothesis_revision.py` | **NEW** | Multi-step fixtures that verify support, weakening, opposition, accumulation, and comparative (pairwise-edge) updates |
+| `docs/specs/15_5b_hypothesis_revision.test.md` | **NEW** | Human-readable spec describing why belief-revision failures matter to briefing quality |
 
 ### Evaluation cases
 
 - a support case where new evidence strengthens an existing hypothesis
 - a weakening case where new evidence lowers confidence without full replacement
 - an opposition case where evidence against a current hypothesis lowers posterior belief
-- a propagation case where changing one hypothesis updates a dependent hypothesis or briefing conclusion
 - an accumulation case where multiple weak signals together change belief state
 - a comparative-update case where head-to-head evidence moves the belief on the *correct* pairwise edge; a new contender adds a fresh edge without disturbing existing ones; and a cycle (A>B, B>C, C>A) is preserved as conditional dominance rather than forced into a total order
 
 ### Verification
 
 - belief state changes are visible in durable files, not only theme prose
-- downstream derived outputs change when upstream beliefs change
 - opposing evidence remains visible in the hypothesis history and affects posterior belief
 - head-to-head evidence moves the belief on the correct pairwise edge; a new contender adds edges rather than rebuilding, and cycles are not "resolved" away into a fabricated global ranking
 

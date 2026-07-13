@@ -124,7 +124,6 @@ def test_hypotheses_round_trip(tmp_path):
                 "scope": "frontier-class releases",
                 "horizon": "2027-06-30",
             },
-            "depends_on": [{"hypothesis_id": "synthetic_data_quality_rising", "relationship": "supports"}],
             "created_at": "2026-04-26",
             "last_updated_at": "2026-04-26",
         }

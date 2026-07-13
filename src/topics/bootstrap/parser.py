@@ -93,13 +93,6 @@ class DossierComparison(BaseModel):
     subject_b: str
 
 
-class DossierDependency(BaseModel):
-    """A directional dependency on another hypothesis."""
-
-    hypothesis_id: str
-    relationship: str
-
-
 class DossierHypothesis(BaseModel):
     """A resolvable directional bet from the dossier JSON."""
 
@@ -110,7 +103,6 @@ class DossierHypothesis(BaseModel):
     why_it_matters: str = ""
     resolution_criterion: DossierResolutionCriterion | None = None
     comparison: DossierComparison | None = None
-    depends_on: list[DossierDependency] = Field(default_factory=list)
 
 
 class DossierPayload(BaseModel):

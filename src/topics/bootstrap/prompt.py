@@ -74,8 +74,7 @@ _JSON_SCHEMA = """\
         "scope": "<population/domain this claim ranges over>",
         "horizon": "<YYYY-MM-DD resolution horizon>"
       },
-      "comparison": null,
-      "depends_on": []
+      "comparison": null
     }
   ]
 }"""
