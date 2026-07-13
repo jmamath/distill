@@ -153,25 +153,22 @@ The rule, in one line: open a hypothesis whenever a claim names a real question,
 - **Too coarse:** every claim piles onto the same few broad hypotheses. "Does dedup help" climbs, but "fuzzy vs exact" and "per-dump vs global" — the specific questions — vanish into it. Well-evidenced, but unable to answer anything specific. *Avoided by* giving a real question its own hypothesis.
 - **Too fine:** a hypothesis is opened for every measurement. The store fills with dead one-liners ("exact dedup of C4 gives 2%") that no later claim will ever join. *Avoided by* keeping results as evidence, not bets.
 
-**Still open — two judgments to specify before building.**
+**Two per-claim jobs live outside §6.** The result-vs-standing-question call — and which existing bet a claim attaches to — is the **matching** consumer specified in the model-judgment surface below, not a separate §6 gap. And cleaning up the near-duplicates that free opening inevitably creates ("fuzzy beats exact" and "shard-local beats corpus-wide" for one underlying bet) runs at a different cadence than the belief update, so it is its own plan: **Plan 18 — duplicate hypothesis cleanup** (flag candidates, confirm the merge, consolidate evidence; never merging two hypotheses that *disagree*, and keeping every merge reversible).
 
-1. **The per-claim call.** For each claim: is this a result (evidence) or a standing question (a new bet)? And if it bears on a bet that already exists, which one? This is the matching judgment §2 and the model-judgment surface below already flag — the loop's largest gap to close.
-2. **Cleaning up duplicates.** Opening freely will sometimes open two hypotheses for the same question under different wording ("fuzzy beats exact" and "shard-local beats corpus-wide"). The plan accepts this on the way in and folds duplicates together in a later batch pass, rather than trying to prevent it on every claim. That pass is not yet specified: what flags two hypotheses as candidates to merge, how a merge is confirmed, and its safety rules — never merge two hypotheses that *disagree* (same subjects, opposite finding), and keep every merge reversible.
-
-**Acceptance gate (not a test).** Both judgments above are recorded in this plan (or its `doing/` spec) before implementation, and the result demonstrably avoids both failure modes on the Plan 14 backfill batch — checked by Sub-task D: specific questions keep their own hypotheses (no flattening), and the store does not fill with one-measurement hypotheses (no dead one-liners).
+**Acceptance gate (not a test).** Before implementation, the matching judgment (specified in the model-judgment surface) is recorded, and the result demonstrably avoids both failure modes on the Plan 14 backfill batch — checked by Sub-task D: specific questions keep their own hypotheses (no flattening), and the store does not fill with one-measurement hypotheses (no dead one-liners).
 
 ### The model-judgment surface (cross-cutting)
 
-Two of the loop's steps are model calls, not deterministic code — the amber nodes:
+The loop needs two model judgments per claim — the two amber nodes in the §1 diagram; everything else is deterministic. Each is described below by its **consumers** (the loop steps that call it), what it decides, and its input → output. Both are the `[llm]` behaviors flagged above and share one acceptance gate.
 
-1. **Triage / matching** (§2) — which hypothesis a claim bears on, or whether it routes out. (Whether matching and route-out are one model call or two is itself an implementation detail to settle.)
-2. **Stance re-resolution** (§3) — the claim's bearing on the named hypothesis.
+- **Matching / triage.** *Consumers:* §2 Decision 1 (route the claim) and §6's per-claim call (result vs standing question) — the **same** judgment from two angles, not two separate gaps. *Decides:* given a claim and the current hypothesis set, whether it attaches to an existing bet (and which one), opens a new bet, routes out as a non-evidence fact, or drops. *In → out:* `{claim, candidate hypotheses}` → `attach hypothesis_id | open new | route entity | drop`. The loop's hardest call; whether matching and route-out are one model call or two is the implementation detail to settle here.
+- **Stance re-resolution.** *Consumer:* §3 Decision 2. *Decides:* for the hypothesis the claim just matched or opened, whether the claim supports, opposes, or mixes against *that* bet — re-read against it, never copied from pass-2. *In → out:* `{claim, matched hypothesis}` → `for | against | mixed` (never `neutral`, which is filtered here).
 
-(The wiki-novelty judgment that used to be the third call now lives in Plan 17, with its own model-judgment surface.)
+(The wiki-novelty judgment that used to be a third call now lives in Plan 17, with its own model-judgment surface.)
 
-**Unlike Plan 7, this plan does not yet specify their model machinery** — prompt contract, model + fallback selection, and the parse/validation path — for either of them. That is the single largest gap to close at the `doing/` boundary; treat it as a prerequisite for §2–§3, not an afterthought. Its quality gate is Sub-task C.
+**What's unspecified — the gap to close.** Unlike Plan 7, this plan does not yet pin either judgment's **model machinery**: the prompt contract, model + fallback selection, and parse/validation path. That is the single largest gap at the `doing/` boundary — a prerequisite for §2–§3, not an afterthought. Its quality gate is Sub-task C.
 
-**Acceptance gate (not a test).** Before `doing/`, each of the two model calls needs a recorded prompt contract, model + fallback selection, and parse/validation path. This gate blocks every `[llm]` check above: until it closes, the amber behaviors have no harness to verify against.
+**Acceptance gate (not a test).** Before `doing/`, each of the two judgments has a recorded prompt contract, model + fallback selection, and parse/validation path. This gate blocks every `[llm]` check above: until it closes, the amber behaviors have no harness to verify against.
 
 ### Verification — loop-level invariants
 
