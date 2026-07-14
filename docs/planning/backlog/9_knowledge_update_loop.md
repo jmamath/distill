@@ -90,7 +90,7 @@ The branches:
 
 *How finely* to split the questions the system tracks — open a new hypothesis, or attach to an existing one — is the granularity question, resolved in **§6**.
 
-- **Matching mechanism (resolved) —** an **LLM judgment** picks the hypothesis a claim bears on. Start with the LLM ranking over the full hypothesis set (theme overlap is an available scope, not required at current scale). Theme overlap is *not* the long-term shortlister: the taxonomy's ~8-theme resolution is fixed, so its selectivity flattens as the store grows. When Sub-task C shows matching quality sagging with scale, add a shortlisting stage — embedding similarity to a fixed-size top-k is the leading candidate — and let the LLM judge over that shortlist. Retrieval only narrows the candidates; the LLM always makes the attach / open / route / drop call, which similarity alone cannot. The dedup id keys on the *matched* `hypothesis_id`, so it is stable either way. The prompt/model/parse contract for this call stays open in "The model-judgment surface" below.
+- **Matching mechanism (resolved) —** an **LLM judgment** picks the hypothesis a claim bears on. Start with the LLM ranking over the full hypothesis set (theme overlap is an available scope, not required at current scale). Theme overlap is *not* the long-term shortlister: the taxonomy's ~8-theme resolution is fixed, so its selectivity flattens as the store grows. When Sub-task C shows matching quality sagging with scale, add a shortlisting stage — embedding similarity to a fixed-size top-k is the leading candidate — and let the LLM judge over that shortlist. Retrieval only narrows the candidates; the LLM always makes the attach / open / route / drop call, which similarity alone cannot. The dedup id keys on the *matched* `hypothesis_id`, so it is stable either way. The prompt/model/parse contract for this call is pinned in "The model-judgment surface" below.
 - **Keep-vs-drop rule (resolved) —** relevance is inherited (the claim's signal already passed pass-1/pass-2), so the route branch judges only **centrality**: register the artifact the signal is *about*, drop one it merely *mentions* — the same central-vs-incidental cut §6 applies to hypotheses. An entity record is `{id, name, entity_type, description}` (Plan 1's `DossierEntity`; `entity_type` ∈ dataset / benchmark / model / institution). Because a release claim commonly bundles an artifact with a result, **entity registration runs as an independent mechanic, not only on the route branch**: a claim that attaches or opens *and* names a central artifact both updates its belief and registers its entity. The route branch proper is for artifact-only claims; drop is for neither.
 
 **Verify.** *(`[det]` = deterministic, asserts exact behavior; `[llm]` = model judgment, verified by eval cases and blocked until the model-judgment gate closes.)*
@@ -161,14 +161,47 @@ Opening freely inevitably creates near-duplicates of the same underlying bet; fo
 
 The loop needs two model judgments per claim — the two amber nodes in the §1 diagram; everything else is deterministic. Each is described below by its **consumers** (the loop steps that call it), what it decides, and its input → output. Both are the `[llm]` behaviors flagged above and share one acceptance gate.
 
-- **Matching / triage.** *Consumers:* §2 Decision 1 (route the claim) and §6's per-claim call (result vs standing question) — the **same** judgment from two angles, not two separate gaps. *Decides:* given a claim and the current hypothesis set, whether it attaches to an existing bet (and which one), opens a new bet, routes out as a non-evidence fact, or drops. *In → out:* `{claim, candidate hypotheses}` → `attach hypothesis_id | open new | route entity | drop`. The loop's hardest call; whether matching and route-out are one model call or two is the implementation detail to settle here.
-- **Stance re-resolution.** *Consumer:* §3 Decision 2. *Decides:* for the hypothesis the claim just matched or opened, whether the claim supports, opposes, or mixes against *that* bet — re-read against it, never copied from pass-2. *In → out:* `{claim, matched hypothesis}` → `for | against | mixed` (never `neutral`, which is filtered here).
+- **Matching / triage.** 
+  - *Consumers:* §2 Decision 1 (route the claim) and §6's per-claim call (result vs standing question) — the **same** judgment from two angles, not two separate gaps. 
+  - *Decides:* given a claim and the current hypothesis set, whether it attaches to an existing bet (and which one), opens a new bet, routes out as a non-evidence fact, or drops. 
+  - *In → out:* `{claim, candidate hypotheses}` → `attach hypothesis_id | open new | route entity | drop`. The loop's hardest call — and matching and route-out are **one** model call, not two (contract below).
+
+- **Stance re-resolution.** 
+  - *Consumer:* §3 Decision 2. 
+  - *Decides:* for the hypothesis the claim just matched or opened, whether the claim supports, opposes, or mixes against *that* bet — re-read against it, never copied from pass-2. 
+  - *In → out:* `{claim, matched hypothesis}` → `for | against | mixed` (never `neutral`, which is filtered here).
 
 (The wiki-novelty judgment that used to be a third call now lives in Plan 17, with its own model-judgment surface.)
 
-**What's unspecified — the gap to close.** Unlike Plan 7, this plan does not yet pin either judgment's **model machinery**: the prompt contract, model + fallback selection, and parse/validation path. That is the single largest gap at the `doing/` boundary — a prerequisite for §2–§3, not an afterthought. Its quality gate is Sub-task C.
+**The prompt contracts.** Each judgment is pinned the way Plan 7 pinned pass-2 — a `build_*_prompt(...) → str` builder in `prompts.py`, a strict-JSON schema the model must return, and a Pydantic parse model in `models.py` that fails fast on a bad shape.
 
-**Acceptance gate (not a test).** Before `doing/`, each of the two judgments has a recorded prompt contract, model + fallback selection, and parse/validation path. This gate blocks every `[llm]` check above: until it closes, the amber behaviors have no harness to verify against.
+*Triage* — `build_triage_prompt(claim, candidate_hypotheses, candidate_themes, topic_config) → str`. The prompt shows each candidate hypothesis by its **identity only** — `id`, `statement`, `theme_ids`, and `comparison` subjects. It **withholds the belief state** (`alpha`/`beta`), the evidence list, and the posture. This mirrors `build_pass2_prompt`, which withholds theme bodies and current evidence for the same reason: a matcher that sees a hypothesis is already confident will over-attach to it. The claim's `candidate_themes` ride along as a prefilter hint, though at current scale the model still ranks over the full set (§2). It returns:
+
+```json
+{
+  "decision": "attach | open | route | drop",
+  "hypothesis_id": "<existing id — required when attach>",
+  "new_statement": "<a resolvable, directional bet — required when open>",
+  "entity": {"name": "...", "entity_type": "dataset | benchmark | model | institution", "description": "..."},
+  "rationale": "<one sentence>"
+}
+```
+
+`entity` is required on `route`, and may **co-fire** on `attach`/`open` when the claim names a central artifact (§2's keep-vs-drop rule). The parse model enforces each branch — `attach` needs a `hypothesis_id` drawn from the candidates, `open` needs a `new_statement` — and raises on anything else rather than coercing it.
+
+**Matching and route-out are one call, not two.** A claim is often only recognizable as a non-evidence artifact *because* nothing attaches to it, so an artifact-first call would decide blind. Folding them also matches the co-fire case: the attach branch already emits an entity, so there is no clean seam to split on.
+
+*Stance* — `build_stance_prompt(claim, matched_hypothesis) → str`. Only the one matched hypothesis is in context, never the candidate set. That is the point: because this call never picks a hypothesis, the model cannot lean on the pass-2 stance — it has to read the claim against the single named bet, which is what §3 requires. It returns:
+
+```json
+{ "stance": "for | against | mixed", "rationale": "<one sentence>" }
+```
+
+`neutral` is not offered, and the parse model rejects it if it appears — §3 already argued it away.
+
+**Model selection.** Both calls reuse the existing `SCORING_MODEL` / `SCORING_FALLBACK_MODEL` pair and the call-with-fallback loop pass-2 already runs in `scoring.py`. No new model split is introduced up front. Matching is the harder call, so if Sub-task C shows its quality sagging, that is the moment to give it a stronger model — not before.
+
+**Acceptance gate (not a test) — met by the contracts above.** Each judgment now has a recorded prompt contract, model + fallback selection, and parse/validation path. Until that held, the `[llm]` checks in §2–§3 had no harness to verify against; what remains is proving the two calls are *correct*, which is Sub-task C's quality gate.
 
 ### Verification — loop-level invariants
 
