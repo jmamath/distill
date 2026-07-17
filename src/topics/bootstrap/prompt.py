@@ -47,7 +47,7 @@ _JSON_SCHEMA = """\
     {
       "id": "<kebab-case-stable-id>",
       "name": "<canonical name>",
-      "entity_type": "<lab|company|dataset|method|benchmark|person|product>",
+      "entity_type": "<lab|company|dataset|method|benchmark|product>",
       "description": "<one-sentence summary>"
     }
   ],

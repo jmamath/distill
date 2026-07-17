@@ -91,7 +91,7 @@ The branches:
 *How finely* to split the questions the system tracks — open a new hypothesis, or attach to an existing one — is the granularity question, resolved in **§6**.
 
 - **Matching mechanism (resolved) —** an **LLM judgment** picks the hypothesis a claim bears on. Start with the LLM ranking over the full hypothesis set (theme overlap is an available scope, not required at current scale). Theme overlap is *not* the long-term shortlister: the taxonomy's ~8-theme resolution is fixed, so its selectivity flattens as the store grows. When Sub-task C shows matching quality sagging with scale, add a shortlisting stage — embedding similarity to a fixed-size top-k is the leading candidate — and let the LLM judge over that shortlist. Retrieval only narrows the candidates; the LLM always makes the attach / open / route / drop call, which similarity alone cannot. The dedup id keys on the *matched* `hypothesis_id`, so it is stable either way. The prompt/model/parse contract for this call is pinned in "The model-judgment surface" below.
-- **Keep-vs-drop rule (resolved) —** relevance is inherited (the claim's signal already passed pass-1/pass-2), so the route branch judges only **centrality**: register the artifact the signal is *about*, drop one it merely *mentions* — the same central-vs-incidental cut §6 applies to hypotheses. An entity record is `{id, name, entity_type, description}` (Plan 1's `DossierEntity`; `entity_type` ∈ dataset / benchmark / model / institution). Because a release claim commonly bundles an artifact with a result, **entity registration runs as an independent mechanic, not only on the route branch**: a claim that attaches or opens *and* names a central artifact both updates its belief and registers its entity. The route branch proper is for artifact-only claims; drop is for neither.
+- **Keep-vs-drop rule (resolved) —** relevance is inherited (the claim's signal already passed pass-1/pass-2), so the route branch judges only **centrality**: register the artifact the signal is *about*, drop one it merely *mentions* — the same central-vs-incidental cut §6 applies to hypotheses. An entity record is `{id, name, entity_type, description}` (Plan 1's `DossierEntity`; `entity_type` ∈ lab / company / dataset / method / benchmark / product). Because a release claim commonly bundles an artifact with a result, **entity registration runs as an independent mechanic, not only on the route branch**: a claim that attaches or opens *and* names a central artifact both updates its belief and registers its entity. The route branch proper is for artifact-only claims; drop is for neither.
 
 **Verify.** *(`[det]` = deterministic, asserts exact behavior; `[llm]` = model judgment, verified by eval cases and blocked until the model-judgment gate closes.)*
 - **`[det]`** An unmatched, bet-worthy claim opens a uniform-prior `Beta(1, 1)` hypothesis — the same path by which a genuinely new uncertainty enters the store.
@@ -182,12 +182,13 @@ The loop needs two model judgments per claim — the two amber nodes in the §1 
   "decision": "attach | open | route | drop",
   "hypothesis_id": "<existing id — required when attach>",
   "new_statement": "<a resolvable, directional bet — required when open>",
-  "entity": {"name": "...", "entity_type": "dataset | benchmark | model | institution", "description": "..."},
+  "comparison": {"subject_a": "...", "subject_b": "..."},
+  "entity": {"name": "...", "entity_type": "lab | company | dataset | method | benchmark | product", "description": "..."},
   "rationale": "<one sentence>"
 }
 ```
 
-`entity` is required on `route`, and may **co-fire** on `attach`/`open` when the claim names a central artifact (§2's keep-vs-drop rule). The parse model enforces each branch — `attach` needs a `hypothesis_id` drawn from the candidates, `open` needs a `new_statement` — and raises on anything else rather than coercing it.
+`comparison` is **optional on `open`** — populate it only when the new bet is relational (a head-to-head), and its two subjects make the opened hypothesis a pairwise edge, the same shape Plan 8 infers from a populated `comparison`. `entity` is required on `route`, and may **co-fire** on `attach`/`open` when the claim names a central artifact (§2's keep-vs-drop rule). The parse model enforces each branch — `attach` needs a `hypothesis_id` drawn from the candidates, `open` needs a `new_statement` — and raises on anything else rather than coercing it.
 
 **Matching and route-out are one call, not two.** A claim is often only recognizable as a non-evidence artifact *because* nothing attaches to it, so an artifact-first call would decide blind. Folding them also matches the co-fire case: the attach branch already emits an entity, so there is no clean seam to split on.
 

@@ -58,7 +58,11 @@ class DossierTheme(BaseModel):
 
 
 class DossierEntity(BaseModel):
-    """A single entity record from the dossier JSON."""
+    """A single entity record from the dossier JSON.
+
+    entity_type is drawn from a controlled vocabulary: lab, company, dataset,
+    method, benchmark, product.
+    """
 
     id: str
     name: str
