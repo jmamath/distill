@@ -98,6 +98,10 @@ The branches:
 - **`[det]`** Claim-level dedup is keyed on `claim hash + hypothesis_id`: the same claim re-matched to the same hypothesis attaches once, not twice (signal-level no-double-count is a loop invariant — see the end).
 - **`[llm]`** A non-evidence fact (dataset / benchmark / model release) is routed out, not attached as evidence; a bet-worthy unmatched claim opens a hypothesis rather than being routed or dropped.
 
+**Status: passed** — implemented in commit `fb595e8`; 23 updater tests and 174
+full-suite tests passing as of 2026-07-18. The model-judgment quality gate
+remains Sub-task C, as designed.
+
 ### §3 · Decision 2 — Resolve stance: which way does it cut? (per claim, attach / open only)
 
 **Once a claim is evidence — attached or opening a new bet — resolve its stance against *that* hypothesis.** The pass-2 `stance` describes the claim's own framing, not its bearing on the matched hypothesis, so it must be re-read once the hypothesis is named: a claim emitted `for` its own framing can be `against` the bet it attaches to.
