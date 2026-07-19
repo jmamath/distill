@@ -128,8 +128,9 @@ schema and authoring rules live in the storage plan
 
 Scored signals are Markdown with YAML frontmatter, written by the pass-2 scorer
 (`src/topics/scoring.py`). Frontmatter carries the scoring outputs the belief
-graph consumes — `source_credibility`, `new_evidences` (each `{claim, stance}`),
-`candidate_themes`, and applicability/significance scores. Signal-specific
+graph consumes — `source_credibility`, plain-text `claims`, `candidate_themes`,
+and applicability/significance scores. Claims gain a stance only after the
+belief updater matches them to a hypothesis. Signal-specific
 read/update helpers (the `classification` and `theme_id_assigned` write-back)
 live with the wiki updater in Plan 9, not in `storage.py`.
 

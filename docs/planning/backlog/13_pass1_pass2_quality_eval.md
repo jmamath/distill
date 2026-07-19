@@ -569,7 +569,7 @@ number is actionable (extend alias map, file adapter bug, fix golden label).
 |---|---|
 | `applicability_score`, `strategic_significance` | Bucket match: `low` (0–3), `medium` (4–7), `high` (8–10). Pass = bucket matches the golden bucket. |
 | `candidate_themes` | Top-1 `theme_id` must equal the golden `expected_top_theme`. Secondary themes graded as recall@3 against `acceptable_themes`. |
-| `new_evidences`, `rationale` | LLM-as-judge rubric (from `evals/golden/judge_prompt.md`) returns a 1–5 score + one-line justification per field. (`new_open_questions` is removed by the Plan 7 revision — open questions are hypotheses now.) |
+| `claims`, `rationale` | LLM-as-judge rubric (from `evals/golden/judge_prompt.md`) returns a 1–5 score + one-line justification per field. Pass-2 extracts plain claims; hypothesis matching and stance belong to Plan 9. |
 | `paper_audience` | LLM-as-judge: same rubric, 1–5. |
 
 Numeric / categorical checks are deterministic; only free-text fields go to

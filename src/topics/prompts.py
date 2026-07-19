@@ -1,7 +1,8 @@
 """Prompt builders for the topic-aware signal scoring pipeline.
 
-Pass-1, pass-2, and triage prompts are kept here so the orchestration modules
-stay focused and the prompt text is independently readable and testable.
+Pass-1, pass-2, triage, and stance prompts are kept here so the orchestration
+modules stay focused and the prompt text is independently readable and
+testable.
 
 Prompt templates are written as triple-quoted blocks passed through
 `textwrap.dedent`, so the source reads like the rendered prompt. Substitution
@@ -13,8 +14,10 @@ Public API:
     build_pass1_prompt(item, topic_config) → str
     build_pass2_prompt(item, topic_config, theme_definitions) → str
     build_triage_prompt(claim, candidate_hypotheses, candidate_themes, topic_config) → str
+    build_stance_prompt(claim, matched_hypothesis) → str
 """
 
+from collections.abc import Mapping
 from string import Template
 from textwrap import dedent
 
@@ -143,7 +146,7 @@ def build_pass2_prompt(
           "candidate_themes": [
             {"theme_id": "<id from the list above>", "confidence": <0-10>, "rationale": "<one sentence: why this confidence level>"}
           ],
-          "new_evidences": [{"claim": "<claim text>", "stance": "<for|against|mixed|neutral>"}],
+          "claims": ["<one concrete, self-contained claim>"],
           "affiliations": ["<author organization as cited in the source>"],
           "rationale": "<markdown paragraph explaining the applicability score>"
         }
@@ -151,6 +154,7 @@ def build_pass2_prompt(
         Rules:
         - candidate_themes: at most 3 entries, sorted by descending confidence.
         - Only use theme_ids from the list above; omit themes with confidence < 4.
+        - claims: extract concrete findings or assertions without assigning a stance; direction is resolved later against a specific hypothesis.
         - affiliations: list author organizations exactly as cited — do not infer or expand.
         - rationale: written for a research analyst; focus on what is novel and why it matters."""))
 
@@ -250,4 +254,52 @@ def build_triage_prompt(
         claim=claim,
         themes_hint=themes_hint,
         hypotheses_block=hypotheses_block,
+    )
+
+
+def build_stance_prompt(
+    claim: str,
+    matched_hypothesis: Mapping[str, object],
+) -> str:
+    """Build the stance prompt for one claim against one named hypothesis.
+
+    The prompt contains only the matched hypothesis's identity. It excludes
+    the candidate set, belief state, and evidence history so the model judges
+    how the claim bears on this specific bet without being anchored by current
+    confidence.
+
+    Args:
+        claim: The claim text extracted by pass-2.
+        matched_hypothesis: The chosen hypothesis record; it must contain `id`
+            and `statement`.
+
+    Returns:
+        A prompt string ready for the stance-resolution LLM.
+
+    Raises:
+        KeyError: if the matched hypothesis lacks `id` or `statement`.
+    """
+    template = Template(dedent("""\
+        You are resolving how one research claim bears on one specific hypothesis.
+
+        Claim: $claim
+
+        Matched hypothesis:
+          id: $hypothesis_id
+          statement: $hypothesis_statement
+
+        Decide the claim's stance against the hypothesis above:
+        - for: the claim supports the directional bet.
+        - against: the claim opposes the bet, including a null or no-difference result against a directional claim.
+        - mixed: the claim contains genuinely conflicting evidence for and against the bet.
+
+        A neutral verdict is not valid here. A claim that is irrelevant to the hypothesis should have been rejected during triage; every claim reaching this step must resolve to for, against, or mixed.
+
+        Respond strictly as JSON with this exact schema:
+        {"stance": "for | against | mixed", "rationale": "<one sentence>"}"""))
+
+    return template.substitute(
+        claim=claim,
+        hypothesis_id=matched_hypothesis["id"],
+        hypothesis_statement=matched_hypothesis["statement"],
     )

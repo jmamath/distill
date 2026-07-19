@@ -3,6 +3,8 @@
 Pass-1 produces Pass1Score from the item abstract only.
 Pass-2 produces Pass2Score after full-text enrichment.
 Triage (Plan 9, Decision 1) produces TriageDecision per claim.
+Stance resolution (Plan 9, Decision 2) produces StanceDecision per attached
+or newly opened claim.
 
 Public API:
     Pass1Score  — pass-1 relevance verdict for one NormalizedItem
@@ -11,13 +13,14 @@ Public API:
     TriageComparison — the two subjects of a comparative (head-to-head) bet
     TriageEntity     — a routed non-evidence artifact record
     TriageDecision   — validated triage verdict for one claim
+    StanceDecision   — support/opposition verdict against one named hypothesis
     make_signal_id — deterministic signal file identifier
 """
 
 import hashlib
 from typing import Literal
 
-from pydantic import BaseModel, Field, ValidationInfo, model_validator
+from pydantic import BaseModel, ConfigDict, Field, ValidationInfo, model_validator
 
 
 class Pass1Score(BaseModel):
@@ -39,13 +42,15 @@ class CandidateTheme(BaseModel):
     rationale: str
 
 
-class Evidence(BaseModel):
-    claim: str
-    stance: str  # for | against | mixed | neutral
-
-
 class Pass2Score(BaseModel):
-    """Full pass-2 scoring result produced from the item's full text."""
+    """Full pass-2 scoring result produced from the item's full text.
+
+    Claims are extracted as plain text. They do not gain a stance until Plan
+    9 matches them to a specific hypothesis, because direction has no stable
+    meaning without a named bet.
+    """
+
+    model_config = ConfigDict(extra="forbid")
 
     applicability_score: int = Field(..., ge=0, le=10)
     applicability_rationale: str
@@ -53,7 +58,7 @@ class Pass2Score(BaseModel):
     strategic_significance_rationale: str
     paper_audience: str
     candidate_themes: list[CandidateTheme] = Field(default_factory=list)
-    new_evidences: list[Evidence] = Field(default_factory=list)
+    claims: list[str] = Field(default_factory=list)
     affiliations: list[str] = Field(default_factory=list)
     rationale: str
 
@@ -132,6 +137,21 @@ class TriageDecision(BaseModel):
         if self.comparison is not None and self.decision != "open":
             raise ValueError("comparison is only valid on open")
         return self
+
+
+class StanceDecision(BaseModel):
+    """Validated stance verdict against one matched hypothesis.
+
+    A claim reaching Decision 2 is already evidence, so the model must resolve
+    it to a direction that can move the hypothesis. `neutral` is deliberately
+    absent: null results oppose directional bets, conflicting results are
+    mixed, and genuinely irrelevant claims belong in triage instead.
+    """
+
+    model_config = ConfigDict(extra="forbid")
+
+    stance: Literal["for", "against", "mixed"]
+    rationale: str
 
 
 def make_signal_id(source_id: str, published_at: str, url: str) -> str:

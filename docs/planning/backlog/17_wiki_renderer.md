@@ -6,7 +6,7 @@
 
 **Timeline note (2026-07-05):** `timeline.json` is written here, not in Plan 9. A dated fact (a dataset, benchmark, or model release) earns a timeline entry only when it grows a theme — a rule this plan enforces structurally, because theme growth is its own verdict. Replication never appends: no growth, no entry.
 
-**Depends on:** Plan 7 (pass-2 signals carry `new_evidences` claims and `candidate_themes`); Plan 8 (the shared `storage` module and signal frontmatter I/O — see Plan 9 Sub-task A for the shared-ownership note); Plan 13 (the LLM-as-judge helper, reused by Sub-task B).
+**Depends on:** Plan 7 (pass-2 signals carry plain `claims` and `candidate_themes`); Plan 8 (the shared `storage` module and signal frontmatter I/O — see Plan 9 Sub-task A for the shared-ownership note); Plan 13 (the LLM-as-judge helper, reused by Sub-task B).
 
 ---
 
@@ -59,7 +59,7 @@ One entry-point module drives the renderer. `wiki_updater.py` runs the novelty d
 
 ### §2 · Decision — Wiki novelty (per claim)
 
-**Classify each claim against the theme body and grow the theme accordingly.** The unit is the *claim* — the same `new_evidences` entry the belief graph uses, not the paper: a paper with one novel result among three replications should grow the theme from the one claim and leave the rest alone, which a single paper-level verdict cannot express.
+**Classify each claim against the theme body and grow the theme accordingly.** The unit is the same plain-text `claims` entry the belief graph uses, not the paper: a paper with one novel result among three replications should grow the theme from the one claim and leave the rest alone, which a single paper-level verdict cannot express.
 
 | File | Action | Description |
 |---|---|---|

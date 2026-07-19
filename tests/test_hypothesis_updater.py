@@ -1,4 +1,4 @@
-"""Tests for Plan 9 §2 — Decision 1 (triage) and its deterministic mechanics.
+"""Tests for Plan 9 Decisions 1–2 and their deterministic contracts.
 
 All tests are offline: the Gemini client is mocked, so no API key or network
 access is required. The `[llm]` behaviours (is a given triage verdict
@@ -19,10 +19,11 @@ from topics.config import TaxonomyEntry, TopicConfig
 from topics.hypothesis_updater import (
     make_evidence_id,
     open_hypothesis_record,
+    resolve_stance,
     triage_claim,
 )
-from topics.models import TriageDecision
-from topics.prompts import build_triage_prompt
+from topics.models import StanceDecision, TriageDecision
+from topics.prompts import build_stance_prompt, build_triage_prompt
 from topics.storage import merge_by_id
 
 # ---------------------------------------------------------------------------
@@ -230,6 +231,75 @@ def test_prompt_shows_identity_and_withholds_belief_state():
 def test_prompt_with_empty_hypothesis_store():
     prompt = build_triage_prompt("A claim.", [], [], _make_topic())
     assert "(none yet)" in prompt
+
+
+# ---------------------------------------------------------------------------
+# §3 Decision 2 — stance resolution against the matched hypothesis
+# ---------------------------------------------------------------------------
+
+
+@pytest.mark.parametrize("stance", ["for", "against", "mixed"])
+def test_stance_decision_accepts_directional_verdicts(stance: str):
+    decision = StanceDecision(stance=stance, rationale="resolved against the bet")
+    assert decision.stance == stance
+
+
+def test_stance_decision_rejects_neutral():
+    with pytest.raises(ValidationError):
+        StanceDecision(stance="neutral", rationale="not directional")
+
+
+def test_stance_decision_rejects_unexpected_fields():
+    with pytest.raises(ValidationError):
+        StanceDecision(
+            stance="for",
+            rationale="supports the bet",
+            confidence=0.9,
+        )
+
+
+def test_resolve_stance_classifies_claim_against_matched_hypothesis():
+    client = _mock_client(
+        {
+            "stance": "against",
+            "rationale": "the reported null result opposes the directional bet",
+        }
+    )
+
+    decision = resolve_stance(
+        client,
+        "Fuzzy and exact deduplication showed no significant difference.",
+        _make_hypotheses()[1],
+    )
+
+    assert decision is not None
+    assert decision.stance == "against"
+
+
+def test_resolve_stance_rejects_neutral_from_model():
+    client = _mock_client({"stance": "neutral", "rationale": "no effect"})
+
+    decision = resolve_stance(client, "No difference was observed.", _make_hypotheses()[1])
+
+    assert decision is None
+    assert client.models.generate_content.call_count == 2
+
+
+def test_stance_prompt_names_only_matched_hypothesis_and_withholds_belief():
+    matched = _make_hypotheses()[1]
+    prompt = build_stance_prompt("A null result.", matched)
+
+    assert matched["id"] in prompt
+    assert matched["statement"] in prompt
+    assert "dedup_improves_quality" not in prompt
+    assert "alpha" not in prompt
+    assert "beta" not in prompt
+    assert "neutral verdict is not valid" in prompt
+
+
+def test_stance_prompt_requires_hypothesis_identity():
+    with pytest.raises(KeyError):
+        build_stance_prompt("A claim.", {"id": "missing_statement"})
 
 
 # ---------------------------------------------------------------------------

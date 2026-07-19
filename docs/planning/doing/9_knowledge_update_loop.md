@@ -75,7 +75,7 @@ Each section below opens with the new files it introduces, so a file's responsib
 
 ### §2 · Decision 1 — Triage: where does this claim go? (per claim)
 
-**Every claim runs through triage first.** Pass-2 hands over each claim as `{claim, stance}` with **no hypothesis attached** (see Plan 7's `Pass2Score`), so triage classifies the claim into exactly one branch.
+**Every claim runs through triage first.** Pass-2 hands over plain claim text with **no hypothesis or stance attached**, so triage classifies the claim into exactly one branch.
 
 | File | Action | Description |
 |---|---|---|
@@ -104,14 +104,14 @@ remains Sub-task C, as designed.
 
 ### §3 · Decision 2 — Resolve stance: which way does it cut? (per claim, attach / open only)
 
-**Once a claim is evidence — attached or opening a new bet — resolve its stance against *that* hypothesis.** The pass-2 `stance` describes the claim's own framing, not its bearing on the matched hypothesis, so it must be re-read once the hypothesis is named: a claim emitted `for` its own framing can be `against` the bet it attaches to.
+**Once a claim is evidence — attached or opening a new bet — resolve its stance against *that* hypothesis.** Pass-2 deliberately extracts claim text without assigning direction: `for` or `against` has no stable meaning until the hypothesis is named.
 
-A `neutral` verdict is **never stored as inert evidence**. Surfacing a claim against a *specific* hypothesis already implies a direction, so each "neutral" candidate is really one of — directional once the bet is named (`for`/`against`), a null / "no difference" result (`against` a directional bet), or conflicting (`mixed`). A claim that is genuinely belief-irrelevant was not evidence in the first place and should have routed out in Decision 1, not arrived here. So this step always collapses to `for | against | mixed`; the updater never writes a `neutral` row in `evidence.json` and never calls the belief-update helper for one. (Plan 8 keeps a `neutral` → no-op branch as defensive insurance against a stray value; the pass-2 `Evidence` enum is a shipped contract and stays unchanged — the filtering lives here, where the hypothesis is known.)
+A `neutral` verdict is **never stored as inert evidence**. Surfacing a claim against a *specific* hypothesis already implies a direction: a null / "no difference" result is `against` a directional bet, while conflicting findings are `mixed`. A claim that is genuinely belief-irrelevant was not evidence in the first place and should have routed out in Decision 1, not arrived here. So this step always returns `for | against | mixed`; the updater never writes a `neutral` row in `evidence.json` and never calls the belief-update helper for one. Plan 8 keeps a `neutral` → no-op branch only as defensive insurance against a stray value.
 
 **Wrinkle on the open branch.** When a claim *opens* a new hypothesis, the new bet is framed so its founding claim supports it, so stance here is almost always `for` by construction. The interesting re-resolution happens on the **attach** branch, where the claim meets a hypothesis it did not create.
 
 **Verify.**
-- **`[llm]`** Stance is re-resolved against the *matched* hypothesis, not copied from pass-2: a claim emitted `for` its own framing can resolve `against` the bet it attaches to, and a `neutral` candidate collapses to `for`/`against`/`mixed` — no `neutral` row is ever written to `evidence.json`.
+- **`[llm]`** Stance is resolved against the *matched* hypothesis: a null result resolves `against` a directional bet, conflicting findings resolve `mixed`, and no `neutral` row is ever written to `evidence.json`.
 
 ### §4 · Mechanics — update belief, route the fact (deterministic)
 
@@ -172,8 +172,8 @@ The loop needs two model judgments per claim — the two amber nodes in the §1 
 
 - **Stance re-resolution.** 
   - *Consumer:* §3 Decision 2. 
-  - *Decides:* for the hypothesis the claim just matched or opened, whether the claim supports, opposes, or mixes against *that* bet — re-read against it, never copied from pass-2. 
-  - *In → out:* `{claim, matched hypothesis}` → `for | against | mixed` (never `neutral`, which is filtered here).
+  - *Decides:* for the hypothesis the claim just matched or opened, whether the claim supports, opposes, or mixes against *that* bet. Pass-2 supplies no stance to copy.
+  - *In → out:* `{claim, matched hypothesis}` → `for | against | mixed` (never `neutral`).
 
 (The wiki-novelty judgment that used to be a third call now lives in Plan 17, with its own model-judgment surface.)
 
@@ -196,7 +196,7 @@ The loop needs two model judgments per claim — the two amber nodes in the §1 
 
 **Matching and route-out are one call, not two.** A claim is often only recognizable as a non-evidence artifact *because* nothing attaches to it, so an artifact-first call would decide blind. Folding them also matches the co-fire case: the attach branch already emits an entity, so there is no clean seam to split on.
 
-*Stance* — `build_stance_prompt(claim, matched_hypothesis) → str`. Only the one matched hypothesis is in context, never the candidate set. That is the point: because this call never picks a hypothesis, the model cannot lean on the pass-2 stance — it has to read the claim against the single named bet, which is what §3 requires. It returns:
+*Stance* — `build_stance_prompt(claim, matched_hypothesis) → str`. Only the one matched hypothesis is in context, never the candidate set. The model reads the plain claim against that single named bet, which is what §3 requires. It returns:
 
 ```json
 { "stance": "for | against | mixed", "rationale": "<one sentence>" }
@@ -262,7 +262,7 @@ The two model calls in §2–§3 are judgments, not deterministic code, so the s
 ### Verification
 
 - **Matching is the call to prioritise** — §6 names it the loop's largest gap.
-- A claim attached to the wrong hypothesis, routed when it should have opened a bet, or whose stance was copied from pass-2 instead of re-resolved against the matched hypothesis, scores low and is named in the report.
+- A claim attached to the wrong hypothesis, routed when it should have opened a bet, or assigned the wrong stance against its matched hypothesis scores low and is named in the report.
 - Re-running on the same predictions is near-identical (±1 judge drift), matching Plan 13's eval contract.
 
 ---

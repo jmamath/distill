@@ -1,17 +1,16 @@
-"""Hypothesis update loop — Decision 1 (triage) for the belief graph (Plan 9).
+"""Hypothesis update decisions for the belief graph (Plan 9).
 
 This module is the entry point that turns pass-2 signal claims into belief
 updates. It owns the per-claim *decisions*; the merge/Beta *mechanics* live in
-`topics.storage`. Implemented so far is §2 — triage: for each claim, an LLM
-judgment decides whether it attaches to an existing hypothesis, opens a new
-one, routes out as a non-evidence fact, or is dropped — plus the deterministic
-consequences this section owns (the uniform-prior open, the claim-level dedup
-id). Stance resolution (§3), the belief-update/route mechanics (§4), and the
-signal-consumption loop follow in later steps.
+`topics.storage`. Decision 1 triages each claim to attach, open, route, or drop.
+Decision 2 re-resolves an attached or opening claim's stance against the one
+matched hypothesis. The deterministic belief-update/route mechanics (§4) and
+the signal-consumption loop follow in later steps.
 
 Public API:
     triage_claim(client, claim, hypotheses, candidate_themes, topic_config)
         → TriageDecision | None
+    resolve_stance(client, claim, matched_hypothesis) → StanceDecision | None
     make_evidence_id(claim, hypothesis_id) → str
     open_hypothesis_record(decision, theme_ids, created_at) → dict
 
@@ -24,6 +23,7 @@ import json
 import logging
 import re
 import time
+from collections.abc import Mapping
 
 from pydantic import ValidationError
 from google import genai
@@ -31,8 +31,8 @@ from google.genai import types
 
 from config import SCORING_FALLBACK_MODEL, SCORING_MODEL
 from topics.config import TopicConfig
-from topics.models import TriageDecision
-from topics.prompts import build_triage_prompt
+from topics.models import StanceDecision, TriageDecision
+from topics.prompts import build_stance_prompt, build_triage_prompt
 
 logger = logging.getLogger(__name__)
 
@@ -114,6 +114,81 @@ def triage_claim(
                     logger.warning("triage: model %s exhausted, trying fallback", model)
 
     logger.error("triage: all models failed for claim %r", claim)
+    return None
+
+
+# ---------------------------------------------------------------------------
+# §3 Decision 2 — stance resolution (model judgment)
+# ---------------------------------------------------------------------------
+
+
+def _call_stance_model(client: genai.Client, prompt: str, model: str) -> str:
+    response = client.models.generate_content(
+        model=model,
+        contents=prompt,
+        config=types.GenerateContentConfig(
+            response_mime_type="application/json",
+        ),
+    )
+    return response.text.strip()
+
+
+def resolve_stance(
+    client: genai.Client,
+    claim: str,
+    matched_hypothesis: Mapping[str, object],
+) -> StanceDecision | None:
+    """Resolve how one evidential claim bears on its matched hypothesis.
+
+    Pass-2 extracts the claim text but does not assign direction, because a
+    stance has no stable meaning until the hypothesis is named. The validated
+    result is always `for`, `against`, or `mixed`; `neutral` and malformed
+    responses are rejected rather than stored. Tries each scoring model with
+    one retry before falling back.
+
+    Args:
+        client: Configured Gemini client.
+        claim: The claim text extracted by pass-2.
+        matched_hypothesis: The existing or newly opened hypothesis record.
+
+    Returns:
+        A validated StanceDecision, or None if all models fail. The caller
+        must skip the claim so its signal remains eligible for a later retry.
+
+    Raises:
+        KeyError: if the matched hypothesis lacks `id` or `statement`.
+    """
+    prompt = build_stance_prompt(claim, matched_hypothesis)
+
+    for model in _MODELS:
+        raw = ""
+        for attempt in range(2):
+            try:
+                raw = _call_stance_model(client, prompt, model)
+                return StanceDecision.model_validate(json.loads(raw))
+            except (json.JSONDecodeError, ValidationError) as exc:
+                logger.warning(
+                    "stance: model %s parse failed (%s) — raw: %s",
+                    model,
+                    exc,
+                    raw,
+                )
+                break
+            except Exception as exc:
+                if "404" in str(exc):
+                    logger.warning("stance: model %s not found, trying fallback", model)
+                    break
+                if attempt == 0:
+                    logger.warning(
+                        "stance: model %s attempt 1 failed (%s), retrying in 5s",
+                        model,
+                        exc,
+                    )
+                    time.sleep(5)
+                else:
+                    logger.warning("stance: model %s exhausted, trying fallback", model)
+
+    logger.error("stance: all models failed for claim %r", claim)
     return None
 
 

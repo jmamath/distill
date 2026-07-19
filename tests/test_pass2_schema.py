@@ -15,7 +15,6 @@ from sources.base import NormalizedItem
 from topics.config import TaxonomyEntry, TopicConfig
 from topics.models import (
     CandidateTheme,
-    Evidence,
     Pass2Score,
     make_signal_id,
 )
@@ -72,11 +71,8 @@ class TestPass2Score:
                     "rationale": "Core contribution is a scalable synthetic pipeline.",
                 }
             ],
-            "new_evidences": [
-                {
-                    "claim": "Self-play achieves parity with human-curated data on benchmark X.",
-                    "stance": "for",
-                }
+            "claims": [
+                "Self-play achieves parity with human-curated data on benchmark X."
             ],
             "affiliations": ["MIT", "Google DeepMind"],
             "rationale": "This paper directly advances the synthetic data theme.",
@@ -116,12 +112,22 @@ class TestPass2Score:
             strategic_significance_rationale="Incremental result with limited strategic impact.",
             paper_audience="general",
             candidate_themes=[],
-            new_evidences=[],
+            claims=[],
             affiliations=[],
             rationale="Marginally relevant.",
         )
         assert score.candidate_themes == []
-        assert score.new_evidences == []
+        assert score.claims == []
+
+    def test_legacy_stanced_evidence_field_is_rejected(self):
+        payload = self._valid_payload()
+        payload.pop("claims")
+        payload["new_evidences"] = [
+            {"claim": "A claim with no named hypothesis.", "stance": "for"}
+        ]
+
+        with pytest.raises(Exception):
+            Pass2Score(**payload)
 
 
 class TestCandidateTheme:
@@ -214,6 +220,9 @@ class TestBuildPass2Prompt:
         assert "applicability_score" in prompt
         assert "strategic_significance" in prompt
         assert "candidate_themes" in prompt
+        assert '"claims"' in prompt
+        assert "new_evidences" not in prompt
+        assert "for|against" not in prompt
 
     def test_candidate_themes_rule_in_prompt(self):
         prompt = build_pass2_prompt(_ITEM, _TOPIC, _THEME_DEFINITIONS)

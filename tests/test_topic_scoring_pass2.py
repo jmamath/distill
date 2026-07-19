@@ -91,7 +91,7 @@ def _valid_score_payload(affiliations: list[str] | None = None) -> dict:
                 "rationale": "Core contribution is a scalable synthetic pipeline.",
             }
         ],
-        "new_evidences": [{"claim": "Self-play achieves parity with human data.", "stance": "for"}],
+        "claims": ["Self-play achieves parity with human data."],
         "affiliations": affiliations if affiliations is not None else ["MIT"],
         "rationale": "This paper is highly relevant to the data advantage topic.",
     }
@@ -212,9 +212,11 @@ class TestPass2ScoreHappyPath:
             "applicability_score", "applicability_rationale",
             "strategic_significance", "strategic_significance_rationale",
             "paper_audience", "source_credibility", "temporal_freshness",
-            "candidate_themes", "new_evidences",
+            "candidate_themes", "claims",
         ):
             assert field in fm, f"missing frontmatter field: {field}"
+        assert fm["claims"] == ["Self-play achieves parity with human data."]
+        assert "new_evidences" not in fm
 
     def test_body_contains_rationale_section(self, tmp_path):
         topic_dir = _make_topic_dir(tmp_path)

@@ -90,7 +90,7 @@ The current data-advantage dossier predates the references contract and retained
 Backfill stops at signal files. Two existing consumers turn those signals into durable belief and wiki state, and neither is part of this plan — they run identically over backfilled and live signals:
 
 ```
-backfill → signals/{yyyy}/{mm}/{dd}/*.md   (claims already scored into `new_evidences` frontmatter)
+backfill → signals/{yyyy}/{mm}/{dd}/*.md   (plain text in `claims` frontmatter)
    → hypothesis_updater (Plan 9): for each claim, dedup against evidence.json, increment
      strength + append provenance (via the Plan 8 storage helpers), attach to a matching
      hypothesis and move its Beta — or mint a new uniform-prior hypothesis when nothing
@@ -102,7 +102,7 @@ backfill → signals/{yyyy}/{mm}/{dd}/*.md   (claims already scored into `new_ev
 
 Note this is two conceptual stages, not three: the storage layer (Plan 8) is **not** a separate step that produces `evidence.json` on its own. It is the frontmatter-aware read/merge/write helper library the updater *calls*; the updater is what reads signals and writes both `evidence.json` and `hypotheses.json`.
 
-Backfill produces *evidence claims*, not hypotheses — ~200–300 `new_evidences` across 100 papers, not 200 hypotheses. Whether a backfilled claim thickens an existing bet or spawns a new one is the updater's call; the resulting hypothesis granularity is governed in Plan 9 (see §6 · Granularity there), not here.
+Backfill produces claims, not hypotheses — ~200–300 `claims` across 100 papers, not 200 hypotheses. Whether a backfilled claim becomes evidence for an existing bet, opens a new one, or routes out is the updater's call; the resulting hypothesis granularity is governed in Plan 9 (see §6 · Granularity there), not here.
 
 ## Verification (plan-level)
 

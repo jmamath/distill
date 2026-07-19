@@ -355,7 +355,7 @@ def pass2_score(
                 ct.model_dump()
                 for ct in sorted(score.candidate_themes, key=lambda t: -t.confidence)
             ],
-            "new_evidences": [e.model_dump() for e in score.new_evidences],
+            "claims": score.claims,
         }
         write_with_frontmatter(signal_path, frontmatter, f"\n## Rationale\n\n{score.rationale}\n")
         logger.info("pass2: wrote signal %s", signal_path)
