@@ -2,7 +2,7 @@
 
 **Introduced:** 2026-06-09 — newly created; not part of the original 15.x task breakdown. Surfaced by the open-questions→hypotheses refactor: bootstrap now seeds hypotheses at a uniform `Beta(1, 1)`, which discards the literature the deep-research dossier was synthesized from.
 
-**Depends on:** Plan 7 pass-2 pipeline (the backfill driver reuses `pass2_score` and the full-text fetch paths); Plan 1 bootstrap dossier contract (`prompt.py`, `parser.py` — this plan extends it); Plan 9 `hypothesis_updater` (turns backfilled signals into evidence; backfill can write signals before Plan 9 lands, but the belief graph only moves once the updater consumes them).
+**Depends on:** Plan 19 finding extraction (the backfill driver reuses its full-text path); Plan 1 bootstrap dossier contract; Plan 9 (turns findings into graph outcomes). Plan 17 may render those outcomes afterward but is not required to backfill belief state.
 
 ---
 
@@ -53,7 +53,7 @@ Replay the dossier's references through the existing full-text + pass-2 machiner
 - **Pass-1 is bypassed.** Pass-1 is a cheap relevance gate for unsolicited feed items; dossier references were hand-picked by the research agent for this exact topic. The driver constructs a synthetic `Pass1Score` (the `smoke_pass2.py --pass 2` path already demonstrates this) so `pass2_score`'s signature is reused unchanged.
 - **Not arXiv-only.** Most non-arXiv references are still fetchable documents — PDFs (Nature/CVPR/NeurIPS papers) or HTML articles (lab and company blogs) — and the full-text machinery from Plan 7 already handles both: a PDF goes to Gemini with `application/pdf`, an article is fetched and stripped to text. The driver routes each reference by its identifier: arXiv id → arXiv PDF path; PDF URL → PDF path; article URL → HTML-strip path. Only references that are genuinely not documents — court dockets, code repositories, bare dataset releases — are skipped, counted, and reported. (Routing a generic PDF/article through the existing source-specific adapters may need a thin generalization of their fetch methods; pinned at `doing/`.)
 - **Title-match is the verification gate.** Because the driver fetches by identifier and recovers the real title, a hallucinated or transposed id either 404s or returns a title that does not match the reference — both flagged and reported, never silently written as a wrong signal. This is what makes a recovered (model-supplied) bibliography safe to replay without hand-verifying every id.
-- **Old papers accrue full evidence mass.** `signals/` partitions by `published_at`, and evidence `strength` is credibility-weighted, not freshness-weighted; `temporal_freshness` will read near 0 for old papers, which is correct and affects ranking, not belief.
+- **Old papers accrue full evidence mass.** Evidence strength is credibility-weighted, not recency-weighted. Plan 10 derives recency from `published_at` only when ranking outputs.
 - **Idempotent and dedup-safe against live ingestion.** `signal_id` is deterministic from the URL, so re-running backfill skips existing signals — and a backfilled paper that later arrives via RSS is the same signal, not a double count.
 - **Evidence attachment is Plan 9's job.** Backfill stops at written signal files. The `hypothesis_updater` consumes them exactly as it consumes live signals; no backfill-specific path exists in the updater.
 
@@ -87,22 +87,19 @@ The current data-advantage dossier predates the references contract and retained
 
 ## Downstream: from backfilled signals to beliefs
 
-Backfill stops at signal files. Two existing consumers turn those signals into durable belief and wiki state, and neither is part of this plan — they run identically over backfilled and live signals:
+Backfill stops at signal files. The normal sequential consumers then turn those findings into graph and wiki state:
 
 ```
-backfill → signals/{yyyy}/{mm}/{dd}/*.md   (plain text in `claims` frontmatter)
-   → hypothesis_updater (Plan 9): for each claim, dedup against evidence.json, increment
-     strength + append provenance (via the Plan 8 storage helpers), attach to a matching
-     hypothesis and move its Beta — or mint a new uniform-prior hypothesis when nothing
-     matches; routes non-evidence facts to entities.json
-     → writes evidence.json AND hypotheses.json in one pass
-   → wiki_updater (Plan 17, parallel sibling): folds the same signals into themes and
-     the timeline (with an append-only decision log)
+backfill → signals/{yyyy}/{mm}/{dd}/*.md   (Plan 19 findings)
+   → hypothesis_updater (Plan 9): interpret every finding once
+     → evidence / new hypothesis / routed entity / drop
+     → durable graph-update outcomes
+   → wiki_updater (Plan 17): render those outcomes into themes and timeline
 ```
 
 Note this is two conceptual stages, not three: the storage layer (Plan 8) is **not** a separate step that produces `evidence.json` on its own. It is the frontmatter-aware read/merge/write helper library the updater *calls*; the updater is what reads signals and writes both `evidence.json` and `hypotheses.json`.
 
-Backfill produces claims, not hypotheses — ~200–300 `claims` across 100 papers, not 200 hypotheses. Whether a backfilled claim becomes evidence for an existing bet, opens a new one, or routes out is the updater's call; the resulting hypothesis granularity is governed in Plan 9 (see §6 · Granularity there), not here.
+Backfill produces findings, not hypotheses — roughly 200–300 findings across 100 papers, not 200 hypotheses. Whether one becomes evidence, opens a bet, routes out, or drops is Plan 9's call; Plan 17 never re-interprets that disposition.
 
 ## Verification (plan-level)
 

@@ -2,13 +2,13 @@
 
 **Original task ids:** 15.5 (Hypothesis Update Loop — belief half), 15.5b (Hypothesis Revision And Propagation Evaluation)
 
-**Split note (2026-06-29):** This plan was originally "Hypothesis And Wiki Update Loop" and covered both the belief graph and the wiki renderer. It was split so each subsystem can be built and proven on its own. This plan owns the **belief graph**. The **wiki renderer** — the old §5 wiki-novelty decision, theme growth, and anchors — is now **Plan 17**. The two are parallel siblings: they consume the same pass-2 signals through the shared signal contract and never call each other.
+**Split note (updated 2026-07-19):** This plan owns the **belief graph**; Plan 17 owns wiki rendering. Their code remains separate, but their dataflow is now sequential: Plan 9 is the sole interpreter of Plan 19 findings and emits durable graph-update outcomes; Plan 17 renders those outcomes. The renderer no longer reads pass-2 signals independently.
 
 **Timeline note (2026-07-05):** `timeline.json` writes also live in Plan 17, not here. A dated fact earns a timeline entry only when it grows a theme, and that verdict — the novelty call — is the renderer's. This plan's route branch writes `entities.json` only.
 
 ---
 
-Build the mechanism that turns newly scored signals into updated topic beliefs, then prove those updates are coherent.
+Build the mechanism that turns source-grounded findings into updated topic beliefs, then prove those updates are coherent.
 
 **Why this matters:** The system should not only store new evidence — it must let that evidence move what it believes. Without a hypothesis update loop, the system stays a feed summarizer: it can file a new result but still reasons as though the old world holds. So this plan tests that directly — that a new claim moves the right belief — to keep the product from quietly degrading into an append-only log of unconnected results.
 
@@ -16,18 +16,18 @@ Build the mechanism that turns newly scored signals into updated topic beliefs, 
 
 ## §1 · What this plan does
 
-Each signal is exploded into the claims it carries. The belief graph makes **two decisions per claim, plus the mechanics they trigger** — all *below* the paper level:
+Each signal is exploded into the source-grounded findings Plan 19 defines. The belief graph makes **two decisions per finding, plus the mechanics they trigger** — all *below* the paper level:
 
 - Decision 1 (**triage**, §2) asks *where does this claim go?* — attach to an existing hypothesis, open a new one, or route out as a non-evidence fact (a dataset, benchmark, or model release).
 - Decision 2 (**resolve stance**, §3) asks *which way does it cut?* — support, oppose, or mixed — and runs only when Decision 1 said attach or open.
 
 Everything else is **mechanics, not decisions** — deterministic logic that fires on its own once a decision is made: the belief update and the routed-fact writes (§4). The mechanics call the shared `storage` module, which owns load/save, merge-by-id, the credibility-weighted `strength` increment, and the Beta update. **This plan owns the decisions and orchestrates the mechanics; `storage` owns the merge/Beta machinery.** That split is stated here once and not repeated below.
 
-A signal carries one further decision — *is each claim new to the theme it touches?* — but that is the **wiki renderer's** job, now **Plan 17**. The renderer reads the same signals independently and never reads this plan's `hypotheses.json`; the two stay decoupled through the signal contract.
+Whether a graph update should change theme prose is the **wiki renderer's** decision in Plan 17. Plan 9 does not render themes; it hands Plan 17 a durable outcome describing the evidence, new hypothesis, or routed entity it created. The modules stay decoupled through that outcome contract, not through parallel reads of the source signal.
 
 ```mermaid
 flowchart TB
-    sig[("signals/*.md<br/>(pass-2 output)")]:::data
+    sig[("signals/*.md<br/>(Plan 19 findings)")]:::data
 
     subgraph perclaim["Per claim"]
         direction TB
@@ -38,7 +38,7 @@ flowchart TB
     end
 
     store["shared storage module<br/>load / save · merge by id · strength increment · Beta update · neutral fallback weight"]:::store
-    done["write belief_processed_at<br/>(once all the signal's claims are done)"]:::det
+    done["write belief_processed_at<br/>(once all findings have outcomes)"]:::det
 
     sig --> d1
     d1 -->|attach / open| d2
@@ -51,8 +51,9 @@ flowchart TB
     perclaim --> done
     done -. "stamps signal done<br/>for this subsystem" .-> sig
 
-    renderer["Plan 17 · wiki renderer<br/>(parallel sibling — reads the same signals,<br/>never reads hypotheses.json)"]:::ext
-    sig -.-> renderer
+    outcome[("durable graph-update outcome<br/>evidence · new hypothesis · routed entity")]:::data
+    renderer["Plan 17 · wiki renderer<br/>(downstream projection)"]:::ext
+    perclaim --> outcome --> renderer
 
     classDef llm fill:#fdeecf,stroke:#b9821f,color:#5c3d00;
     classDef det fill:#d9f2e6,stroke:#1a7f52,color:#0b3d26;
@@ -61,54 +62,54 @@ flowchart TB
     classDef ext fill:#f3e8fd,stroke:#7c3aed,color:#3b0764;
 ```
 
-*Amber = a model call (a judgment) · green = deterministic mechanics this plan owns · blue = the shared `storage` module · grey = files on disk · purple = the parallel renderer (Plan 17).*
+*Amber = a model call (a judgment) · green = deterministic mechanics this plan owns · blue = the shared `storage` module · grey = durable data · purple = the downstream renderer (Plan 17).*
 
 ---
 
 ## Sub-task A — Hypothesis Update Loop
 
-One entry-point module drives the loop. `hypothesis_updater.py` reads pass-2 signals and runs the two per-claim decisions (§2, §3), then the mechanics they trigger (§4). The shared `storage` module owns the merge/Beta mechanics that §4 calls.
+One entry-point module drives the loop. `hypothesis_updater.py` reads Plan 19 findings and runs the two per-finding decisions (§2, §3), then the mechanics they trigger (§4). The shared `storage` module owns the merge/Beta mechanics that §4 calls.
 
-**Reading and stamping signals is shared with the renderer.** Both this plan and Plan 17 read pass-2 signals and write a small "done" stamp back to the signal frontmatter — this plan writes `belief_processed_at`, the renderer writes `classification`. So the `SignalFrontmatter` model and the signal read/write helper are **shared infrastructure**, owned by neither subsystem: they live in a neutral module both import (the Plan 8 `storage` module, or a small new `signals.py` — pinned at the `doing/` boundary), and each subsystem writes only its own stamp field. A run of this plan consumes the signals missing `belief_processed_at`; writing that stamp is the **last** step for a signal, so a crash mid-signal leaves it unstamped and the next run safely re-opens it. The per-claim dedup keyed on `claim hash + hypothesis_id` is what stops an already-attached claim from counting twice on that re-open — so the stamp can stay one mark for the whole signal rather than one per claim. The two subsystems run in either order but never concurrently: both read-modify-write the same signal frontmatter for their stamps, and interleaved runs could silently drop each other's stamp.
+**Plan 9 alone consumes and stamps source signals.** A run processes signals missing `belief_processed_at`; writing that stamp is the last step, so a crash leaves the signal eligible for retry. Stable finding/evidence ids prevent double-counting on replay. For every non-drop finding, the updater also writes an idempotent graph-update outcome that references the source finding and the durable object created or changed. Plan 17 consumes those outcomes and tracks its own rendering progress without modifying source signal frontmatter. The exact outcome shape is pinned with the Plan 19 finding contract.
 
 Each section below opens with the new files it introduces, so a file's responsibility is read where it is explained.
 
-### §2 · Decision 1 — Triage: where does this claim go? (per claim)
+### §2 · Decision 1 — Triage: where does this finding go? (per finding)
 
-**Every claim runs through triage first.** Pass-2 hands over plain claim text with **no hypothesis or stance attached**, so triage classifies the claim into exactly one branch.
+**Every finding runs through triage first.** Plan 19 hands over source-grounded finding content with no hypothesis, stance, or theme attached, so triage classifies it into exactly one branch.
 
 | File | Action | Description |
 |---|---|---|
-| `src/topics/hypothesis_updater.py` | **NEW** | The updater entry point; reads pass-2 signals and runs Decision 1 and Decision 2, then the mechanics in §4 |
+| `src/topics/hypothesis_updater.py` | **NEW** | The updater entry point; reads Plan 19 findings, runs both decisions and mechanics, and emits durable graph outcomes |
 | `tests/test_hypothesis_updater.py` | **NEW** | Triage branches; stance cases; `strength` scales with source credibility; a new uncertainty creates a uniform-prior hypothesis |
 
 The branches:
 
-- **Attach** — the claim bears on an existing hypothesis. Match it against `hypotheses.json` and pick the one it speaks to. The signal's `candidate_themes` are a natural prefilter: a claim most plausibly bears on hypotheses sharing its theme. Dedup by stable id (`claim hash + hypothesis_id`) so the same claim re-matched to the same hypothesis attaches once. → resolve stance (§3), then the belief update (§4).
-- **Open a new hypothesis** — nothing matches, but the claim is worth its own bet. Open a uniform-prior `Beta(1, 1)` hypothesis. **This is also how a genuinely new uncertainty enters the store** — there is no separate `open_questions.json`; an "open question" is just a low-evidence hypothesis near its prior, and surfacing one as such is Plan 10's read-time composition (`overview.md` is retired — no stored landing page gets updated). → resolve stance (§3), then the belief update (§4).
-- **Route out** — nothing matches and the claim is not worth a bet, but it is a fact worth keeping: a new dataset, benchmark, or model release. It is not evidence. → the routed-fact write (§4). If it is not even that, drop it.
+- **Attach** — the finding bears on an existing hypothesis. Match it against the hypothesis set and pick the one it speaks to; theme is not a prefilter. Attached evidence inherits narrative context through the hypothesis's existing `theme_ids`. Dedup by stable finding/evidence id so replay attaches once. → resolve stance (§3), then the belief update (§4).
+- **Open a new hypothesis** — nothing matches, but the finding is worth its own bet. Open a uniform-prior `Beta(1, 1)` hypothesis and assign its `theme_ids` as part of creation. **This is also how a genuinely new uncertainty enters the store** — there is no separate `open_questions.json`; an "open question" is just a low-evidence hypothesis near its prior, and surfacing one as such is Plan 10's read-time composition (`overview.md` is retired — no stored landing page gets updated). → resolve stance (§3), then the belief update (§4).
+- **Route out** — nothing matches and the finding is not worth a bet, but it is a fact worth keeping: a new dataset, benchmark, or model release. It is not evidence. → the routed-fact write (§4). If it is not even that, drop it.
 
 *How finely* to split the questions the system tracks — open a new hypothesis, or attach to an existing one — is the granularity question, resolved in **§6**.
 
-- **Matching mechanism (resolved) —** an **LLM judgment** picks the hypothesis a claim bears on. Start with the LLM ranking over the full hypothesis set (theme overlap is an available scope, not required at current scale). Theme overlap is *not* the long-term shortlister: the taxonomy's ~8-theme resolution is fixed, so its selectivity flattens as the store grows. When Sub-task C shows matching quality sagging with scale, add a shortlisting stage — embedding similarity to a fixed-size top-k is the leading candidate — and let the LLM judge over that shortlist. Retrieval only narrows the candidates; the LLM always makes the attach / open / route / drop call, which similarity alone cannot. The dedup id keys on the *matched* `hypothesis_id`, so it is stable either way. The prompt/model/parse contract for this call is pinned in "The model-judgment surface" below.
-- **Keep-vs-drop rule (resolved) —** relevance is inherited (the claim's signal already passed pass-1/pass-2), so the route branch judges only **centrality**: register the artifact the signal is *about*, drop one it merely *mentions* — the same central-vs-incidental cut §6 applies to hypotheses. An entity record is `{id, name, entity_type, description}` (Plan 1's `DossierEntity`; `entity_type` ∈ lab / company / dataset / method / benchmark / product). Because a release claim commonly bundles an artifact with a result, **entity registration runs as an independent mechanic, not only on the route branch**: a claim that attaches or opens *and* names a central artifact both updates its belief and registers its entity. The route branch proper is for artifact-only claims; drop is for neither.
+- **Matching mechanism (resolved) —** an **LLM judgment** picks the hypothesis a finding bears on, ranking over the full hypothesis set at current scale. Pass-2 themes are not available and theme overlap is not used as a shortlist. If evaluation later shows matching quality sagging with scale, retrieval can be added without changing the attach / open / route / drop contract; no retrieval mechanism is part of this plan now.
+- **Keep-vs-drop rule (resolved) —** relevance is inherited because the signal already passed pass-1/Plan 19 extraction, so the route branch judges only **centrality**: register the artifact the source is about, drop one it merely mentions. Entity registration may co-fire when a finding both updates a belief and centrally describes an artifact.
 
 **Verify.** *(`[det]` = deterministic, asserts exact behavior; `[llm]` = model judgment, verified by eval cases and blocked until the model-judgment gate closes.)*
-- **`[det]`** An unmatched, bet-worthy claim opens a uniform-prior `Beta(1, 1)` hypothesis — the same path by which a genuinely new uncertainty enters the store.
-- **`[det]`** Claim-level dedup is keyed on `claim hash + hypothesis_id`: the same claim re-matched to the same hypothesis attaches once, not twice (signal-level no-double-count is a loop invariant — see the end).
-- **`[llm]`** A non-evidence fact (dataset / benchmark / model release) is routed out, not attached as evidence; a bet-worthy unmatched claim opens a hypothesis rather than being routed or dropped.
+- **`[det]`** An unmatched, bet-worthy finding opens a uniform-prior `Beta(1, 1)` hypothesis — the same path by which a genuinely new uncertainty enters the store.
+- **`[det]`** Finding-level dedup is keyed on stable finding id + hypothesis id: the same finding re-matched to the same hypothesis attaches once, not twice.
+- **`[llm]`** A non-evidence fact is routed out, not attached as evidence; a bet-worthy unmatched finding opens a hypothesis rather than being routed or dropped.
 
-**Status: passed** — implemented in commit `fb595e8`; 23 updater tests and 174
-full-suite tests passing as of 2026-07-18. The model-judgment quality gate
-remains Sub-task C, as designed.
+**Status:** the earlier claim-level triage implementation passed its tests, but
+the Plan 19 finding contract, theme ownership, and graph-outcome handoff still
+need to be applied before this section is complete under the revised design.
 
-### §3 · Decision 2 — Resolve stance: which way does it cut? (per claim, attach / open only)
+### §3 · Decision 2 — Resolve stance: which way does it cut? (per finding, attach / open only)
 
-**Once a claim is evidence — attached or opening a new bet — resolve its stance against *that* hypothesis.** Pass-2 deliberately extracts claim text without assigning direction: `for` or `against` has no stable meaning until the hypothesis is named.
+**Once a finding is evidence — attached or opening a new bet — resolve its stance against *that* hypothesis.** Plan 19 deliberately extracts source content without assigning direction: `for` or `against` has no stable meaning until the hypothesis is named.
 
-A `neutral` verdict is **never stored as inert evidence**. Surfacing a claim against a *specific* hypothesis already implies a direction: a null / "no difference" result is `against` a directional bet, while conflicting findings are `mixed`. A claim that is genuinely belief-irrelevant was not evidence in the first place and should have routed out in Decision 1, not arrived here. So this step always returns `for | against | mixed`; the updater never writes a `neutral` row in `evidence.json` and never calls the belief-update helper for one. Plan 8 keeps a `neutral` → no-op branch only as defensive insurance against a stray value.
+A `neutral` verdict is **never stored as inert evidence**. A finding linked to a specific hypothesis must resolve directionally: a null result is `against` a directional bet, while conflicting findings are `mixed`. Belief-irrelevant material should have routed out in Decision 1.
 
-**Wrinkle on the open branch.** When a claim *opens* a new hypothesis, the new bet is framed so its founding claim supports it, so stance here is almost always `for` by construction. The interesting re-resolution happens on the **attach** branch, where the claim meets a hypothesis it did not create.
+**Wrinkle on the open branch.** When a finding opens a hypothesis, the new bet is framed so its founding evidence supports it. The interesting resolution happens on attach, where a finding meets a hypothesis it did not create.
 
 **Verify.**
 - **`[llm]`** Stance is resolved against the *matched* hypothesis: a null result resolves `against` a directional bet, conflicting findings resolve `mixed`, and no `neutral` row is ever written to `evidence.json`.
@@ -125,13 +126,13 @@ A `neutral` verdict is **never stored as inert evidence**. Surfacing a claim aga
 
 - **Resolved —** `action_posture` is derived from `alpha`/`beta` at read time, not stored; §4 never writes it. The confidence→label threshold rule lives in the read-time renderer (Plan 10).
 
-**Route the non-evidence fact** (route branch; the entity write also co-fires for an attach/open claim whose central subject is a named artifact — see §2's keep-vs-drop resolution). Append to `entities.json` (by id). The timeline is not written here: a dated fact earns a `timeline.json` entry only when it grows a theme, and that verdict is the renderer's — timeline writes live in Plan 17 (see the timeline note at the top).
+**Route the non-evidence fact** (route branch; entity registration may also co-fire with attach/open). Append to `entities.json` by id and include enough theme placement in the graph-update outcome for Plan 17 to render it without reopening the source signal. The timeline is not written here: a dated fact earns a timeline entry only when Plan 17 decides it grows a theme.
 
 Comparative hypotheses are handled as **pairwise edges**: a hypothesis naming two subjects (`comparison: {subject_a, subject_b}`, see Plan 8) accumulates its own Beta over observed head-to-heads. A new contender adds new edges rather than rebuilding anything, and **no global ranking is stored** — a "who leads" view is *derived* at read time. Cycles among comparisons (A>B, B>C, C>A) are valid data (conditional dominance), not contradictions to resolve.
 
 **Verify.**
-- **`[det]`** A high-`source_credibility` increment moves the posterior more than the same claim from a low-credibility paper (`weight_applied = source_credibility / 10`; `null` → `NEUTRAL_CREDIBILITY_WEIGHT`).
-- **`[det]`** An `against` claim lowers posterior belief (raises `beta`) rather than only being mentioned in prose.
+- **`[det]`** A high-`source_credibility` increment moves the posterior more than the same finding from a low-credibility source.
+- **`[det]`** An `against` finding lowers posterior belief rather than only being mentioned in prose.
 - **`[det]`** A routed fact lands in `entities.json` (by id) instead of being dropped. (Timeline appends are Plan 17's mechanics — a dated fact enters the timeline only by growing a theme.)
 - **`[det]`** Accumulation and comparative (pairwise-edge) belief updates behave correctly; multi-step cases live in Sub-task B (`tests/test_hypothesis_revision.py`).
 
@@ -139,10 +140,10 @@ Comparative hypotheses are handled as **pairwise edges**: a hypothesis naming tw
 
 §6 settles one thing: **how finely the system splits the questions it keeps an opinion on.** A topic is never one question. For deduplication, "does dedup help at all?" is one bet; "is fuzzy matching better than exact?" is a different bet; "is per-dump dedup better than global?" is a third. Every question the system opens as a hypothesis is one it can hold an opinion on. Every question it never opens is one it can never answer — even after reading the paper that settles it.
 
-**The resolution: separate a result from a question, then open freely.** Setting aside the non-evidence facts that route out (§2 — a dataset or benchmark release), each *evidential* claim is one of two things.
+**The resolution: separate a result from a question, then open freely.** Setting aside routed non-evidence facts, each evidential finding is one of two things.
 
 - A **result** — a measurement the paper reports, e.g. "exact dedup of C4 raised accuracy 2%". A result is *evidence*: it attaches to the hypothesis whose question it speaks to and moves that opinion. It does not become a hypothesis of its own. A hypothesis named after a single measurement is a dead end — nothing else will ever attach to it.
-- A **standing question** — something the field genuinely disagrees on, e.g. "is fuzzy better than exact?". This is worth its own hypothesis, even when only one claim speaks to it so far. "A standing question the field disagrees on" is the plain-language form of Plan 8's **betting-market test** (resolvable + strategically significant); the per-claim call below applies that same bar at ingestion time that Plan 8 applies when authoring the seed hypotheses.
+- A **standing question** — something the field genuinely disagrees on, e.g. "is fuzzy better than exact?". This is worth its own hypothesis, even when only one finding speaks to it so far.
 
 One rule stops this from spiralling:
 
@@ -150,11 +151,11 @@ One rule stops this from spiralling:
 
 Narrow and broad bets that touch the same subject are grouped by their shared **theme**, not chained to each other — there is no cross-hypothesis dependency edge (`depends_on` and its propagation were removed; each bet accumulates only its own evidence).
 
-The rule, in one line: open a hypothesis whenever a claim names a real question, keep results as evidence, and let the store be sparse. A complementary lever from Plan 1: seeding more hypotheses up front gives incoming claims something to attach to, so the updater opens fewer brand-new bets.
+The rule, in one line: open a hypothesis whenever a finding names a real question, keep results as evidence, and let the store be sparse. A complementary lever from Plan 1: seeding more hypotheses up front gives incoming findings something to attach to, so the updater opens fewer brand-new bets.
 
-**The two failure modes this avoids** — most visible when Plan 14 backfill replays a dossier's references as one large batch (~200–300 claims across ~100 papers against ~10 seeded hypotheses):
+**The two failure modes this avoids** — most visible when Plan 14 backfill replays a dossier's references as one large batch (~200–300 findings across ~100 papers against ~10 seeded hypotheses):
 
-- **Too coarse:** every claim piles onto the same few broad hypotheses. "Does dedup help" climbs, but "fuzzy vs exact" and "per-dump vs global" — the specific questions — vanish into it. Well-evidenced, but unable to answer anything specific. *Avoided by* giving a real question its own hypothesis.
+- **Too coarse:** every finding piles onto the same few broad hypotheses. Specific questions vanish into broad bets. *Avoided by* giving a real question its own hypothesis.
 - **Too fine:** a hypothesis is opened for every measurement. The store fills with dead one-liners ("exact dedup of C4 gives 2%") that no later claim will ever join. *Avoided by* keeping results as evidence, not bets.
 
 Opening freely inevitably creates near-duplicates of the same underlying bet; folding them back together runs at a different cadence than the belief update, so it is its own periodic pass — **Plan 18 — duplicate hypothesis cleanup**.
@@ -163,23 +164,22 @@ Opening freely inevitably creates near-duplicates of the same underlying bet; fo
 
 ### The model-judgment surface (cross-cutting)
 
-The loop needs two model judgments per claim — the two amber nodes in the §1 diagram; everything else is deterministic. Each is described below by its **consumers** (the loop steps that call it), what it decides, and its input → output. Both are the `[llm]` behaviors flagged above and share one acceptance gate.
+The loop needs two model judgments per finding — the two amber nodes in the §1 diagram; everything else is deterministic.
 
 - **Matching / triage.** 
-  - *Consumers:* §2 Decision 1 (route the claim) and §6's per-claim call (result vs standing question) — the **same** judgment from two angles, not two separate gaps. 
-  - *Decides:* given a claim and the current hypothesis set, whether it attaches to an existing bet (and which one), opens a new bet, routes out as a non-evidence fact, or drops. 
-  - *In → out:* `{claim, candidate hypotheses}` → `attach hypothesis_id | open new | route entity | drop`. The loop's hardest call — and matching and route-out are **one** model call, not two (contract below).
+  - *Decides:* given a finding and the current hypothesis set, whether it attaches to an existing bet, opens a new bet, routes out, or drops.
+  - *In → out:* `{finding, candidate hypotheses}` → `attach hypothesis_id | open new | route entity | drop` plus theme placement where Plan 9 creates a new object.
 
 - **Stance re-resolution.** 
   - *Consumer:* §3 Decision 2. 
-  - *Decides:* for the hypothesis the claim just matched or opened, whether the claim supports, opposes, or mixes against *that* bet. Pass-2 supplies no stance to copy.
-  - *In → out:* `{claim, matched hypothesis}` → `for | against | mixed` (never `neutral`).
+  - *Decides:* whether the finding supports, opposes, or mixes against the hypothesis it just matched or opened.
+  - *In → out:* `{finding, matched hypothesis}` → `for | against | mixed`.
 
 (The wiki-novelty judgment that used to be a third call now lives in Plan 17, with its own model-judgment surface.)
 
 **The prompt contracts.** Each judgment is pinned the way Plan 7 pinned pass-2 — a `build_*_prompt(...) → str` builder in `prompts.py`, a strict-JSON schema the model must return, and a Pydantic parse model in `models.py` that fails fast on a bad shape.
 
-*Triage* — `build_triage_prompt(claim, candidate_hypotheses, candidate_themes, topic_config) → str`. The prompt shows each candidate hypothesis by its **identity only** — `id`, `statement`, `theme_ids`, and `comparison` subjects. It **withholds the belief state** (`alpha`/`beta`), the evidence list, and the posture. This mirrors `build_pass2_prompt`, which withholds theme bodies and current evidence for the same reason: a matcher that sees a hypothesis is already confident will over-attach to it. The claim's `candidate_themes` ride along as a prefilter hint, though at current scale the model still ranks over the full set (§2). It returns:
+*Triage* — `build_triage_prompt(finding, candidate_hypotheses, topic_config) → str`. The prompt shows the complete source-grounded finding and each candidate hypothesis by its **identity only** — `id`, `statement`, `theme_ids`, and comparison subjects. It **withholds the belief state** (`alpha`/`beta`), the evidence list, and posture. The model ranks over the full set; no pass-2 theme hint narrows the candidates. When opening a hypothesis or routing an entity, the judgment also supplies the theme placement Plan 9 must preserve for downstream rendering. It returns:
 
 ```json
 {
@@ -188,15 +188,16 @@ The loop needs two model judgments per claim — the two amber nodes in the §1 
   "new_statement": "<a resolvable, directional bet — required when open>",
   "comparison": {"subject_a": "...", "subject_b": "..."},
   "entity": {"name": "...", "entity_type": "lab | company | dataset | method | benchmark | product", "description": "..."},
+  "theme_ids": ["<topic taxonomy id — required when open or route>"],
   "rationale": "<one sentence>"
 }
 ```
 
-`comparison` is **optional on `open`** — populate it only when the new bet is relational (a head-to-head), and its two subjects make the opened hypothesis a pairwise edge, the same shape Plan 8 infers from a populated `comparison`. `entity` is required on `route`, and may **co-fire** on `attach`/`open` when the claim names a central artifact (§2's keep-vs-drop rule). The parse model enforces each branch — `attach` needs a `hypothesis_id` drawn from the candidates, `open` needs a `new_statement` — and raises on anything else rather than coercing it.
+`comparison` is optional on `open`; `entity` is required on `route` and may co-fire on attach/open. The parse model enforces each branch, validates new theme assignments against the topic taxonomy, and raises on anything else rather than coercing it. Attach does not reassign themes: the matched hypothesis remains authoritative.
 
-**Matching and route-out are one call, not two.** A claim is often only recognizable as a non-evidence artifact *because* nothing attaches to it, so an artifact-first call would decide blind. Folding them also matches the co-fire case: the attach branch already emits an entity, so there is no clean seam to split on.
+**Matching and route-out are one call, not two.** A finding is often recognizable as a non-evidence artifact only after no hypothesis matches it.
 
-*Stance* — `build_stance_prompt(claim, matched_hypothesis) → str`. Only the one matched hypothesis is in context, never the candidate set. The model reads the plain claim against that single named bet, which is what §3 requires. It returns:
+*Stance* — `build_stance_prompt(finding, matched_hypothesis) → str`. Only the one matched hypothesis is in context, never the candidate set.
 
 ```json
 { "stance": "for | against | mixed", "rationale": "<one sentence>" }
@@ -213,8 +214,9 @@ The loop needs two model judgments per claim — the two amber nodes in the §1 
 Per-step checks sit with the step they test (§2–§4). What remains here is what no single step owns — the whole-loop invariants.
 
 - A second run updates existing belief state instead of recreating it from scratch.
-- Re-processing a signal already recorded in provenance does **not** double-count it (provenance is keyed by `signal_id` — distinct from §2's claim-level dedup).
-- A run consumes the signals missing this plan's `belief_processed_at` stamp; the stamp is written **last**, after all of a signal's claims are processed (resolves the previously-open "which signals does a run consume?" question, now answered per subsystem).
+- Re-processing a signal already recorded in provenance does **not** double-count it.
+- A run consumes signals missing `belief_processed_at`; the stamp is written **last**, after every finding has a durable graph outcome or explicit drop.
+- Every non-drop outcome is idempotent and gives Plan 17 the finding reference, resulting evidence/hypothesis/entity ids, and theme placement it needs without reading pass-2.
 - Auto-updated surfaces this plan writes — the entity records from routed facts — remain legible after a run. (Theme and timeline legibility are Plan 17's concern.)
 
 ---
@@ -256,8 +258,8 @@ The two model calls in §2–§3 are judgments, not deterministic code, so the s
 
 | File | Action | Description |
 |---|---|---|
-| `evals/golden/update_loop.yaml` | **NEW** | A handful of claims, each paired with a human judgment: which hypothesis it should attach to (or `open new` / `route out`), and its resolved stance against that hypothesis, against a fixed seed hypothesis store |
-| `evals/eval_update_loop.py` | **NEW** | Runs triage + stance over the golden claims against the fixed store and judges each call with the rubric; writes a markdown report. Reuses Plan 13's `eval_judge.py`; does not modify Plan 13 |
+| `evals/golden/update_loop.yaml` | **NEW** | A handful of findings, each paired with a human judgment: which hypothesis it should attach to (or `open new` / `route out`), its theme assignment where required, and its stance |
+| `evals/eval_update_loop.py` | **NEW** | Runs triage + stance over the golden findings against the fixed store and judges each call with the rubric; writes a markdown report |
 
 ### Verification
 
@@ -271,7 +273,7 @@ The two model calls in §2–§3 are judgments, not deterministic code, so the s
 
 **Depends on:** Plan 14 (produces the backfilled signal batch) and Sub-task A (moves beliefs over it).
 
-The evals above check one mechanic or one judgment at a time. They cannot see the property that only emerges when the whole loop runs over a large batch: does the **store keep its shape?** This sub-task checks that on the Plan 14 backfill (~200–300 claims across ~100 papers against ~10 seeded hypotheses) — the same batch §6's acceptance gate calls out.
+The evals above check one mechanic or one judgment at a time. They cannot see the property that only emerges when the whole loop runs over a large batch: does the **store keep its shape?** This sub-task checks that on the Plan 14 backfill (~200–300 findings across ~100 papers against ~10 seeded hypotheses) — the same batch §6's acceptance gate calls out.
 
 What it must demonstrate, measured on the real backfilled store:
 

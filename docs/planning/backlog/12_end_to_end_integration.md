@@ -1,7 +1,7 @@
 # Plan 12 — First End-To-End Slice: Data Advantage
 
 **Original task id:** 15.8
-**Assumes:** Plan 3 (first bootstrap run) has already seeded `data_advantage` so the graph is not cold.
+**Assumes:** Plan 3 has seeded `data_advantage`; Plans 19 → 9 → 17 → 10 provide the extraction, graph, rendering, and output sequence.
 
 ---
 
@@ -15,12 +15,13 @@ Deliver the first narrow topic slice using the new architecture. This is the pro
 |---|---|---|
 | `data/research_topics/data_advantage/` | **UPDATE** | First live topic workspace; seeded by bootstrap, extended by Plans 1–5 |
 | `docs/specs/15_8_end_to_end.test.md` | **NEW** | Human-first validation test for the first topic slice |
-| `tests/test_research_topic_pipeline.py` | **NEW** | Focused automated test for config → normalize → score → wiki → tweets flow |
+| `tests/test_research_topic_pipeline.py` | **NEW** | Focused automated test for config → normalize → extract findings → update graph → render wiki → generate output |
 
 ## End-to-end slice must prove
 
 - one topic config works
 - at least two source classes ingest successfully
+- pass-2 findings become durable graph outcomes before any wiki rendering
 - wiki state updates across runs
 - tweet candidates are generated and included in the daily PR
 

@@ -39,6 +39,7 @@ flowchart TB
     p14["14 · references backfill"]:::backlog
     p17["17 · wiki renderer"]:::backlog
     p18["18 · duplicate cleanup"]:::backlog
+    p19["19 · pass-2 findings"]:::backlog
 
     p1 --> p2
     p2 --> p3
@@ -50,13 +51,17 @@ flowchart TB
     p5 --> p13
     p7 --> p8
     p7 --> p16
+    p16 --> p19
     p8 --> p9
     p8 --> p13
     p8 --> p15
-    p8 --> p17
     p9 --> p10
+    p9 --> p17
     p9 --> p18
     p9 -->|updater| p14
+    p19 --> p9
+    p19 --> p12
+    p19 --> p13
     p17 --> p10
     p10 --> p11
 
@@ -72,7 +77,7 @@ flowchart TB
 
 **Reading it.** Arrows run from a plan to the one that builds on it. A **solid** arrow means the target needs the source built first; a **dashed** arrow means the source only gates one of the target's *evaluation* sub-tasks, so the target's core work can start before it exists. Where several plans feed one, only the nearest link is drawn — each plan's own file lists its full `Depends on` set. Node colour marks status: green = done, amber = in progress, grey = backlog.
 
-Plan 9 and Plan 17 are **parallel siblings** — they read the same pass-2 signals through a shared contract and never call each other, so no edge joins them.
+The core knowledge flow is sequential: **Plan 19 extracts findings → Plan 9 interprets them into durable graph outcomes → Plan 17 renders those outcomes → Plan 10 assesses and formats outputs.** The modules remain decoupled through durable contracts even though the data moves in that order.
 
 ## Numbering
 
