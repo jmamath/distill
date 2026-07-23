@@ -2,7 +2,7 @@
 
 **Original task id:** 15.6
 
-**Depends on:** Plan 9 (current belief state), Plan 17 (theme novelty and growth), and Plan 19 (source-grounded finding contract).
+**Depends on:** Plan 9 (current belief state), Plan 17 (theme novelty and growth), and Plan 19 (experiment-grounded finding contract).
 
 ---
 
@@ -12,11 +12,11 @@ Build the `output/` package and implement the first renderer: daily tweet candid
 
 ## Contextual assessment belongs here, not in pass-2
 
-Plan 19 makes pass-2 a source-grounded finding extractor and deliberately removes `applicability_score`, `strategic_significance`, `paper_audience`, and `temporal_freshness` from durable signals. This plan owns those interpretations because an output is where the current graph, current audience, and current time finally meet.
+Plan 19 makes pass-2 an experiment-grounded finding extractor and deliberately removes `applicability_score`, `strategic_significance`, `paper_audience`, and `temporal_freshness` from durable signals. This plan owns those interpretations because an output is where the current graph, current audience, and current time finally meet.
 
 ```mermaid
 flowchart LR
-    finding[("Plan 19 finding<br/>statement + source support")]:::data
+    finding[("Plan 19 finding<br/>proposition · experiment · result")]:::data
     graph[("Current graph<br/>beliefs + evidence + themes")]:::data
     audience[("Audience profile<br/>current time")]:::data
     assess{{"Per-finding assessment<br/>applicability · significance<br/>audience fit · recency"}}:::llm
@@ -40,7 +40,7 @@ Assessments are made **per finding**, not once per paper:
 - **Audience fit and action** ask whether this reader should ignore, monitor, prototype, or invest based on the finding and current graph—not based on a stored `paper_audience` label.
 - **Recency** is calculated from `published_at` when rendering, so it changes with time rather than going stale in signal frontmatter.
 
-These judgments rank and frame outputs only. They never gate extraction, remove findings from the graph, or increase Beta evidence weight: importance is not truth. The canonical finding remains unchanged when its assessment changes.
+These judgments rank and frame outputs only. They never alter Plan 19's experimental-admission decision, remove findings from the graph, or increase Beta evidence weight: importance is not truth. The canonical experimental finding remains unchanged when its assessment changes.
 
 The simplest implementation is to assess during rendering from an explicit graph and audience snapshot. Caching is deferred until measured runtime cost justifies it. The exact prompt/model/validation contract, ranking rollup, and audit fields are pinned when this plan moves to `doing`; every generated artifact must retain enough rationale and input provenance to explain its ranking at that time.
 
@@ -80,7 +80,7 @@ The simplest implementation is to assess during rendering from an explicit graph
 - A mixed paper is judged per finding; its best output-worthy finding may represent the signal, while routine findings do not inherit its score
 - `strategic_significance` is derived at render time from current graph state (e.g., did the finding flip a hypothesis posterior, retire an open question, or extend a high-priority theme)
 - `action` text is derived from the finding + graph + target audience — phrased as a direct hook to the reader, not a generic verb
-- Text must be derivable from the source-grounded finding and relevant graph/theme context — no hallucinated support
+- Text must be derivable from the experiment-grounded finding and relevant graph/theme context — no hallucinated support
 - Each candidate must address: what changed, how it fits the landscape, why it matters for the audience
 
 ### Audience actionability axis

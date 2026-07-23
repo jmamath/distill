@@ -1,14 +1,14 @@
 # Plan 13 — Relevance And Finding-Extraction Quality Evaluation
 
-**Depends on:** Plan 5 (pass-1 relevance filter); Plan 19 (source-grounded pass-2 findings).
+**Depends on:** Plan 5 (pass-1 relevance filter); Plan 19 (experiment-grounded pass-2 findings).
 
 **Shared infrastructure:** Plan 9 reuses this plan's judge helper for matching/stance quality; Plan 17 reuses it for narrative-novelty quality. Those plans own their own golden cases and reports.
 
 ---
 
-Build a small, repeatable evaluation set that tells us whether pass-1 admits the right sources and pass-2 faithfully extracts the findings those sources actually support.
+Build a small, repeatable evaluation set that tells us whether pass-1 admits the right sources and pass-2 admits only complete, experiment-grounded findings from them.
 
-**Why this matters:** Unit tests can prove that an LLM response has the expected shape, but not that it captured the right research result or preserved its evidence and limitations. The graph can only be as good as the findings it receives. A fixed, human-reviewed yardstick makes prompt and model changes measurable rather than anecdotal.
+**Why this matters:** Unit tests can prove that an LLM response has the expected shape, but not that it captured the right experiment, preserved its design and limitations, or correctly rejected unsupported commentary. The graph can only be as good as the findings it receives. A fixed, human-reviewed yardstick makes prompt and model changes measurable rather than anecdotal.
 
 ---
 
@@ -20,11 +20,11 @@ Plan 19 removes applicability, strategic significance, audience, stance, and the
 flowchart LR
     sources["Fixed source set"]:::data
     p1["Pass 1 predictions"]:::pred
-    p2["Pass 2 findings"]:::pred
+    p2["Pass 2 experimental findings"]:::pred
     g1["Human relevance labels"]:::gold
-    g2["Human-reviewed source findings"]:::gold
+    g2["Human-reviewed experimental findings"]:::gold
     e1["Relevance report"]:::report
-    e2["Extraction fidelity report"]:::report
+    e2["Admission + extraction report"]:::report
     shared["Shared LLM-as-judge helper<br/>reused by Plans 9 and 17"]:::shared
 
     sources --> p1 --> e1
@@ -43,9 +43,9 @@ flowchart LR
 The evaluation has two production dimensions:
 
 1. **Pass-1 relevance** — does the cheap filter admit genuinely on-topic sources and reject obvious noise?
-2. **Pass-2 extraction fidelity** — are the relevant findings complete, source-supported, properly bounded, and traceable?
+2. **Pass-2 experimental admission and fidelity** — does pass-2 reject non-experimental material and preserve every eligible proposition, dataset, method, result, condition, and locator accurately?
 
-Graph interpretation is deliberately evaluated elsewhere: hypothesis matching, open/route/drop, stance, and theme assignment belong to Plan 9; narrative novelty belongs to Plan 17; output-time applicability and significance belong to Plan 10.
+Graph interpretation is deliberately evaluated elsewhere: hypothesis matching, attach/open/drop, stance, and theme assignment belong to Plan 9; narrative novelty belongs to Plan 17; output-time applicability and significance belong to Plan 10.
 
 ---
 
@@ -58,8 +58,9 @@ Pass-1 golden entries carry the source URL, expected pass/fail label, and a shor
 Pass-2 golden entries carry:
 
 - expected authors and affiliations;
-- the important source-grounded findings a good extraction should capture;
-- for each finding, the expected statement, supporting basis, conditions or limitations, and source location; and
+- the important experimentally grounded findings a good extraction should capture;
+- for each finding, the expected proposition, data, method, result, conditions, and source location;
+- an explicit empty expectation for a source, or source section, with no eligible experiment; and
 - notes identifying acceptable variation rather than forcing one exact wording.
 
 A frontier model may draft the golden findings, but a human verifies every entry against the source before it becomes the yardstick. Golden labels are committed separately from production predictions so a model is never graded against labels it generated unreviewed.
@@ -89,18 +90,20 @@ For edge cases, default to `fail` when the human reviewer cannot make a clear in
 
 | # | Title | arXiv | Extraction coverage |
 |---|---|---|---|
-| 1 | Textbooks Are All You Need (Phi-1) | 2306.11644 | Synthetic-data results and their experimental basis |
-| 2 | Self-Rewarding Language Models | 2401.10020 | Self-play reasoning and iterative data-generation evidence |
-| 3 | The FineWeb Datasets | 2406.17557 | Multi-stage curation methods, comparisons, and scale conditions |
-| 4 | DataComp-LM | 2406.11794 | Benchmark construction and head-to-head data-curation results |
+| 1 | Textbooks Are All You Need (Phi-1) | 2306.11644 | Synthetic-data propositions, data, methods, and results |
+| 2 | Self-Rewarding Language Models | 2401.10020 | Iterative self-play and data-generation experiments |
+| 3 | The FineWeb Datasets | 2406.17557 | Experimental curation comparisons and their scale conditions; descriptive construction details are excluded |
+| 4 | DataComp-LM | 2406.11794 | Head-to-head data-curation experiments; descriptive benchmark construction is excluded |
 | 5 | The Curse of Recursion | 2305.17493 | Negative findings, failure conditions, and limitations |
 | 6 | Beyond Human Data (ReST^EM) | 2312.06585 | Iterative synthetic-data findings and bounded conditions |
-| 7 | OLMo | 2402.00838 | Provenance, openness, and training-data documentation |
+| 7 | OLMo | 2402.00838 | Reported evaluations only; provenance and openness claims are excluded |
 | 8 | The False Promise of Imitating Proprietary LLMs | 2305.15717 | Counterevidence and limits of imitation data |
 | 9 | WRAP: Rephrasing the Web for Pretraining | 2401.16380 | Web-rewriting method, supporting comparisons, and constraints |
-| 10 | Nemotron-4 340B Technical Report | 2406.11704 | Large-scale synthetic-data claims with technical-report complexity |
+| 10 | Nemotron-4 340B Technical Report | 2406.11704 | Large-scale synthetic-data experiments with technical-report complexity |
 
-The old primary-theme column is intentionally replaced by extraction coverage. These papers no longer test pass-2 theme placement; they test whether different kinds of findings retain their support, conditions, and traceability.
+The old primary-theme column is intentionally replaced by extraction coverage. These papers no longer test pass-2 theme placement; they test whether experimental findings retain their complete evidence chain and whether descriptive or argumentative sections stay out of the findings collection.
+
+Add two small HTML cases alongside the paper set: one research blog with a documented experiment that must yield findings, and one topical announcement or opinion post that must yield zero. This proves that admission follows the evidence shape rather than the source format.
 
 ---
 
@@ -122,14 +125,15 @@ Report false admissions and false rejections per source, plus aggregate precisio
 
 Grade objective metadata deterministically and use the shared judge for semantic fidelity. The finding rubric covers:
 
-- **Coverage** — the important topic-relevant findings were captured without extracting the whole paper indiscriminately.
-- **Faithfulness** — statements and reasoning do not exceed what the source supports.
-- **Support completeness** — key measurements, comparisons, or arguments are preserved.
+- **Experimental admission** — only findings backed by an identifiable evaluation, comparison, intervention, or ablation are emitted.
+- **Coverage** — the important topic-relevant experiments were captured without extracting descriptive or argumentative material indiscriminately.
+- **Proposition fidelity** — the source-level claim being tested is preserved without turning it into an endorsed Distill fact or graph hypothesis.
+- **Experimental completeness** — the data, method, and measured result are all present and do not exceed what the source supports.
 - **Conditions and limitations** — scope boundaries that change interpretation are not omitted.
 - **Traceability** — source locations let a reviewer verify the extraction.
 - **Atomicity** — distinct findings are not collapsed into one ambiguous record, and one result is not fragmented unnecessarily.
 
-The report scores each finding and names missing, unsupported, or poorly bounded content. It does not grade applicability, strategic significance, audience, theme assignment, or stance because pass-2 no longer produces them.
+The report scores each finding and names missing, unsupported, or poorly bounded content. It also reports false extractions from non-experimental material and missed experiments. It does not grade applicability, strategic significance, audience, theme assignment, or stance because pass-2 no longer produces them.
 
 ### Shared judge helper
 
@@ -161,7 +165,8 @@ The existing need to evaluate bootstrap-authored hypotheses still stands, but it
 - Prediction generation and evaluation are separate; regrading does not rerun pass-2.
 - Every run records model, prompt, configuration, source, and timestamp provenance.
 - Pass-1 failures identify concrete false admissions or rejections.
-- Pass-2 reports identify missing findings, unsupported synthesis, lost conditions, and unverifiable source locations.
+- Pass-2 reports identify missed experiments, false extraction of non-experimental claims, unsupported synthesis, missing data/method/result fields, lost conditions, and unverifiable source locations.
+- A mixed source yields only its experimental findings; a purely argumentative or announcement source yields an empty findings collection.
 - Changing graph state or audience does not change pass-2 extraction expectations.
 - No pass-2 eval expects themes, stance, applicability, strategic significance, audience, or freshness.
 - Plans 9 and 17 can reuse the judge helper without coupling their golden cases to this plan.

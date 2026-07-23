@@ -6,7 +6,7 @@
 
 Fold hypotheses that ask the same question under different wording into one, as a periodic batch pass over the store.
 
-**Why this matters:** Plan 9 opens a hypothesis whenever a claim names a real question and deliberately does *not* deduplicate on the way in — preventing it per claim is expensive and error-prone. So near-duplicates accumulate: "fuzzy beats exact" and "shard-local beats corpus-wide" for the same underlying bet. Left alone, one question's evidence is split across two records, so neither reaches confidence, the store looks more fragmented than the knowledge is, and a briefing can surface the same question twice while under-counting its evidence. This pass restores one-question-one-bet after the fact.
+**Why this matters:** Plan 9 opens a hypothesis whenever an experimental proposition names a real question and deliberately does *not* deduplicate on the way in — preventing it per finding is expensive and error-prone. So near-duplicates accumulate: "fuzzy beats exact" and "shard-local beats corpus-wide" for the same underlying bet. Left alone, one question's evidence is split across two records, so neither reaches confidence, the store looks more fragmented than the knowledge is, and a briefing can surface the same question twice while under-counting its evidence. This pass restores one-question-one-bet after the fact.
 
 **Why its own plan, separate from Plan 9:** the belief update runs per signal, continuously as signals arrive. Consolidation only pays off once duplicates have accumulated, so it runs on its own slower cadence — periodically, or after a large backfill batch — over the whole store. Different trigger and different frequency, so it is a separate entry point that the belief loop never calls.
 

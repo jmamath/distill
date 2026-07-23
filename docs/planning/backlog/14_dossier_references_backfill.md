@@ -6,9 +6,9 @@
 
 ---
 
-Make the dossier carry a machine-addressable bibliography, then replay those references through the existing pass-2 pipeline as dated signals — so the belief graph starts from provenanced, credibility-weighted evidence instead of pretending we know nothing.
+Make the dossier carry a machine-addressable bibliography, then replay those references through the existing pass-2 pipeline as dated signals — so experimentally supported beliefs start with provenanced, credibility-weighted evidence instead of pretending we know nothing.
 
-**Why this matters:** The bootstrap deep-research pass reads hundreds of references and then collapses all of it into uniform-prior hypotheses that assert *we know nothing*. That is both false and mechanically harmful: from `Beta(1, 1)`, the first few live signals swing a posterior violently, so the belief graph is biased toward whatever arrives first — and live ingestion delivers recent items first. Backfill closes that window with the machinery we already have: replayed references become ordinary signals, the updater attaches ordinary evidence, and the hypotheses start with real mass before live ingestion begins.
+**Why this matters:** The bootstrap deep-research pass reads hundreds of references and then collapses all of it into uniform-prior hypotheses that assert *we know nothing*. That is both false and mechanically harmful: from `Beta(1, 1)`, the first few live signals swing a posterior violently, so the belief graph is biased toward whatever arrives first — and live ingestion delivers recent items first. Backfill closes that window with the machinery we already have: replayed references become ordinary signals, Plan 19 retains their eligible experiments, and the updater attaches that evidence before live ingestion begins. References without experiments remain archived but do not move belief.
 
 ## Sequencing
 
@@ -45,17 +45,17 @@ Replay the dossier's references through the existing full-text + pass-2 machiner
 | File | Action | Description |
 |---|---|---|
 | `src/topics/backfill.py` | **NEW** | Backfill driver: takes a parsed dossier, routes each reference to a fetch path by identifier, builds a `NormalizedItem`, and feeds it to `pass2_score` with a synthetic `Pass1Score` — no pass-1 gate. Verifies each fetch against the reference title. References that resolve to no document route are skipped and counted |
-| `scripts/backfill_references.py` | **NEW** | Operator CLI: `--topic` + `--dossier`; prints written/skipped/already-present/title-mismatch counts; supports `--limit` for a cheap first run |
-| `tests/test_backfill.py` | **NEW** | Route selection per identifier; synthetic pass-1 bypass; title-mismatch is flagged not written; unfetchable references skipped-and-counted; idempotency on re-run (existing `signal_id` → skip) |
+| `scripts/backfill_references.py` | **NEW** | Operator CLI: `--topic` + `--dossier`; reports fetched references, experimental findings, zero-finding references, skipped references, already-present signals, and title mismatches; supports `--limit` for a cheap first run |
+| `tests/test_backfill.py` | **NEW** | Route selection per identifier; synthetic pass-1 bypass; title-mismatch is flagged not written; non-experimental documents write zero-finding signals; unfetchable references are skipped and counted; idempotency on re-run (existing `signal_id` → skip) |
 
 ### Mechanics
 
 - **Pass-1 is bypassed.** Pass-1 is a cheap relevance gate for unsolicited feed items; dossier references were hand-picked by the research agent for this exact topic. The driver constructs a synthetic `Pass1Score` (the `smoke_pass2.py --pass 2` path already demonstrates this) so `pass2_score`'s signature is reused unchanged.
-- **Not arXiv-only.** Most non-arXiv references are still fetchable documents — PDFs (Nature/CVPR/NeurIPS papers) or HTML articles (lab and company blogs) — and the full-text machinery from Plan 7 already handles both: a PDF goes to Gemini with `application/pdf`, an article is fetched and stripped to text. The driver routes each reference by its identifier: arXiv id → arXiv PDF path; PDF URL → PDF path; article URL → HTML-strip path. Only references that are genuinely not documents — court dockets, code repositories, bare dataset releases — are skipped, counted, and reported. (Routing a generic PDF/article through the existing source-specific adapters may need a thin generalization of their fetch methods; pinned at `doing/`.)
+- **Not arXiv-only.** Most non-arXiv references are still fetchable documents — PDFs (Nature/CVPR/NeurIPS papers) or HTML articles (lab and company blogs) — and the full-text machinery from Plan 7 already handles both: a PDF goes to Gemini with `application/pdf`, an article is fetched and stripped to text. The driver routes each reference by its identifier: arXiv id → arXiv PDF path; PDF URL → PDF path; article URL → HTML-strip path. Plan 19 then applies the same experimental-evidence gate regardless of format: a research blog with a documented experiment may yield findings, while a paper or blog with none writes a zero-finding signal. Only references that are genuinely not documents — court dockets, code repositories, bare dataset releases — are skipped, counted, and reported. (Routing a generic PDF/article through the existing source-specific adapters may need a thin generalization of their fetch methods; pinned at `doing/`.)
 - **Title-match is the verification gate.** Because the driver fetches by identifier and recovers the real title, a hallucinated or transposed id either 404s or returns a title that does not match the reference — both flagged and reported, never silently written as a wrong signal. This is what makes a recovered (model-supplied) bibliography safe to replay without hand-verifying every id.
 - **Old papers accrue full evidence mass.** Evidence strength is credibility-weighted, not recency-weighted. Plan 10 derives recency from `published_at` only when ranking outputs.
 - **Idempotent and dedup-safe against live ingestion.** `signal_id` is deterministic from the URL, so re-running backfill skips existing signals — and a backfilled paper that later arrives via RSS is the same signal, not a double count.
-- **Evidence attachment is Plan 9's job.** Backfill stops at written signal files. The `hypothesis_updater` consumes them exactly as it consumes live signals; no backfill-specific path exists in the updater.
+- **Evidence attachment is Plan 9's job.** Backfill stops at written signal files. The `hypothesis_updater` consumes them exactly as it consumes live signals; no backfill-specific path exists in the updater. A zero-finding signal is still consumed and stamped without changing graph state.
 
 ---
 
@@ -92,19 +92,19 @@ Backfill stops at signal files. The normal sequential consumers then turn those 
 ```
 backfill → signals/{yyyy}/{mm}/{dd}/*.md   (Plan 19 findings)
    → hypothesis_updater (Plan 9): interpret every finding once
-     → evidence / new hypothesis / routed entity / drop
+     → evidence / new hypothesis / drop
      → durable graph-update outcomes
-   → wiki_updater (Plan 17): render those outcomes into themes and timeline
+   → wiki_updater (Plan 17): render those outcomes into themes
 ```
 
 Note this is two conceptual stages, not three: the storage layer (Plan 8) is **not** a separate step that produces `evidence.json` on its own. It is the frontmatter-aware read/merge/write helper library the updater *calls*; the updater is what reads signals and writes both `evidence.json` and `hypotheses.json`.
 
-Backfill produces findings, not hypotheses — roughly 200–300 findings across 100 papers, not 200 hypotheses. Whether one becomes evidence, opens a bet, routes out, or drops is Plan 9's call; Plan 17 never re-interprets that disposition.
+Backfill produces findings, not hypotheses. The strict experimental gate means the earlier rough estimate of 200–300 findings is no longer an assumption: the run reports how many references yield eligible experiments and how many yield none. Whether a finding becomes evidence, opens a bet, or drops is Plan 9's call; Plan 17 never re-interprets that disposition.
 
 ## Verification (plan-level)
 
 - The bootstrap prompt instructs the agent to emit `references`; `parse_dossier` accepts a dossier with them and (for backward compatibility) without them.
-- Running the backfill driver on a dossier with N fetchable references writes up to N signal files under the correct `published_at` partitions, with no pass-1 calls made.
+- Running the backfill driver on a dossier with N fetchable references writes up to N signal files under the correct `published_at` partitions, with no pass-1 calls made; its report separates experimental findings from zero-finding documents.
 - A reference whose fetched title does not match the listed title is flagged and not written; non-document references are reported as skipped — neither is silently dropped.
 - Re-running the driver is a no-op (same `signal_id` → same path → skip); subsequently ingesting one of the same papers live creates no duplicate signal.
 - *(The post-backfill belief-health check — that hypotheses supported by the literature carry visibly more evidence mass than genuinely open ones, every unit traceable to a `signal_id` in provenance — moved to Plan 9 Sub-task D, which owns the belief-graph evals. It cannot be verified without Plan 9's updater, so it does not belong here.)*

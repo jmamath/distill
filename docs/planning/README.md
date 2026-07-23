@@ -4,7 +4,7 @@ Task plans for Distill, organized by status.
 
 ```
 done/     ← completed tasks, kept for reference and traceability
-doing/    ← the task actively being worked on (one at a time)
+doing/    ← tasks actively being worked on
 backlog/  ← upcoming tasks in dependency order, ready to be started
 ```
 
@@ -31,7 +31,7 @@ flowchart TB
     p8["8 · storage layer"]:::done
     p16["16 · pass-2 cleanup"]:::done
     p15["15 · hypotheses migration"]:::doing
-    p9["9 · belief graph"]:::backlog
+    p9["9 · belief graph"]:::doing
     p10["10 · output generation"]:::backlog
     p11["11 · editorial workflow"]:::backlog
     p12["12 · end-to-end slice"]:::backlog
@@ -39,7 +39,7 @@ flowchart TB
     p14["14 · references backfill"]:::backlog
     p17["17 · wiki renderer"]:::backlog
     p18["18 · duplicate cleanup"]:::backlog
-    p19["19 · pass-2 findings"]:::backlog
+    p19["19 · experimental findings"]:::doing
 
     p1 --> p2
     p2 --> p3
@@ -77,7 +77,7 @@ flowchart TB
 
 **Reading it.** Arrows run from a plan to the one that builds on it. A **solid** arrow means the target needs the source built first; a **dashed** arrow means the source only gates one of the target's *evaluation* sub-tasks, so the target's core work can start before it exists. Where several plans feed one, only the nearest link is drawn — each plan's own file lists its full `Depends on` set. Node colour marks status: green = done, amber = in progress, grey = backlog.
 
-The core knowledge flow is sequential: **Plan 19 extracts findings → Plan 9 interprets them into durable graph outcomes → Plan 17 renders those outcomes → Plan 10 assesses and formats outputs.** The modules remain decoupled through durable contracts even though the data moves in that order.
+The core knowledge flow is sequential: **Plan 19 extracts experiment-grounded findings → Plan 9 interprets them into durable graph outcomes → Plan 17 renders those outcomes → Plan 10 assesses and formats outputs.** The modules remain decoupled through durable contracts even though the data moves in that order.
 
 ## Numbering
 
